@@ -11,11 +11,12 @@ Usage()
 }
 
 # Initialise the options
-OPTS=$(getopt -o vh --long verbose,help -n "$(basename "$0")" -- "$@")
+OPTS=$(getopt -o vhx --long verbose,help,xml -n "$(basename "$0")" -- "$@")
 if [ $? != 0 ]; then echo; Usage; fi
 eval set -- "$OPTS"
 
 REDIRECT_OUTPUT="> /dev/null 2>&1"
+GENERATE_XML=
 
 # Go through all the options
 if [[ $* > 1 ]] ; then
@@ -30,6 +31,11 @@ if [[ $* > 1 ]] ; then
       -h|--help ) # Help
         shift
         Usage
+        ;;
+
+      -x|--xml ) # Outputs visual-tests-results.xml with the test re
+        GENERATE_XML=1
+        shift
         ;;
 
       -- )
@@ -57,6 +63,8 @@ num_tests=$(echo $tests | wc -w)
 num_passes=0
 num_fails=0
 
+testOutput=""
+
 # Execute each test executable in turn
 for i in $tests ; do
   test=$(basename $i).test
@@ -67,9 +75,11 @@ for i in $tests ; do
   # Check the test result
   if [ "$?" != "0" ]; then
     echo "$test Failed"
+    testOutput="$testOutput $test,Failed"
     ((num_fails++))
   else
     echo "$test Passed"
+    testOutput="$testOutput $test,Passed"
     ((num_passes++))
   fi
 done
@@ -78,9 +88,36 @@ done
 TestOutputColor=${Green}
 if [[ ! "$num_passes" = "$num_tests" ]] ; then TestOutputColor=${Red}; fi
 percent_passing=$(printf %.2f\\n "$((10000 * $num_passes / $num_tests ))e-2")
+percent_failing=$(printf %.2f\\n "$((10000 * $num_fails / $num_tests ))e-2")
 echo
 echo -e "${Bold}Test Summary:${Clear}"
 echo -e "  Total tests: $num_tests"
 echo -e "  Number of test passes: ${Bold}$num_passes ($percent_passing%)${Clear}"
 echo -e "  ${TestOutputColor}Number of test failures: ${Bold}$num_fails ${Clear}"
 
+# Create an XML file with all the output
+if [[ "$GENERATE_XML" = "1" ]]
+then
+  xmlOutputFile=visual-tests-results.xml
+  echo -e "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $xmlOutputFile
+  echo -e "<visual_tests>" >> $xmlOutputFile
+  echo -e "\t<summary>" >> $xmlOutputFile
+  echo -e "\t\t<total_tests>$num_tests</total_tests>" >> $xmlOutputFile
+  echo -e "\t\t<pass_tests>$num_passes</pass_tests>" >> $xmlOutputFile
+  echo -e "\t\t<pass_rate>$percent_passing</pass_rate>" >> $xmlOutputFile
+  echo -e "\t\t<fail_tests>$num_fails</fail_tests>" >> $xmlOutputFile
+  echo -e "\t\t<fail_rate>$percent_failing</fail_rate>" >> $xmlOutputFile
+  echo -e "\t</summary>" >> $xmlOutputFile
+  echo -e "\t<tests>" >> $xmlOutputFile
+  for test in $testOutput
+  do
+    testName=$(echo $test | cut -d, -f 1)
+    testResult=$(echo $test | cut -d, -f 2)
+    echo -e "\t\t<test>" >> $xmlOutputFile
+    echo -e "\t\t\t<name>$testName</name>" >> $xmlOutputFile
+    echo -e "\t\t\t<result>$testResult</result>" >> $xmlOutputFile
+    echo -e "\t\t</test>" >> $xmlOutputFile
+  done
+  echo -e "\t</tests>" >> $xmlOutputFile
+  echo -e "</visual_tests>" >> $xmlOutputFile
+fi
