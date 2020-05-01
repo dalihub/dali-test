@@ -21,16 +21,25 @@ SET(IMAGES_DIR ${APP_DATA_RES_DIR}/images/)
 
 SET(TEST_IMAGE_DIR \\"${IMAGES_DIR}\\")
 
-SET(PKG_LIST dali-core
-             dali-adaptor
-             dali-toolkit
-             opencv)
-
 INCLUDE(FindPkgConfig)
-pkg_check_modules(REQUIRED_PKGS REQUIRED ${PKG_LIST})
+
+SET(PKG_LIST dali2-core
+             dali2-adaptor
+             dali2-toolkit)
+
+PKG_CHECK_MODULES(DALI_PKGS QUIET ${PKG_LIST})
+
+IF(NOT DALI_PKGS_FOUND)
+  SET(PKG_LIST dali-core
+               dali-adaptor
+               dali-toolkit)
+ENDIF()
+
+SET(PKG_LIST ${PKG_LIST} opencv)
+PKG_CHECK_MODULES(REQUIRED_PKGS REQUIRED ${PKG_LIST})
 
 FOREACH(flag ${REQUIRED_PKGS_CFLAGS})
-        SET(REQUIRED_CFLAGS "${REQUIRED_CFLAGS} ${flag}")
+  SET(REQUIRED_CFLAGS "${REQUIRED_CFLAGS} ${flag}")
 ENDFOREACH(flag)
 
 SET(DALI_TEST_CFLAGS "-DTEST_IMAGE_DIR=${TEST_IMAGE_DIR} -DTEST_BIN=${TEST_BIN} -fvisibility=hidden -DHIDE_DALI_INTERNALS")
