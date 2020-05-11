@@ -25,17 +25,9 @@ INCLUDE(FindPkgConfig)
 
 SET(PKG_LIST dali2-core
              dali2-adaptor
-             dali2-toolkit)
+             dali2-toolkit
+             opencv)
 
-PKG_CHECK_MODULES(DALI_PKGS QUIET ${PKG_LIST})
-
-IF(NOT DALI_PKGS_FOUND)
-  SET(PKG_LIST dali-core
-               dali-adaptor
-               dali-toolkit)
-ENDIF()
-
-SET(PKG_LIST ${PKG_LIST} opencv)
 PKG_CHECK_MODULES(REQUIRED_PKGS REQUIRED ${PKG_LIST})
 
 FOREACH(flag ${REQUIRED_PKGS_CFLAGS})
