@@ -51,8 +51,8 @@ void VisualTest::SetupNativeImage( Dali::Window window )
     mFrameBuffer.AttachColorTexture( mNativeTexture );
 
     mCameraActor = CameraActor::New( Vector2(window.GetSize().GetWidth(), window.GetSize().GetHeight()) );
-    mCameraActor.SetParentOrigin( ParentOrigin::CENTER );
-    mCameraActor.SetParentOrigin( AnchorPoint::CENTER );
+    mCameraActor.SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
+    mCameraActor.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
     window.Add( mCameraActor );
 
     RenderTaskList taskList = DevelWindow::GetRenderTaskList( window );

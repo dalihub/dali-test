@@ -78,8 +78,8 @@ class ResourceUploadingTest: public VisualTest
 
     // Create a table view to show the images.
     mTable = Toolkit::TableView::New( 1, NUMBER_OF_IMAGES );
-    mTable.SetAnchorPoint( AnchorPoint::CENTER );
-    mTable.SetParentOrigin( ParentOrigin::CENTER );
+    mTable.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
+    mTable.SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
     mTable.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
     Vector3 offset( 0.9f, 0.70f, 0.0f );
     mTable.SetSizeModeFactor( offset );
@@ -92,10 +92,8 @@ class ResourceUploadingTest: public VisualTest
       imagePropertyMap.Insert( Toolkit::Visual::Property::TYPE, Toolkit::Visual::IMAGE );
       imagePropertyMap.Insert( Toolkit::ImageVisual::Property::URL, IMAGE_PATH[0] );
       mImageViews[x].SetProperty(Toolkit::ImageView::Property::IMAGE, imagePropertyMap );
-
-
-      mImageViews[x].SetParentOrigin( ParentOrigin::CENTER );
-      mImageViews[x].SetAnchorPoint( AnchorPoint::CENTER );
+      mImageViews[x].SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
+      mImageViews[x].SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
       mImageViews[x].SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
       mTable.AddChild( mImageViews[x], Toolkit::TableView::CellPosition( 0, x ) );
     }

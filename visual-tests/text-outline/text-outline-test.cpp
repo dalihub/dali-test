@@ -72,8 +72,8 @@ class TextOutlineTest: public VisualTest
     for ( int i = 0; i < NUMBER_OF_TEXT_LABELS; i++ )
     {
       mTextLabel[i] = TextLabel::New();
-      mTextLabel[i].SetParentOrigin(ParentOrigin::TOP_LEFT);
-      mTextLabel[i].SetAnchorPoint(AnchorPoint::TOP_LEFT);
+      mTextLabel[i].SetProperty( Actor::Property::PARENT_ORIGIN,ParentOrigin::TOP_LEFT);
+      mTextLabel[i].SetProperty( Actor::Property::ANCHOR_POINT,AnchorPoint::TOP_LEFT);
       mTextLabel[i].SetProperty( TextLabel::Property::OUTLINE, outlineMap );
       window.Add( mTextLabel[i] );
     }

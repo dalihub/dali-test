@@ -52,7 +52,7 @@ public:
     window.SetBackgroundColor( Color::WHITE );
 
     mTextLabel = TextLabel::New( "Hello World" );
-    mTextLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    mTextLabel.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT );
     window.Add( mTextLabel );
 
     // Start the test
@@ -77,8 +77,8 @@ private:
     Actor actor = TextLabel::New();
     actor.SetProperty(Control::Property::BACKGROUND, Color::RED);
     actor.SetSize(100, 100);
-    actor.SetAnchorPoint(AnchorPoint::TOP_LEFT);
-    actor.SetParentOrigin(ParentOrigin::TOP_LEFT);
+    actor.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT );
+    actor.SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT );
     actor.SetProperty(TextLabel::Property::TEXT, index.c_str());
     actor.SetProperty(TextLabel::Property::TEXT_COLOR, Color::WHITE);
     actor.SetProperty(TextLabel::Property::PIXEL_SIZE, 30);

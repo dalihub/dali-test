@@ -67,7 +67,7 @@ class EmptySceneClearTest: public VisualTest
     window.SetBackgroundColor(Color::WHITE);
 
     mTextLabel = TextLabel::New( "Hello World" );
-    mTextLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    mTextLabel.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT );
     window.Add( mTextLabel );
 
     // Start the test
