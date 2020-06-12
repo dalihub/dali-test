@@ -76,7 +76,7 @@ private:
     // Create a text label
     Actor actor = TextLabel::New();
     actor.SetProperty(Control::Property::BACKGROUND, Color::RED);
-    actor.SetProperty( Actor::Property::SIZE, Vector3( 100.0f, 100.0f, 0.0f ) );
+    actor.SetProperty( Actor::Property::SIZE, Vector2( 100.0f, 100.0f ) );
     actor.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT );
     actor.SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT );
     actor.SetProperty(TextLabel::Property::TEXT, index.c_str());

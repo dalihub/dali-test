@@ -107,27 +107,27 @@ private:
   void EnglishOutlineTest()
   {
     mTextLabel[0].SetProperty( TextLabel::Property::TEXT, "uVWXYZ" );
-    mTextLabel[0].SetProperty( Actor::Property::POSITION, Vector3( 80.f, 20.f, 0.0f ) );
+    mTextLabel[0].SetProperty( Actor::Property::POSITION, Vector2( 80.f, 20.f ) );
     mTextLabel[0].SetProperty(TextLabel::Property::POINT_SIZE, 27.f);
 
     mTextLabel[1].SetProperty( TextLabel::Property::TEXT, "uVWXYZ" );
-    mTextLabel[1].SetProperty( Actor::Property::POSITION, Vector3( 80.f, 100.f, 0.0f ) );
+    mTextLabel[1].SetProperty( Actor::Property::POSITION, Vector2( 80.f, 100.f ) );
     mTextLabel[1].SetProperty(TextLabel::Property::POINT_SIZE, 38.f);
 
     mTextLabel[2].SetProperty( TextLabel::Property::TEXT, "uVWXYZ" );
-    mTextLabel[2].SetProperty( Actor::Property::POSITION, Vector3( 80.f, 200.f, 0.0f ) );
+    mTextLabel[2].SetProperty( Actor::Property::POSITION, Vector2( 80.f, 200.f ) );
     mTextLabel[2].SetProperty(TextLabel::Property::POINT_SIZE, 56.f);
 
     mTextLabel[3].SetProperty( TextLabel::Property::TEXT, "uVWXYZ" );
-    mTextLabel[3].SetProperty( Actor::Property::POSITION, Vector3( 80.f, 330.f, 0.0f ) );
+    mTextLabel[3].SetProperty( Actor::Property::POSITION, Vector2( 80.f, 330.f ) );
     mTextLabel[3].SetProperty(TextLabel::Property::POINT_SIZE, 58.f);
 
     mTextLabel[4].SetProperty( TextLabel::Property::TEXT, "uVWXYZ" );
-    mTextLabel[4].SetProperty( Actor::Property::POSITION, Vector3( 80.f, 470.f, 0.0f ) );
+    mTextLabel[4].SetProperty( Actor::Property::POSITION, Vector2( 80.f, 470.f ) );
     mTextLabel[4].SetProperty(TextLabel::Property::POINT_SIZE, 60.f);
 
     mTextLabel[5].SetProperty( TextLabel::Property::TEXT, "uVWXYZ" );
-    mTextLabel[5].SetProperty( Actor::Property::POSITION, Vector3( 80.f, 605.f, 0.0f ) );
+    mTextLabel[5].SetProperty( Actor::Property::POSITION, Vector2( 80.f, 605.f ) );
     mTextLabel[5].SetProperty(TextLabel::Property::POINT_SIZE, 80.f);
 
     CaptureWindow( mApplication.GetWindow() );
@@ -137,27 +137,27 @@ private:
   {
     mTextLabel[0].SetProperty( TextLabel::Property::TEXT, "\xF0\x9F\x98\x81 A Quick Brown Fox Jumps Over The Lazy Dog" );
     mTextLabel[0].SetProperty( TextLabel::Property::FONT_FAMILY, "BreezeColorEmoji" );
-    mTextLabel[0].SetProperty( Actor::Property::POSITION, Vector3( 20.f, 20.f, 0.0f ) );
+    mTextLabel[0].SetProperty( Actor::Property::POSITION, Vector2( 20.f, 20.f ) );
     mTextLabel[0].SetProperty(TextLabel::Property::POINT_SIZE, 16.f);
 
     mTextLabel[1].SetProperty( TextLabel::Property::TEXT, "تَعْدِيلْ قِسْمْ Arabic كَلِمَة أَرْمَلَة" );
-    mTextLabel[1].SetProperty( Actor::Property::POSITION, Vector3( 0.f, 100.f, 0.0f ) );
+    mTextLabel[1].SetProperty( Actor::Property::POSITION, Vector2( 0.f, 100.f ) );
     mTextLabel[1].SetProperty(TextLabel::Property::POINT_SIZE, 18.f);
 
     mTextLabel[2].SetProperty( TextLabel::Property::TEXT, "ໄປຫາຕາຕະລາງທີ່ກຳນົດ" );
-    mTextLabel[2].SetProperty( Actor::Property::POSITION, Vector3( 20.f, 200.f, 0.0f ) );
+    mTextLabel[2].SetProperty( Actor::Property::POSITION, Vector2( 20.f, 200.f ) );
     mTextLabel[2].SetProperty(TextLabel::Property::POINT_SIZE, 20.f);
 
     mTextLabel[3].SetProperty( TextLabel::Property::TEXT, "ပန္စီစဥ္ရန္ အျမင္ပံုစံကို စိတ္ၾကိဳက္လုပ္ႏိုင္ေသာ ဂရ" );
-    mTextLabel[3].SetProperty( Actor::Property::POSITION, Vector3( 20.f, 330.f, 0.0f ) );
+    mTextLabel[3].SetProperty( Actor::Property::POSITION, Vector2( 20.f, 330.f ) );
     mTextLabel[3].SetProperty(TextLabel::Property::POINT_SIZE, 22.f);
 
     mTextLabel[4].SetProperty( TextLabel::Property::TEXT, "ضرورت گرڈ میں تبدیل کرنا ہوگا" );
-    mTextLabel[4].SetProperty( Actor::Property::POSITION, Vector3( 0.f, 470.f, 0.0f ) );
+    mTextLabel[4].SetProperty( Actor::Property::POSITION, Vector2( 0.f, 470.f ) );
     mTextLabel[4].SetProperty(TextLabel::Property::POINT_SIZE, 24.f);
 
     mTextLabel[5].SetProperty( TextLabel::Property::TEXT, "보기 방식을 격자 보기(직접 설정)로" );
-    mTextLabel[5].SetProperty( Actor::Property::POSITION, Vector3( 20.f, 605.f, 0.0f ) );
+    mTextLabel[5].SetProperty( Actor::Property::POSITION, Vector2( 20.f, 605.f ) );
     mTextLabel[5].SetProperty(TextLabel::Property::POINT_SIZE, 26.f);
 
     CaptureWindow( mApplication.GetWindow() );
