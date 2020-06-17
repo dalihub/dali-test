@@ -174,7 +174,8 @@ private:
 
     for ( unsigned int i = 0; i < NUMBER_OF_IMAGES; i++ )
     {
-      if ( mImageViews[i].OnStage() )
+      if ( mImageViews[i].GetProperty< bool >( Actor::Property::CONNECTED_TO_SCENE ) )
+
       {
         Property::Map imagePropertyMap;
         imagePropertyMap.Insert( Toolkit::Visual::Property::TYPE,  Toolkit::Visual::IMAGE );
