@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2020 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #include "visual-test.h"
 
 using namespace Dali;
+using namespace Dali::Toolkit;
 
 namespace
 {
@@ -73,29 +74,31 @@ class ResourceUploadingTest: public VisualTest
 
   void OnInit( Application& application )
   {
-    Dali::Window defaultWindow = mApplication.GetWindow();
+    Window defaultWindow = mApplication.GetWindow();
     defaultWindow.SetBackgroundColor(Color::WHITE);
 
-    // Create a table view to show the images.
-    mTable = Toolkit::TableView::New( 1, NUMBER_OF_IMAGES );
-    mTable.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
-    mTable.SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
-    mTable.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
+    // Create a container to layout the images.
+    FlexContainer container = FlexContainer::New();
+    container.SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
+    container.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
+    container.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
     Vector3 offset( 0.9f, 0.70f, 0.0f );
-    mTable.SetProperty( Actor::Property::SIZE_MODE_FACTOR, offset );
-    defaultWindow.Add( mTable );
+    container.SetProperty( Actor::Property::SIZE_MODE_FACTOR, offset );
+    container.SetProperty( FlexContainer::Property::FLEX_DIRECTION, FlexContainer::ROW );
+    defaultWindow.Add( container );
 
     for( unsigned int x = 0; x < NUMBER_OF_IMAGES; x++ )
     {
-      mImageViews[x] = Toolkit::ImageView::New( );
+      mImageViews[x] = ImageView::New( );
       Property::Map imagePropertyMap;
-      imagePropertyMap.Insert( Toolkit::Visual::Property::TYPE, Toolkit::Visual::IMAGE );
-      imagePropertyMap.Insert( Toolkit::ImageVisual::Property::URL, IMAGE_PATH[0] );
-      mImageViews[x].SetProperty(Toolkit::ImageView::Property::IMAGE, imagePropertyMap );
+      imagePropertyMap.Insert( Visual::Property::TYPE, Toolkit::Visual::IMAGE );
+      imagePropertyMap.Insert( ImageVisual::Property::URL, IMAGE_PATH[0] );
+      mImageViews[x].SetProperty(ImageView::Property::IMAGE, imagePropertyMap );
       mImageViews[x].SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
       mImageViews[x].SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
-      mImageViews[x].SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
-      mTable.AddChild( mImageViews[x], Toolkit::TableView::CellPosition( 0, x ) );
+      mImageViews[x].SetProperty( FlexContainer::ChildProperty::FLEX, 0.5f );
+      mImageViews[x].SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT );
+      container.Add( mImageViews[x] );
     }
 
     // Start the test
@@ -121,7 +124,7 @@ private:
 
   void PerformTest()
   {
-    Dali::Window window = mApplication.GetWindow();
+    Window window = mApplication.GetWindow();
 
     switch ( gTestStep )
     {
@@ -178,9 +181,9 @@ private:
 
       {
         Property::Map imagePropertyMap;
-        imagePropertyMap.Insert( Toolkit::Visual::Property::TYPE,  Toolkit::Visual::IMAGE );
-        imagePropertyMap.Insert( Toolkit::ImageVisual::Property::URL,  IMAGE_PATH[i + index] );
-        mImageViews[i].SetProperty( Toolkit::ImageView::Property::IMAGE , imagePropertyMap );
+        imagePropertyMap.Insert( Visual::Property::TYPE,  Toolkit::Visual::IMAGE );
+        imagePropertyMap.Insert( ImageVisual::Property::URL,  IMAGE_PATH[i + index] );
+        mImageViews[i].SetProperty( ImageView::Property::IMAGE , imagePropertyMap );
       }
     }
 
@@ -203,14 +206,10 @@ private:
   }
 
 private:
-  Application&            mApplication;
-
-  Toolkit::TableView      mTable;
-  Toolkit::ImageView      mImageViews[NUMBER_OF_IMAGES];
-
-  int                     mImageIndex;
-
-  Timer                   mTimer;
+  Application&   mApplication;
+  ImageView      mImageViews[NUMBER_OF_IMAGES];
+  int            mImageIndex;
+  Timer          mTimer;
 };
 
 DALI_VISUAL_TEST( ResourceUploadingTest, OnInit )
