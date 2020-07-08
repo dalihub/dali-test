@@ -107,8 +107,8 @@ bool VisualTest::CompareImageFile( const std::string fileName1, const std::strin
   cv::Scalar similarity;
 
   // Load the images
-  cv::Mat matrixImg1 = cv::imread(fileName1, CV_LOAD_IMAGE_UNCHANGED);
-  cv::Mat matrixImg2 = cv::imread(fileName2, CV_LOAD_IMAGE_UNCHANGED);
+  cv::Mat matrixImg1 = cv::imread(fileName1);
+  cv::Mat matrixImg2 = cv::imread(fileName2);
 
   if ( areaToCompare != Rect<uint16_t>( 0u, 0u, 0u, 0u ) )
   {

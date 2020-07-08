@@ -23,10 +23,18 @@ SET(TEST_IMAGE_DIR \\"${IMAGES_DIR}\\")
 
 INCLUDE(FindPkgConfig)
 
+SET(OPENCV opencv)
+
+PKG_CHECK_MODULES(OPENCV_PKG QUIET ${OPENCV})
+
+IF(NOT OPENCV_PKG_FOUND)
+  SET(OPENCV opencv4 )
+ENDIF()
+
 SET(PKG_LIST dali2-core
              dali2-adaptor
              dali2-toolkit
-             opencv)
+             ${OPENCV})
 
 PKG_CHECK_MODULES(REQUIRED_PKGS REQUIRED ${PKG_LIST})
 
