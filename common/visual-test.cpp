@@ -55,7 +55,7 @@ void VisualTest::SetupNativeImage( Dali::Window window )
     mCameraActor.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
     window.Add( mCameraActor );
 
-    RenderTaskList taskList = DevelWindow::GetRenderTaskList( window );
+    RenderTaskList taskList = window.GetRenderTaskList();
     if ( mOffscreenRenderTask )
     {
       taskList.RemoveTask( mOffscreenRenderTask );

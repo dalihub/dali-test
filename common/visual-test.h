@@ -22,7 +22,6 @@
 #include <string>
 #include <cstdlib>
 #include <dali/dali.h>
-#include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/adaptor-framework/image-loading.h>
 
 /**
