@@ -21,12 +21,8 @@
 
 using namespace Dali;
 
-namespace
-{
+const char* gTempFilename="/tmp/temp.png";
 
-const std::string TEMP_FILENAME = "/tmp/temp.png";
-
-}  // namespace
 
 /**
  * @brief Constructor.
@@ -91,9 +87,9 @@ bool VisualTest::CheckImage( const std::string fileName, const float similarityT
   bool success = false;
 
   // Compare the image in the given area
-  if ( mNativeImageSourcePtr->EncodeToFile( TEMP_FILENAME ) )
+  if ( mNativeImageSourcePtr->EncodeToFile( gTempFilename ) )
   {
-    if ( CompareImageFile( fileName, TEMP_FILENAME, similarityThreshold, areaToCompare ) )
+    if ( CompareImageFile( fileName, gTempFilename, similarityThreshold, areaToCompare ) )
     {
       success = true;
     }
