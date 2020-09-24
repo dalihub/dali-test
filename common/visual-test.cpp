@@ -21,12 +21,8 @@
 
 using namespace Dali;
 
-namespace
-{
+const char* gTempFilename="/tmp/temp.png";
 
-const std::string TEMP_FILENAME = "/tmp/temp.png";
-
-}  // namespace
 
 /**
  * @brief Constructor.
@@ -91,9 +87,9 @@ bool VisualTest::CheckImage( const std::string fileName, const float similarityT
   bool success = false;
 
   // Compare the image in the given area
-  if ( mNativeImageSourcePtr->EncodeToFile( TEMP_FILENAME ) )
+  if ( mNativeImageSourcePtr->EncodeToFile( gTempFilename ) )
   {
-    if ( CompareImageFile( fileName, TEMP_FILENAME, similarityThreshold, areaToCompare ) )
+    if ( CompareImageFile( fileName, gTempFilename, similarityThreshold, areaToCompare ) )
     {
       success = true;
     }
@@ -130,5 +126,12 @@ bool VisualTest::CompareImageFile( const std::string fileName1, const std::strin
   }
 
   // Check whether SSIM for all the three channels (RGB) are above the threshold
-  return ( similarity.val[0] >= similarityThreshold && similarity.val[1] >= similarityThreshold && similarity.val[2] >= similarityThreshold );
+  bool passed = ( similarity.val[0] >= similarityThreshold && similarity.val[1] >= similarityThreshold && similarity.val[2] >= similarityThreshold );
+
+  printf("Test similarity: R:%6.2f%% G:%6.2f%% B:%6.2f%%\n"
+         "Passed threshold of %6.2f%%: %s\n",
+         100.0f*similarity.val[0], 100.0f*similarity.val[1], 100.0f*similarity.val[2],
+         100.0f*similarityThreshold, passed?"TRUE":"FALSE");
+
+  return passed;
 }

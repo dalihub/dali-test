@@ -24,6 +24,8 @@
 #include <dali/dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading.h>
 
+extern const char* gTempFilename;
+
 /**
  * DALI_VISUAL_TEST_WITH_WINDOW_SIZE is a wrapper for the boilerplate code to create
  * the main function of the visual test application with the given main window size.
@@ -38,6 +40,7 @@
   { \
     setenv( "DALI_DPI_HORIZONTAL", "96", true ); \
     setenv( "DALI_DPI_VERTICAL", "96", true ); \
+    gTempFilename = "/tmp/" #VisualTestName ".png"; \
     Application application = Application::New( &argc, &argv, "", Application::OPAQUE, Dali::Rect<int>(0, 0, WindowWidth, WindowHeight) ); \
     VisualTestName test( application ); \
     application.InitSignal().Connect( &test, &VisualTestName::InitFunction ); \
