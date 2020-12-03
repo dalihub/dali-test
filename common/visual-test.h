@@ -82,8 +82,9 @@ protected:
   /**
    * @brief Capture the content of the given window rendered by GPU
    * @param[in] window The window to be captured
+   * @param[in] customCamera The custom camera to be used to render the offscreen frame buffer (or otherwise a default camera will be created and used )
    */
-  void CaptureWindow( Dali::Window window );
+  void CaptureWindow( Dali::Window window, Dali::CameraActor customCamera = Dali::CameraActor() );
 
   /**
    * @brief Compare the result of the window capture with the given image file
@@ -105,8 +106,9 @@ private:
   /**
    * @brief Set up the native image for offscreen rendering.
    * @param[in] window The window to be rendered
+   * @param[in] customCamera The custom camera to be used to render the offscreen frame buffer
    */
-  void SetupNativeImage( Dali::Window window );
+  void SetupNativeImage( Dali::Window window, Dali::CameraActor customCamera );
 
   /**
    * @brief Callback function when a RenderTask has finished

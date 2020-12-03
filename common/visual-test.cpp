@@ -33,7 +33,7 @@ VisualTest::VisualTest()
 {
 }
 
-void VisualTest::SetupNativeImage( Dali::Window window )
+void VisualTest::SetupNativeImage( Dali::Window window, Dali::CameraActor customCamera )
 {
   if( !mOffscreenRenderTask || window.GetRootLayer() != mWindow.GetHandle() )
   {
@@ -46,11 +46,6 @@ void VisualTest::SetupNativeImage( Dali::Window window )
     mFrameBuffer = FrameBuffer::New( mNativeTexture.GetWidth(), mNativeTexture.GetHeight(), FrameBuffer::Attachment::NONE );
     mFrameBuffer.AttachColorTexture( mNativeTexture );
 
-    mCameraActor = CameraActor::New( Vector2(window.GetSize().GetWidth(), window.GetSize().GetHeight()) );
-    mCameraActor.SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
-    mCameraActor.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
-    window.Add( mCameraActor );
-
     RenderTaskList taskList = window.GetRenderTaskList();
     if ( mOffscreenRenderTask )
     {
@@ -60,17 +55,30 @@ void VisualTest::SetupNativeImage( Dali::Window window )
     mOffscreenRenderTask.SetSourceActor( window.GetRootLayer() );
     mOffscreenRenderTask.SetClearColor( window.GetBackgroundColor() );
     mOffscreenRenderTask.SetClearEnabled( true );
-    mOffscreenRenderTask.SetCameraActor( mCameraActor );
-    mOffscreenRenderTask.GetCameraActor().SetInvertYAxis( true );
     mOffscreenRenderTask.SetFrameBuffer( mFrameBuffer );
+
+    if (customCamera)
+    {
+      mOffscreenRenderTask.SetCameraActor( customCamera );
+    }
+    else
+    {
+      mCameraActor = CameraActor::New( Vector2(window.GetSize().GetWidth(), window.GetSize().GetHeight()) );
+      mCameraActor.SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
+      mCameraActor.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
+      mCameraActor.SetInvertYAxis( true );
+      window.Add( mCameraActor );
+
+      mOffscreenRenderTask.SetCameraActor( mCameraActor );
+    }
   }
 
   mOffscreenRenderTask.SetRefreshRate( RenderTask::REFRESH_ONCE );
 }
 
-void VisualTest::CaptureWindow( Dali::Window window )
+void VisualTest::CaptureWindow( Dali::Window window, Dali::CameraActor customCamera )
 {
-  SetupNativeImage( window );
+  SetupNativeImage( window, customCamera );
 
   mOffscreenRenderTask.FinishedSignal().Connect( this, &VisualTest::OnOffscreenRenderFinished );
 }
@@ -128,8 +136,8 @@ bool VisualTest::CompareImageFile( const std::string fileName1, const std::strin
   // Check whether SSIM for all the three channels (RGB) are above the threshold
   bool passed = ( similarity.val[0] >= similarityThreshold && similarity.val[1] >= similarityThreshold && similarity.val[2] >= similarityThreshold );
 
-  printf("Test similarity: R:%6.2f%% G:%6.2f%% B:%6.2f%%\n"
-         "Passed threshold of %6.2f%%: %s\n",
+  printf("Test similarity: R:%f G:%f B:%f\n"
+         "Passed threshold of %f: %s\n",
          100.0f*similarity.val[0], 100.0f*similarity.val[1], 100.0f*similarity.val[2],
          100.0f*similarityThreshold, passed?"TRUE":"FALSE");
 
