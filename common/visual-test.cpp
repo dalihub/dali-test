@@ -65,7 +65,7 @@ void VisualTest::SetupNativeImage( Dali::Window window )
     mOffscreenRenderTask.SetClearColor( window.GetBackgroundColor() );
     mOffscreenRenderTask.SetClearEnabled( true );
     mOffscreenRenderTask.SetCameraActor( mCameraActor );
-    mOffscreenRenderTask.GetCameraActor().SetInvertYAxis( false );
+    mOffscreenRenderTask.GetCameraActor().SetInvertYAxis( true );
     mOffscreenRenderTask.SetFrameBuffer( mFrameBuffer );
   }
 
