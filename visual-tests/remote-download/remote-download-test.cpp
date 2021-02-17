@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2021 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ namespace
 {
 
 const std::string IMAGE_FILE = TEST_IMAGE_DIR "remote-download/expected-result-1.png";
-const int NUMBER_OF_IMAGES(5);
+const int NUMBER_OF_IMAGES(4);
 struct ImageData
 {
   std::string url;
@@ -44,7 +44,6 @@ const ImageData IMAGES[NUMBER_OF_IMAGES] =
   {"http://static.midomi.com/s/s/images/000/000/000/000/293/259/19/520_000000000000293259191500x1500_72dpi_RGB_q70.jpg", Vector2(0, 100)},
   {"http://static.midomi.com/s/s/images/000/000/000/000/212/651/88/520_000000000000212651881500x1500_72dpi_RGB_q70.jpg", Vector2(400,100)},
   {"http://static.midomi.com/s/s/images/000/000/000/000/212/353/21/520_000000000000212353211500x1500_72dpi_RGB_q70.jpg", Vector2(0, 400)},
-  {"http://d2k43l0oslhof9.cloudfront.net/platform/image/contents/vc/20/01/58/20170629100630071189_0bf6b911-a847-cba4-e518-be40fe2f579420170629192203240.jpg",Vector2(400, 400)},
   {"http://static.midomi.com/h/images/w/weather_sunny.png",Vector2(800, 100)}
 };
 
