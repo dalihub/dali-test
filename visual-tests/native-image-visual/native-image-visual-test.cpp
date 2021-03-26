@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2021 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,15 +57,17 @@ public:
 
   void OnInit( Application& application )
   {
-    Window defaultWindow = mApplication.GetWindow();
-    defaultWindow.SetBackgroundColor(Color::WHITE);
-    CreateContentAreas();
-    SetupNativeImage();
-
-    // Start the test
-    mTimer = Timer::New(1000);
-    mTimer.TickSignal().Connect(this, &NativeImageVisualTest::OnTick);
-    mTimer.Start();
+// @TODO: Disable as we do not have FrameBuffer support at the moment
+//    Window defaultWindow = mApplication.GetWindow();
+//    defaultWindow.SetBackgroundColor(Color::WHITE);
+//    CreateContentAreas();
+//    SetupNativeImage();
+//
+//    // Start the test
+//    mTimer = Timer::New(1000);
+//    mTimer.TickSignal().Connect(this, &NativeImageVisualTest::OnTick);
+//    mTimer.Start();
+    application.Quit();
   }
 
 private:
