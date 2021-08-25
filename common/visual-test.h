@@ -25,6 +25,8 @@
 #include <dali/devel-api/adaptor-framework/image-loading.h>
 
 extern const char* gTempFilename;
+extern bool gFB;
+extern int gExitValue;
 
 /**
  * DALI_VISUAL_TEST_WITH_WINDOW_SIZE is a wrapper for the boilerplate code to create
@@ -36,16 +38,22 @@ extern const char* gTempFilename;
  * @note This sets the DPI to be 96 for all tests so that text tests all produce the same output image
  */
 #define DALI_VISUAL_TEST_WITH_WINDOW_SIZE( VisualTestName, InitFunction, WindowWidth, WindowHeight ) \
-  int DALI_EXPORT_API main( int argc, char **argv ) \
-  { \
-    setenv( "DALI_DPI_HORIZONTAL", "96", true ); \
-    setenv( "DALI_DPI_VERTICAL", "96", true ); \
-    gTempFilename = "/tmp/" #VisualTestName ".png"; \
+  int DALI_EXPORT_API main( int argc, char **argv )                     \
+  {                                                                     \
+    setenv( "DALI_DPI_HORIZONTAL", "96", true );                        \
+    setenv( "DALI_DPI_VERTICAL", "96", true );                          \
+    gTempFilename = "/tmp/" #VisualTestName ".png";                     \
+    if(argc>1 && !strcmp(argv[1], "--get-dimensions"))                  \
+    {                                                                   \
+      printf("%dx%dx24\n", WindowWidth, WindowHeight);                  \
+      return 0;                                                         \
+    }                                                                   \
+    else if(argc>1 && !strcmp(argv[1], "--fb")){gFB=true;}              \
     Application application = Application::New( &argc, &argv, "", Application::OPAQUE, Dali::Rect<int>(0, 0, WindowWidth, WindowHeight) ); \
-    VisualTestName test( application ); \
+    VisualTestName test( application );                                 \
     application.InitSignal().Connect( &test, &VisualTestName::InitFunction ); \
-    application.MainLoop(); \
-    return 0; \
+    application.MainLoop();                                             \
+    return gExitValue;                                                  \
   }
 
 /**
@@ -57,7 +65,7 @@ extern const char* gTempFilename;
 #define DALI_VISUAL_TEST( VisualTestName, InitFunction ) DALI_VISUAL_TEST_WITH_WINDOW_SIZE( VisualTestName, InitFunction, 480, 800 )
 
 // The default threshold for image similarity
-#define DEFAULT_IMAGE_SIMILARITY_THRESHOLD 1.0f
+#define DEFAULT_IMAGE_SIMILARITY_THRESHOLD 0.99f
 
 /**
  * @brief This class provides the functionality of visual test by capturing the content

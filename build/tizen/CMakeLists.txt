@@ -39,6 +39,7 @@ SET(PKG_LIST dali2-core
              dali2-adaptor
              dali2-toolkit
              dali2-scene-loader
+             Magick++
              ${OPENCV})
 
 PKG_CHECK_MODULES(REQUIRED_PKGS REQUIRED ${PKG_LIST})

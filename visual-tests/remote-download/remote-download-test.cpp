@@ -100,7 +100,7 @@ private:
 
   void PostRender()
   {
-    DALI_ASSERT_ALWAYS( CheckImage( IMAGE_FILE ) ); // should be identical
+    CheckImage( IMAGE_FILE ); // should be identical
     mApplication.Quit();
   }
 

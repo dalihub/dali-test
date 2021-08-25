@@ -353,31 +353,51 @@ private:
   {
     if (gTestStep == LOAD_FIRST_SCENE_AND_CAPTURE)
     {
-      DALI_ASSERT_ALWAYS(CheckImage(FIRST_IMAGE_FILE, 0.99f)); // verify the similarity
-
-      WaitForNextTest(DEFAULT_DELAY_TIME);
+      if(CheckImage(FIRST_IMAGE_FILE, 0.99f))
+      {
+        WaitForNextTest(DEFAULT_DELAY_TIME);
+      }
+      else
+      {
+        mApplication.Quit();
+      }
     }
     else if (gTestStep == FIRST_SCENE_SECOND_CAPTURE)
     {
-      DALI_ASSERT_ALWAYS(CheckImage(SECOND_IMAGE_FILE, 0.99f)); // verify the similarity
-
-      WaitForNextTest(DEFAULT_DELAY_TIME);
+      if(CheckImage(SECOND_IMAGE_FILE, 0.99f))
+      {
+        WaitForNextTest(DEFAULT_DELAY_TIME);
+      }
+      else
+      {
+        mApplication.Quit();
+      }
     }
     else if ( gTestStep == LOAD_SECOND_SCENE_AND_CAPTURE )
     {
-      DALI_ASSERT_ALWAYS(CheckImage(THIRD_IMAGE_FILE, 0.99f)); // verify the similarity
-
-      WaitForNextTest(DEFAULT_DELAY_TIME);
+      if(CheckImage(THIRD_IMAGE_FILE, 0.99f))
+      {
+         WaitForNextTest(DEFAULT_DELAY_TIME);
+      }
+      else
+      {
+        mApplication.Quit();
+      }
     }
     else if ( gTestStep == SECOND_SCENE_SECOND_CAPTURE )
     {
-      DALI_ASSERT_ALWAYS(CheckImage(FOURTH_IMAGE_FILE, 0.99f)); // verify the similarity
-
-      WaitForNextTest(DEFAULT_DELAY_TIME);
+      if(CheckImage(FOURTH_IMAGE_FILE, 0.99f))
+      {
+        WaitForNextTest(DEFAULT_DELAY_TIME);
+      }
+      else
+      {
+        mApplication.Quit();
+      }
     }
     else if ( gTestStep == THIRD_SCENE_CAPTURE )
     {
-      DALI_ASSERT_ALWAYS(CheckImage(FIFTH_IMAGE_FILE, 0.99f)); // verify the similarity
+      CheckImage(FIFTH_IMAGE_FILE, 0.99f);
 
       // The last check has been done, so we can quit the test
       mApplication.Quit();
@@ -394,4 +414,3 @@ private:
 };
 
 DALI_VISUAL_TEST( SceneLoaderTest, OnInit )
-

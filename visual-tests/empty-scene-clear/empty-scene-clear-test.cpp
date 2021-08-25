@@ -122,17 +122,21 @@ private:
   {
     if ( gTestStep == FIRST_WINDOW )
     {
-      DALI_ASSERT_ALWAYS( CheckImage( IMAGE_FILE_1, 0.95f ) ); // verify the similarity
-      PerformNextTest();
+      if(CheckImage( IMAGE_FILE_1, 0.95f ) ) // verify the similarity
+        PerformNextTest();
+      else
+        mApplication.Quit();
     }
     else if ( gTestStep == SECOND_WINDOW )
     {
-      DALI_ASSERT_ALWAYS( CheckImage( IMAGE_FILE_2 ) ); // ensure identical
-      PerformNextTest();
+      if( CheckImage( IMAGE_FILE_2 ) ) // ensure identical
+        PerformNextTest();
+      else
+        mApplication.Quit();
     }
     else if ( gTestStep == THIRD_WINDOW )
     {
-      DALI_ASSERT_ALWAYS( CheckImage( IMAGE_FILE_3 ) ); // ensure identical
+      CheckImage( IMAGE_FILE_3 ); // ensure identical
 
       // The last check has been done, so we can quit the test
       mApplication.Quit();
@@ -148,4 +152,3 @@ private:
 };
 
 DALI_VISUAL_TEST( EmptySceneClearTest, OnInit )
-

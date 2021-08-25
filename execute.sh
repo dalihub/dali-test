@@ -3,11 +3,11 @@
 # Usage Function
 Usage()
 {
-  echo "Usage: $(basename ${BASH_SOURCE[0]}) [OPTIONS]"
-  echo " Optional Options:"
-  # Just do a simple grep of this file so we can keep the command with the comment together
-  grep ". )\ #" ${BASH_SOURCE[0]} | sed 's/# //' | awk -F ")" '{ printf "%-25s %s\n", $1, $2 }'
-  exit 0
+    echo "Usage: $(basename ${BASH_SOURCE[0]}) [OPTIONS]"
+    echo " Optional Options:"
+    # Just do a simple grep of this file so we can keep the command with the comment together
+    grep ". )\ #" ${BASH_SOURCE[0]} | sed 's/# //' | awk -F ")" '{ printf "%-25s %s\n", $1, $2 }'
+    exit 0
 }
 
 # Initialise the options
@@ -20,34 +20,34 @@ GENERATE_XML=
 
 # Go through all the options
 if [[ $* > 1 ]] ; then
-  while true;
-  do
-    case "$1" in
-      -v|--verbose ) # Verbose output for every test case
-        REDIRECT_OUTPUT=
-        shift
-        ;;
+    while true;
+    do
+        case "$1" in
+            -v|--verbose ) # Verbose output for every test case
+                REDIRECT_OUTPUT=
+                shift
+                ;;
 
-      -h|--help ) # Help
-        shift
-        Usage
-        ;;
+            -h|--help ) # Help
+                shift
+                Usage
+                ;;
 
-      -x|--xml ) # Outputs visual-tests-results.xml with the test re
-        GENERATE_XML=1
-        shift
-        ;;
+            -x|--xml ) # Outputs visual-tests-results.xml with the test re
+                GENERATE_XML=1
+                shift
+                ;;
 
-      -- )
-        shift
-        ;;
+            -- )
+                shift
+                ;;
 
-    * )
-      break
-      ;;
+            * )
+                break
+                ;;
 
-    esac
-  done
+        esac
+    done
 fi
 
 # Formatting Codes
@@ -65,23 +65,30 @@ num_fails=0
 
 testOutput=""
 
+DEBUG=""
+#DEBUG=gdb --args
+
 # Execute each test executable in turn
 for i in $tests ; do
-  test=$(basename $i).test
-  echo -e "${Bold}Executing: $test${Clear}"
-  command="$test ${REDIRECT_OUTPUT}"
-  eval $command
+    test=$(basename $i).test
+    dimensions=$($test --get-dimensions 2>/dev/null)
+    command="xvfb-run -s \"-screen 0 $dimensions -fbdir /var/tmp\" $DEBUG $test --fb ${REDIRECT_OUTPUT}"
+    echo -e "${Bold}Executing: $command"
+    eval $command
 
-  # Check the test result
-  if [ "$?" != "0" ]; then
-    echo "$test Failed"
-    testOutput="$testOutput $test,Failed"
-    ((num_fails++))
-  else
-    echo "$test Passed"
-    testOutput="$testOutput $test,Passed"
-    ((num_passes++))
-  fi
+    percent=$?
+    # Check the test result
+    if [ "$percent" != "0" ]; then
+        echo "$test Failed ($percent % match)"
+        testOutput="$testOutput $test,Failed"
+        ((num_fails++))
+    else
+        echo "$test Passed"
+        testOutput="$testOutput $test,Passed"
+        ((num_passes++))
+    fi
+
+    #read -p "Waiting..>" aline
 done
 
 # Output the summary of test result
@@ -98,28 +105,28 @@ echo -e "  ${TestOutputColor}Number of test failures: ${Bold}$num_fails ${Clear}
 # Create an XML file with all the output
 if [[ "$GENERATE_XML" = "1" ]]
 then
-  xmlOutputFile=visual-tests-results.xml
-  echo -e "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $xmlOutputFile
-  echo -e "<visual_tests>" >> $xmlOutputFile
-  echo -e "\t<summary>" >> $xmlOutputFile
-  echo -e "\t\t<total_tests>$num_tests</total_tests>" >> $xmlOutputFile
-  echo -e "\t\t<pass_tests>$num_passes</pass_tests>" >> $xmlOutputFile
-  echo -e "\t\t<pass_rate>$percent_passing</pass_rate>" >> $xmlOutputFile
-  echo -e "\t\t<fail_tests>$num_fails</fail_tests>" >> $xmlOutputFile
-  echo -e "\t\t<fail_rate>$percent_failing</fail_rate>" >> $xmlOutputFile
-  echo -e "\t</summary>" >> $xmlOutputFile
-  echo -e "\t<tests>" >> $xmlOutputFile
-  for test in $testOutput
-  do
-    testName=$(echo $test | cut -d, -f 1)
-    testResult=$(echo $test | cut -d, -f 2)
-    echo -e "\t\t<test>" >> $xmlOutputFile
-    echo -e "\t\t\t<name>$testName</name>" >> $xmlOutputFile
-    echo -e "\t\t\t<result>$testResult</result>" >> $xmlOutputFile
-    echo -e "\t\t</test>" >> $xmlOutputFile
-  done
-  echo -e "\t</tests>" >> $xmlOutputFile
-  echo -e "</visual_tests>" >> $xmlOutputFile
+    xmlOutputFile=visual-tests-results.xml
+    echo -e "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $xmlOutputFile
+    echo -e "<visual_tests>" >> $xmlOutputFile
+    echo -e "\t<summary>" >> $xmlOutputFile
+    echo -e "\t\t<total_tests>$num_tests</total_tests>" >> $xmlOutputFile
+    echo -e "\t\t<pass_tests>$num_passes</pass_tests>" >> $xmlOutputFile
+    echo -e "\t\t<pass_rate>$percent_passing</pass_rate>" >> $xmlOutputFile
+    echo -e "\t\t<fail_tests>$num_fails</fail_tests>" >> $xmlOutputFile
+    echo -e "\t\t<fail_rate>$percent_failing</fail_rate>" >> $xmlOutputFile
+    echo -e "\t</summary>" >> $xmlOutputFile
+    echo -e "\t<tests>" >> $xmlOutputFile
+    for test in $testOutput
+    do
+        testName=$(echo $test | cut -d, -f 1)
+        testResult=$(echo $test | cut -d, -f 2)
+        echo -e "\t\t<test>" >> $xmlOutputFile
+        echo -e "\t\t\t<name>$testName</name>" >> $xmlOutputFile
+        echo -e "\t\t\t<result>$testResult</result>" >> $xmlOutputFile
+        echo -e "\t\t</test>" >> $xmlOutputFile
+    done
+    echo -e "\t</tests>" >> $xmlOutputFile
+    echo -e "</visual_tests>" >> $xmlOutputFile
 fi
 
 # If we have failures, this will exit this script with 1 otherwise it'll be 0 (success)

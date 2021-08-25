@@ -194,14 +194,18 @@ private:
   {
     if ( gTestStep == ADAPTOR_RESUME )
     {
-      DALI_ASSERT_ALWAYS( CheckImage( SECOND_IMAGE_FILE ) ); // should be identical
+      CheckImage( SECOND_IMAGE_FILE ); // should be identical
 
       // The last check has been done, so we can quit the test
       mApplication.Quit();
     }
     else
     {
-      DALI_ASSERT_ALWAYS( CheckImage( FIRST_IMAGE_FILE ) ); // should be identical
+      if(!CheckImage( FIRST_IMAGE_FILE)) // should be identical
+      {
+        mTimer.Stop();
+        mApplication.Quit();
+      }
     }
   }
 
@@ -213,4 +217,3 @@ private:
 };
 
 DALI_VISUAL_TEST( ResourceUploadingTest, OnInit )
-

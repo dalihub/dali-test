@@ -98,6 +98,7 @@ private:
     {
       // Since we have created/deleted maximum number of new windows, quit the test
       mApplication.Quit();
+      gExitValue=0;
 
       return false;
     }
@@ -107,7 +108,6 @@ private:
 
     // Create a new window
     mNewWindow = CreateNewWindow();
-
     return true;
   }
 
@@ -121,4 +121,3 @@ private:
 };
 
 DALI_VISUAL_TEST( MultipleWIndowCreationDeletionTest, OnInit )
-

@@ -165,14 +165,20 @@ private:
 
   void PostRender()
   {
-    if ( gTestStep == ENGLISH_OUTLINE )
+    if( gTestStep == ENGLISH_OUTLINE )
     {
-      DALI_ASSERT_ALWAYS( CheckImage( IMAGE_FILE_1, 0.95f ) ); // verify the similarity
-      PerformNextTest();
+      if(CheckImage(IMAGE_FILE_1, 0.95f))
+      {
+        PerformNextTest();
+      }
+      else
+      {
+        mApplication.Quit();
+      }
     }
-    else if ( gTestStep == MULTI_LANGUAGE_OUTLINE )
+    else if( gTestStep == MULTI_LANGUAGE_OUTLINE )
     {
-      DALI_ASSERT_ALWAYS( CheckImage( IMAGE_FILE_2, 0.95f ) ); // verify the similarity
+      CheckImage( IMAGE_FILE_2, 0.95f ); // verify the similarity
 
       // The last check has been done, so we can quit the test
       mApplication.Quit();
@@ -185,4 +191,3 @@ private:
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE( TextOutlineTest, OnInit, 1000, 850 )
-

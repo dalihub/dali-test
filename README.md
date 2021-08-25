@@ -15,9 +15,11 @@
 
 ### Requirements
 
- - Ubuntu 16.04 or later
+ - Ubuntu 20.04 or later
  - GCC version 6
  - OpenCV version 2.4.9 or above
+ - Xvfb
+ - Magick++
  - Environment created using dali_env script in dali-core repository
  - This environment should have the DALi libraries installed
 
@@ -44,6 +46,13 @@ For debug builds:
 To run all the tests:
 
          $ ./execute.sh
+
+This will run each test on it's own X server.
+
+# Running individual tests
+
+The tests are installed into dali-env, and can be run directly.
+In this case, the test is run on the desktop's X server.
 
 # Creating a visual test
 

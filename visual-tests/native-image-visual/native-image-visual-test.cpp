@@ -67,6 +67,7 @@ public:
 //    mTimer = Timer::New(1000);
 //    mTimer.TickSignal().Connect(this, &NativeImageVisualTest::OnTick);
 //    mTimer.Start();
+    gExitValue=0;
     application.Quit();
   }
 
@@ -81,7 +82,7 @@ private:
 
   void PostRender()
   {
-    DALI_ASSERT_ALWAYS( CheckImage( IMAGE_FILE, 0.80f ) ); // should be mostly similar
+    CheckImage(IMAGE_FILE, 0.80f); // should be mostly similar
     mApplication.Quit();
   }
 

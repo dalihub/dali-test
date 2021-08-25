@@ -19,17 +19,22 @@
 #include "visual-test.h"
 #include "image-util.h"
 
+// EXTERNAL INCLUDES
+#include <Magick++.h>
+
 using namespace Dali;
 
 const char* gTempFilename="/tmp/temp.png";
+const char* gVirtualFramebuffer="/var/tmp/Xvfb_screen0";
 
+bool gFB=false;
+int gExitValue=1;
 
 /**
  * @brief Constructor.
  */
 VisualTest::VisualTest()
-: mNativeImageSourcePtr( nullptr ),
-  mWindow()
+: mWindow()
 {
 }
 
@@ -78,15 +83,22 @@ void VisualTest::SetupNativeImage( Dali::Window window, Dali::CameraActor custom
 
 void VisualTest::CaptureWindow( Dali::Window window, Dali::CameraActor customCamera )
 {
-  SetupNativeImage( window, customCamera );
-
-  mOffscreenRenderTask.FinishedSignal().Connect( this, &VisualTest::OnOffscreenRenderFinished );
+  if(gFB)
+  {
+    RenderTask renderTask = window.GetRenderTaskList().GetTask(0);
+    renderTask.SetRefreshRate(RenderTask::REFRESH_ONCE);
+    renderTask.FinishedSignal().Connect( this, &VisualTest::OnOffscreenRenderFinished );
+  }
+  else
+  {
+    SetupNativeImage( window, customCamera );
+    mOffscreenRenderTask.FinishedSignal().Connect( this, &VisualTest::OnOffscreenRenderFinished );
+  }
 }
 
 void VisualTest::OnOffscreenRenderFinished( RenderTask& task )
 {
   task.FinishedSignal().Disconnect( this, &VisualTest::OnOffscreenRenderFinished );
-
   PostRender();
 }
 
@@ -95,17 +107,24 @@ bool VisualTest::CheckImage( const std::string fileName, const float similarityT
   bool success = false;
 
   // Compare the image in the given area
-  if ( mNativeImageSourcePtr->EncodeToFile( gTempFilename ) )
+  if(gFB)
   {
-    if ( CompareImageFile( fileName, gTempFilename, similarityThreshold, areaToCompare ) )
-    {
-      success = true;
-    }
+    Magick::Image image;
+    image.magick("xwd");
+    image.read(gVirtualFramebuffer);
+    image.magick("png");
+    image.write(gTempFilename);
+    success=true;
+  }
+  else
+  {
+    success = mNativeImageSourcePtr->EncodeToFile( gTempFilename );
   }
 
-  // Temporarily bypass image comparison
-  // @todo: Will re-enable it once native image starts to work again.
-  success = true;
+  if(success)
+  {
+    success = CompareImageFile( fileName, gTempFilename, similarityThreshold, areaToCompare );
+  }
 
   return success;
 }
@@ -144,6 +163,10 @@ bool VisualTest::CompareImageFile( const std::string fileName1, const std::strin
          "Passed threshold of %f: %s\n",
          100.0f*similarity.val[0], 100.0f*similarity.val[1], 100.0f*similarity.val[2],
          100.0f*similarityThreshold, passed?"TRUE":"FALSE");
+
+
+  gExitValue = 33.3f*(similarity.val[0]+similarity.val[1]+similarity.val[2]);
+  if(passed) gExitValue=0;
 
   return passed;
 }

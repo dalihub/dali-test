@@ -227,22 +227,40 @@ private:
   {
     if( gTestStep == CLIP_CHILDREN_01 )
     {
-      DALI_ASSERT_ALWAYS( CheckImage( IMAGE_FILE_1) ); // ensure identical
-      PerformNextTest();
+      if(CheckImage( IMAGE_FILE_1))
+      {
+        PerformNextTest();
+      }
+      else
+      {
+        mApplication.Quit();
+      }
     }
     else if( gTestStep == CLIP_CHILDREN_02 )
     {
-      DALI_ASSERT_ALWAYS( CheckImage( IMAGE_FILE_2 ) ); // ensure identical
-      PerformNextTest();
+      if(CheckImage( IMAGE_FILE_2))
+      {
+         PerformNextTest();
+      }
+      else
+      {
+        mApplication.Quit();
+      }
     }
     else if( gTestStep == CLIP_TO_BOUNDING_BOX_01 )
     {
-      DALI_ASSERT_ALWAYS( CheckImage( IMAGE_FILE_3 ) ); // ensure identical
-      PerformNextTest();
+      if(CheckImage( IMAGE_FILE_3 ))
+      {
+        PerformNextTest();
+      }
+      else
+      {
+        mApplication.Quit();
+      }
     }
     else if( gTestStep == CLIP_TO_BOUNDING_BOX_02 )
     {
-      DALI_ASSERT_ALWAYS( CheckImage( IMAGE_FILE_4 ) ); // ensure identical
+      CheckImage( IMAGE_FILE_4 ); // ensure identical
 
       // The last check has been done, so we can quit the test
       mApplication.Quit();
