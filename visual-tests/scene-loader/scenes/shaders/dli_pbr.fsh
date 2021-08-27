@@ -7,6 +7,17 @@
 #endif
 
 #ifdef THREE_TEX
+#ifdef GLTF_CHANNELS
+// https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#pbrmetallicroughnessmetallicroughnesstexture
+#define METALLIC b
+#define ROUGHNESS g
+#else //GLTF_CHANNELS
+#define METALLIC r
+#define ROUGHNESS a
+#endif //GLTF_CHANNELS
+#endif //THREE_TEX
+
+#ifdef THREE_TEX
   uniform sampler2D sAlbedoAlpha;
   uniform sampler2D sMetalRoughness;
   uniform sampler2D sNormal;
@@ -19,10 +30,6 @@
   uniform sampler2D sAlbedoMetal;
   uniform sampler2D sNormalRoughness;
 #endif
-
-#ifdef SSS
-  uniform sampler2D sSubsurface;
-#endif	//SSS
 
 uniform samplerCube sDiffuse;
 uniform samplerCube sSpecular;
@@ -78,11 +85,11 @@ void main()
   vec3 albedoColor = albedoAlpha.rgb * uColor.rgb;
 
   vec4 metalRoughness = texture(sMetalRoughness, vUV.st);
-  float metallic = metalRoughness.r * uMetallicFactor;
-  float roughness = metalRoughness.a * uRoughnessFactor;
+  float metallic = metalRoughness.METALLIC * uMetallicFactor;
+  float roughness = metalRoughness.ROUGHNESS * uRoughnessFactor;
 
   vec3 normalMap = texture(sNormal, vUV.st).rgb;
-#else
+#else  //THREE_TEX
   vec4 albedoMetal = texture(sAlbedoMetal, vUV.st);
   vec3 albedoColor = albedoMetal.rgb * uColor.rgb;
   float metallic = albedoMetal.a * uMetallicFactor;
@@ -146,11 +153,8 @@ void main()
 
   finalColor = sqrt( finalColor ) * uIblIntensity;
 #ifdef THREE_TEX
-#ifdef LIT
-  alpha = max( alpha, dot( specColor, specColor ) + dot( lightSpec, lightSpec ));
-#endif
   FragColor = vec4( finalColor, alpha );
-#else
+#else //THREE_TEX
   FragColor = vec4( finalColor, 1.0 );
-#endif
+#endif //THREE_TEX
 }

@@ -28,6 +28,8 @@ extern const char* gTempFilename;
 extern bool gFB;
 extern int gExitValue;
 
+#define TMPDIR "/tmp/dali-tests/"
+
 /**
  * DALI_VISUAL_TEST_WITH_WINDOW_SIZE is a wrapper for the boilerplate code to create
  * the main function of the visual test application with the given main window size.
@@ -42,7 +44,7 @@ extern int gExitValue;
   {                                                                     \
     setenv( "DALI_DPI_HORIZONTAL", "96", true );                        \
     setenv( "DALI_DPI_VERTICAL", "96", true );                          \
-    gTempFilename = "/tmp/" #VisualTestName ".png";                     \
+    gTempFilename = TMPDIR #VisualTestName;                 \
     if(argc>1 && !strcmp(argv[1], "--get-dimensions"))                  \
     {                                                                   \
       printf("%dx%dx24\n", WindowWidth, WindowHeight);                  \

@@ -18,7 +18,9 @@
 // EXTERNAL INCLUDES
 #include <string>
 #include <dali/dali.h>
+#include <dali/devel-api/rendering/frame-buffer-devel.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali-toolkit/devel-api/image-loader/texture-manager.h>
 #include <dali-scene-loader/public-api/animation-definition.h>
 #include <dali-scene-loader/public-api/scene-definition.h>
 #include <dali-scene-loader/public-api/node-definition.h>
@@ -26,6 +28,7 @@
 #include <dali-scene-loader/public-api/light-parameters.h>
 #include <dali-scene-loader/public-api/dli-loader.h>
 #include <dali-scene-loader/public-api/load-result.h>
+#include <cstdio>
 
 // INTERNAL INCLUDES
 #include "visual-test.h"
@@ -53,6 +56,10 @@ const std::string THIRD_IMAGE_FILE = TEST_IMAGE_DIR "scene-loader/expected-resul
 const std::string FOURTH_IMAGE_FILE = TEST_IMAGE_DIR "scene-loader/expected-result-4.png";
 const std::string FIFTH_IMAGE_FILE = TEST_IMAGE_DIR "scene-loader/expected-result-5.png";
 
+
+const int WINDOW_WIDTH(480);
+const int WINDOW_HEIGHT(800);
+
 enum TestStep
 {
   LOAD_FIRST_SCENE_AND_CAPTURE,
@@ -71,9 +78,18 @@ static int gTestStep = -1;
 }  // namespace
 
 /**
- * @brief This is to test the functionality which allows the uploading of textures to the GPU
- * without rendering while the application is paused, and thus, have them available immediately
- * for rendering on resume.
+ * @brief Tests scene loading functionality
+ *
+ * This is made difficult by the native image renderer rendering upside down. Consequently the
+ * actor tree looks like:
+ *
+ * Window Root Layer
+ *   +
+ *   +---- Scene Layer
+ *   |     + --- SceneCamera
+ *   |     + Scene
+ *   +
+ *
  */
 class SceneLoaderTest: public VisualTest
 {
@@ -89,13 +105,44 @@ class SceneLoaderTest: public VisualTest
     Dali::Window window = mApplication.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    // Create a custom camera
-    mSceneCamera = CameraActor::New();
-    window.Add(mSceneCamera);
+    // Create a custom layer for rendering a 3D scene (depth testing is enabled automatically)
+    mSceneLayer = Layer::New();
+    mSceneLayer.SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
+    mSceneLayer.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
+    mSceneLayer.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
+    mSceneLayer[Layer::Property::BEHAVIOR] = Layer::LAYER_3D;
+    window.Add(mSceneLayer);
 
+    // Create a custom camera (will be modified by scene loader, below)
+    mSceneCamera = CameraActor::New();
+    mSceneLayer.Add(mSceneCamera);
+
+    // Create a custom render task that _exclusively_ renders to a framebuffer with a
+    // depth attachment.
     auto renderTasks = window.GetRenderTaskList();
-    mSceneRender = renderTasks.GetTask(0);
+    mSceneRender = renderTasks.CreateTask();
     mSceneRender.SetCameraActor(mSceneCamera);
+    mSceneRender.SetSourceActor(mSceneLayer);
+    mSceneRender.SetClearColor(Color::WHITE);
+    mSceneRender.SetClearEnabled(true);
+    mSceneRender.SetRefreshRate(RenderTask::REFRESH_ALWAYS);
+    mSceneRender.SetExclusive(true);
+
+    mSceneFBO = FrameBuffer::New( WINDOW_WIDTH, WINDOW_HEIGHT, FrameBuffer::Attachment::COLOR_DEPTH);
+    Texture depthTexture = Texture::New(TextureType::TEXTURE_2D, Pixel::DEPTH_FLOAT, WINDOW_WIDTH, WINDOW_HEIGHT);
+    DevelFrameBuffer::AttachDepthTexture(mSceneFBO, depthTexture);
+    mSceneRender.SetFrameBuffer( mSceneFBO );
+
+    // Now render the color attachment to the main tree, but because fbo is "upside-down" compared to
+    // loaded images we need to invert the image.
+    auto offscreen = mSceneFBO.GetColorTexture();
+    auto offscreenUrl = Toolkit::TextureManager::AddTexture(offscreen);
+    auto offscreenImage = Toolkit::ImageView::New(offscreenUrl);
+    offscreenImage[Actor::Property::PARENT_ORIGIN] = ParentOrigin::CENTER;
+    offscreenImage[Actor::Property::ANCHOR_POINT] = AnchorPoint::CENTER;
+    offscreenImage.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
+    offscreenImage[Actor::Property::SCALE_Y]=-1; // Invert the image.
+    window.Add(offscreenImage);
 
     // Start the test
     gTestStep++;
@@ -131,12 +178,7 @@ private:
     params.CalculateTransformComponents(camTranslation, camOrientation, camScale);
 
     SetActorCentered(camera);
-
-    // Scene loader needs camera configuration with inverted Y axis, which is different
-    // with other visual tests that use the default camera. Therefore, the captured image
-    // will be encoded as upside down.
     camera.SetInvertYAxis(true);
-
     camera.SetProperty(Actor::Property::POSITION, camTranslation);
     camera.SetProperty(Actor::Property::ORIENTATION, camOrientation);
     camera.SetProperty(Actor::Property::SCALE, camScale);
@@ -280,11 +322,9 @@ private:
       case LOAD_FIRST_SCENE_AND_CAPTURE:
       {
         mScene = LoadScene("exercise.dli", mSceneCamera);
-        mSceneRender.SetSourceActor(mScene);
-        window.Add(mScene);
+        mSceneLayer.Add(mScene);
 
-        CaptureWindow(window, mSceneCamera);
-
+        CaptureWindow(window);
         break;
       }
       case FIRST_SCENE_ANIMATION:
@@ -305,11 +345,11 @@ private:
       }
       case LOAD_SECOND_SCENE_AND_CAPTURE:
       {
+        UnparentAndReset(mScene);
         mScene = LoadScene("robot.dli", mSceneCamera);
-        mSceneRender.SetSourceActor(mScene);
-        window.Add(mScene);
+        mSceneLayer.Add(mScene);
 
-        CaptureWindow(window, mSceneCamera);
+        CaptureWindow(window);
 
         break;
       }
@@ -331,17 +371,17 @@ private:
       }
       case LOAD_THIRD_SCENE:
       {
+        UnparentAndReset(mScene);
         mScene = LoadScene("beer.dli", mSceneCamera);
-        mSceneRender.SetSourceActor(mScene);
-        window.Add(mScene);
+        mSceneLayer.Add(mScene);
 
-        WaitForNextTest(DEFAULT_DELAY_TIME);
+        WaitForNextTest(DEFAULT_DELAY_TIME*2);
 
         break;
       }
       case THIRD_SCENE_CAPTURE:
       {
-        CaptureWindow(window, mSceneCamera);
+        CaptureWindow(window);
         break;
       }
       default:
@@ -397,20 +437,23 @@ private:
     }
     else if ( gTestStep == THIRD_SCENE_CAPTURE )
     {
-      CheckImage(FIFTH_IMAGE_FILE, 0.99f);
+      CheckImage(FIFTH_IMAGE_FILE, 0.98f);
 
       // The last check has been done, so we can quit the test
       mApplication.Quit();
     }
   }
 
+
 private:
   Application&      mApplication;
   Timer             mTimer;
   CameraActor       mSceneCamera;
   Actor             mScene;
+  Layer             mSceneLayer;
   RenderTask        mSceneRender;
+  FrameBuffer       mSceneFBO;
   Animation         mAnimation;
 };
 
-DALI_VISUAL_TEST( SceneLoaderTest, OnInit )
+DALI_VISUAL_TEST_WITH_WINDOW_SIZE ( SceneLoaderTest, OnInit, WINDOW_WIDTH, WINDOW_HEIGHT )

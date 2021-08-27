@@ -21,14 +21,20 @@
 
 // EXTERNAL INCLUDES
 #include <Magick++.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <cstdio>
+#include <cerrno>
 
 using namespace Dali;
 
 const char* gTempFilename="/tmp/temp.png";
 const char* gVirtualFramebuffer="/var/tmp/Xvfb_screen0";
-
 bool gFB=false;
 int gExitValue=1;
+int gImageNumber=1;
+
 
 /**
  * @brief Constructor.
@@ -107,24 +113,49 @@ bool VisualTest::CheckImage( const std::string fileName, const float similarityT
   bool success = false;
 
   // Compare the image in the given area
+  char* imageName;
+
+  // Ensure there's a directory to write to:
+  struct stat statBuffer;
+  errno=0;
+  if(-1 == stat(TMPDIR, &statBuffer))
+  {
+    if(errno == ENOENT)
+    {
+      if(-1 == mkdir(TMPDIR, 0755))
+      {
+        fprintf(stderr, "%s\n", strerror(errno));
+      }
+    }
+    else
+    {
+      fprintf(stderr, "%s\n", strerror(errno));
+    }
+  }
+
+  asprintf(&imageName, "%s%02d.png", gTempFilename, gImageNumber);
+  gImageNumber++;
+
   if(gFB)
   {
     Magick::Image image;
     image.magick("xwd");
     image.read(gVirtualFramebuffer);
     image.magick("png");
-    image.write(gTempFilename);
+    image.write(imageName);
     success=true;
   }
   else
   {
-    success = mNativeImageSourcePtr->EncodeToFile( gTempFilename );
+    success = mNativeImageSourcePtr->EncodeToFile( imageName );
   }
 
   if(success)
   {
-    success = CompareImageFile( fileName, gTempFilename, similarityThreshold, areaToCompare );
+    success = CompareImageFile( fileName, imageName, similarityThreshold, areaToCompare );
   }
+
+  free(imageName);
 
   return success;
 }

@@ -39,7 +39,11 @@ uniform mat4 uProjection;
 #define MAX_BLEND_SHAPE_NUMBER 128
 uniform int uNumberOfBlendShapes;                                   ///< Total number of blend shapes loaded.
 uniform float uBlendShapeWeight[MAX_BLEND_SHAPE_NUMBER];            ///< The weight of each blend shape.
+#ifdef MORPH_VERSION_2_0
+uniform float uBlendShapeUnnormalizeFactor;                         ///< Factor used to unnormalize the geometry of the blend shape.
+#else
 uniform float uBlendShapeUnnormalizeFactor[MAX_BLEND_SHAPE_NUMBER]; ///< Factor used to unnormalize the geometry of the blend shape.
+#endif
 uniform int uBlendShapeComponentSize;                               ///< The size in the texture of either the vertices, normals or tangents. Used to calculate the offset to address them.
 #endif
 
@@ -65,7 +69,13 @@ void main()
     // Retrieves the blend shape geometry from the texture, unnormalizes it and multiply by the weight.
     if( 0.0 != uBlendShapeWeight[index] )
     {
-      diff = uBlendShapeWeight[index] * uBlendShapeUnnormalizeFactor[index] * ( texelFetch( sBlendShapeGeometry, ivec2(x, y), 0 ).xyz - 0.5 );
+#ifdef MORPH_VERSION_2_0
+       float unnormalizeFactor = uBlendShapeUnnormalizeFactor;
+#else
+       float unnormalizeFactor = uBlendShapeUnnormalizeFactor[index];
+#endif
+
+      diff = uBlendShapeWeight[index] * unnormalizeFactor * ( texelFetch( sBlendShapeGeometry, ivec2(x, y), 0 ).xyz - 0.5 );
     }
 
     position.xyz += diff;
