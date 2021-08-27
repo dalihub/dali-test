@@ -20,6 +20,7 @@
 #include <dali/dali.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <cstdlib>
 
 // INTERNAL INCLUDES
 #include "visual-test.h"
@@ -58,6 +59,7 @@ class TextOutlineTest: public VisualTest
   TextOutlineTest( Application& application )
     : mApplication( application )
   {
+    setenv("DALI_MATCH_SYSTEM_LANGUAGE_DIRECTION", "0", true);
   }
 
   void OnInit( Application& application )
