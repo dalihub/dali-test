@@ -24,11 +24,12 @@
 #include <dali/dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading.h>
 
-extern const char* gTempFilename;
+extern char* gTempFilename;
+extern char* gTempDir;
 extern bool gFB;
 extern int gExitValue;
 
-#define TMPDIR "/tmp/dali-tests/"
+bool ParseEnvironment(int argc, char**argv, int width, int height);
 
 /**
  * DALI_VISUAL_TEST_WITH_WINDOW_SIZE is a wrapper for the boilerplate code to create
@@ -40,17 +41,13 @@ extern int gExitValue;
  * @note This sets the DPI to be 96 for all tests so that text tests all produce the same output image
  */
 #define DALI_VISUAL_TEST_WITH_WINDOW_SIZE( VisualTestName, InitFunction, WindowWidth, WindowHeight ) \
-  int DALI_EXPORT_API main( int argc, char **argv )                     \
-  {                                                                     \
+  int DALI_EXPORT_API main( int argc, char **argv ){                    \
+    asprintf(&gTempDir,"/tmp/dali-tests");                              \
+    bool cont=ParseEnvironment(argc, argv, WindowWidth, WindowHeight);  \
+    if(!cont) return 0;                                                 \
+    asprintf(&gTempFilename, "%s/%s", gTempDir, #VisualTestName);       \
     setenv( "DALI_DPI_HORIZONTAL", "96", true );                        \
     setenv( "DALI_DPI_VERTICAL", "96", true );                          \
-    gTempFilename = TMPDIR #VisualTestName;                 \
-    if(argc>1 && !strcmp(argv[1], "--get-dimensions"))                  \
-    {                                                                   \
-      printf("%dx%dx24\n", WindowWidth, WindowHeight);                  \
-      return 0;                                                         \
-    }                                                                   \
-    else if(argc>1 && !strcmp(argv[1], "--fb")){gFB=true;}              \
     Application application = Application::New( &argc, &argv, "", Application::OPAQUE, Dali::Rect<int>(0, 0, WindowWidth, WindowHeight) ); \
     VisualTestName test( application );                                 \
     application.InitSignal().Connect( &test, &VisualTestName::InitFunction ); \
