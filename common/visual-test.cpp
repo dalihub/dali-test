@@ -29,12 +29,38 @@
 
 using namespace Dali;
 
-const char* gTempFilename="/tmp/temp.png";
+char* gTempDir;
+char* gTempFilename;
 const char* gVirtualFramebuffer="/var/tmp/Xvfb_screen0";
 bool gFB=false;
 int gExitValue=1;
 int gImageNumber=1;
 
+
+bool ParseEnvironment(int argc, char**argv, int WindowWidth, int WindowHeight)
+{
+  int c=1;
+  while(c<argc){
+    if(!strcmp(argv[c], "--fb")){
+      gFB=true;++c;
+    }
+    else if(!strcmp(argv[c], "--get-dimensions")){
+      printf("%dx%dx24\n", WindowWidth, WindowHeight);
+      return false;
+    }
+    else if(!strcmp(argv[c],"--directory")){
+      if(c+1<argc){
+        asprintf(&gTempDir, "%s", argv[c+1]);
+      }
+      c+=2;
+    }
+    else
+    {
+      ++c;//ignore unknown args
+    }
+  }
+  return true;
+}
 
 /**
  * @brief Constructor.
@@ -118,11 +144,11 @@ bool VisualTest::CheckImage( const std::string fileName, const float similarityT
   // Ensure there's a directory to write to:
   struct stat statBuffer;
   errno=0;
-  if(-1 == stat(TMPDIR, &statBuffer))
+  if(-1 == stat(gTempDir, &statBuffer))
   {
     if(errno == ENOENT)
     {
-      if(-1 == mkdir(TMPDIR, 0755))
+      if(-1 == mkdir(gTempDir, 0755))
       {
         fprintf(stderr, "%s\n", strerror(errno));
       }

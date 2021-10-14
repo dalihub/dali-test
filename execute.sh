@@ -11,18 +11,20 @@ Usage()
 }
 
 # Initialise the options
-OPTS=$(getopt -o vhx --long verbose,help,xml -n "$(basename "$0")" -- "$@")
+OPTS=$(getopt -o vhxd: --long directory:,verbose,help,xml -n "$(basename "$0")" -- "$@")
 if [ $? != 0 ]; then echo; Usage; fi
 eval set -- "$OPTS"
 
 REDIRECT_OUTPUT="> /dev/null 2>&1"
 GENERATE_XML=
+dir=""
 
 # Go through all the options
 if [[ $* > 1 ]] ; then
     while true;
     do
         case "$1" in
+            -d|--directory) dir="--directory $2" ; shift 2 ;;
             -v|--verbose ) # Verbose output for every test case
                 REDIRECT_OUTPUT=
                 shift
@@ -72,7 +74,7 @@ DEBUG=""
 for i in $tests ; do
     test=$(basename $i).test
     dimensions=$($test --get-dimensions 2>/dev/null)
-    command="xvfb-run -s \"-screen 0 $dimensions -fbdir /var/tmp\" $DEBUG $test --fb ${REDIRECT_OUTPUT}"
+    command="xvfb-run -s \"-screen 0 $dimensions -fbdir /var/tmp\" $DEBUG $test --fb $dir ${REDIRECT_OUTPUT}"
     echo -e "${Bold}Executing: $command"
     eval $command
 
