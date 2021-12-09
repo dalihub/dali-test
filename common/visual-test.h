@@ -19,17 +19,17 @@
  */
 
 // EXTERNAL INCLUDES
-#include <string>
-#include <cstdlib>
 #include <dali/dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading.h>
+#include <cstdlib>
+#include <string>
 
 extern char* gTempFilename;
 extern char* gTempDir;
-extern bool gFB;
-extern int gExitValue;
+extern bool  gFB;
+extern int   gExitValue;
 
-bool ParseEnvironment(int argc, char**argv, int width, int height);
+bool ParseEnvironment(int argc, char** argv, int width, int height);
 
 /**
  * DALI_VISUAL_TEST_WITH_WINDOW_SIZE is a wrapper for the boilerplate code to create
@@ -40,19 +40,20 @@ bool ParseEnvironment(int argc, char**argv, int width, int height);
  * @param[in] WindowHeight The height of the application's main window
  * @note This sets the DPI to be 96 for all tests so that text tests all produce the same output image
  */
-#define DALI_VISUAL_TEST_WITH_WINDOW_SIZE( VisualTestName, InitFunction, WindowWidth, WindowHeight ) \
-  int DALI_EXPORT_API main( int argc, char **argv ){                    \
-    asprintf(&gTempDir,"/tmp/dali-tests");                              \
-    bool cont=ParseEnvironment(argc, argv, WindowWidth, WindowHeight);  \
-    if(!cont) return 0;                                                 \
-    asprintf(&gTempFilename, "%s/%s", gTempDir, #VisualTestName);       \
-    setenv( "DALI_DPI_HORIZONTAL", "96", true );                        \
-    setenv( "DALI_DPI_VERTICAL", "96", true );                          \
-    Application application = Application::New( &argc, &argv, "", Application::OPAQUE, Dali::Rect<int>(0, 0, WindowWidth, WindowHeight) ); \
-    VisualTestName test( application );                                 \
-    application.InitSignal().Connect( &test, &VisualTestName::InitFunction ); \
-    application.MainLoop();                                             \
-    return gExitValue;                                                  \
+#define DALI_VISUAL_TEST_WITH_WINDOW_SIZE(VisualTestName, InitFunction, WindowWidth, WindowHeight)                                          \
+  int DALI_EXPORT_API main(int argc, char** argv)                                                                                           \
+  {                                                                                                                                         \
+    asprintf(&gTempDir, "/tmp/dali-tests");                                                                                                 \
+    bool cont = ParseEnvironment(argc, argv, WindowWidth, WindowHeight);                                                                    \
+    if(!cont) return 0;                                                                                                                     \
+    asprintf(&gTempFilename, "%s/%s", gTempDir, #VisualTestName);                                                                           \
+    setenv("DALI_DPI_HORIZONTAL", "96", true);                                                                                              \
+    setenv("DALI_DPI_VERTICAL", "96", true);                                                                                                \
+    Application    application = Application::New(&argc, &argv, "", Application::OPAQUE, Dali::Rect<int>(0, 0, WindowWidth, WindowHeight)); \
+    VisualTestName test(application);                                                                                                       \
+    application.InitSignal().Connect(&test, &VisualTestName::InitFunction);                                                                 \
+    application.MainLoop();                                                                                                                 \
+    return gExitValue;                                                                                                                      \
   }
 
 /**
@@ -61,7 +62,7 @@ bool ParseEnvironment(int argc, char**argv, int width, int height);
  * @param[in] VisualTestName The class name of the visual test
  * @param[in] InitFunction The name of the callback function to connect with the application's InitSignal
  */
-#define DALI_VISUAL_TEST( VisualTestName, InitFunction ) DALI_VISUAL_TEST_WITH_WINDOW_SIZE( VisualTestName, InitFunction, 480, 800 )
+#define DALI_VISUAL_TEST(VisualTestName, InitFunction) DALI_VISUAL_TEST_WITH_WINDOW_SIZE(VisualTestName, InitFunction, 480, 800)
 
 // The default threshold for image similarity
 #define DEFAULT_IMAGE_SIMILARITY_THRESHOLD 0.99f
@@ -73,14 +74,12 @@ bool ParseEnvironment(int argc, char**argv, int width, int height);
 class VisualTest : public Dali::ConnectionTracker
 {
 public:
-
   /**
    * @brief Constructor.
    */
   VisualTest();
 
 protected:
-
   /**
    * @brief Default Destructor.
    */
@@ -91,7 +90,7 @@ protected:
    * @param[in] window The window to be captured
    * @param[in] customCamera The custom camera to be used to render the offscreen frame buffer (or otherwise a default camera will be created and used )
    */
-  void CaptureWindow( Dali::Window window, Dali::CameraActor customCamera = Dali::CameraActor() );
+  void CaptureWindow(Dali::Window window, Dali::CameraActor customCamera = Dali::CameraActor());
 
   /**
    * @brief Compare the result of the window capture with the given image file
@@ -100,10 +99,9 @@ protected:
    * @param[in] areaToCompare The area in the image to be compared (The default value is an empty rectangle which means the whole area of the image will be compared)
    * @return Whether the similarity of the two images reaches the given threshold
    */
-  bool CheckImage( const std::string fileName, const float similarityThreshold = DEFAULT_IMAGE_SIMILARITY_THRESHOLD, const Dali::Rect<uint16_t>& areaToCompare = Dali::Rect<uint16_t>(0u, 0u, 0u, 0u) );
+  bool CheckImage(const std::string fileName, const float similarityThreshold = DEFAULT_IMAGE_SIMILARITY_THRESHOLD, const Dali::Rect<uint16_t>& areaToCompare = Dali::Rect<uint16_t>(0u, 0u, 0u, 0u));
 
 private:
-
   /**
    * @brief This virtual function will be called after the offscreen window frame buffer has been rendered.
    * @note  The visual test case must implement this function to check the result of the offscreen frame buffer.
@@ -115,13 +113,13 @@ private:
    * @param[in] window The window to be rendered
    * @param[in] customCamera The custom camera to be used to render the offscreen frame buffer
    */
-  void SetupNativeImage( Dali::Window window, Dali::CameraActor customCamera );
+  void SetupNativeImage(Dali::Window window, Dali::CameraActor customCamera);
 
   /**
    * @brief Callback function when a RenderTask has finished
    * @param[in] task The render task
    */
-  void OnOffscreenRenderFinished( Dali::RenderTask& task );
+  void OnOffscreenRenderFinished(Dali::RenderTask& task);
 
   /**
    * @brief Compare the given area in the two image files.
@@ -131,17 +129,23 @@ private:
    * @param[in] areaToCompare The area to be compared
    * @return Whether the similarity of the given area in the two images reaches the given threshold
    */
-  bool CompareImageFile( const std::string fileName1, const std::string fileName2, const float similarityThreshold, const Dali::Rect<uint16_t>& areaToCompare );
+  bool CompareImageFile(const std::string fileName1, const std::string fileName2, const float similarityThreshold, const Dali::Rect<uint16_t>& areaToCompare);
+
+  /**
+   * @brief Callback function when a window has been resized
+   * @param[in] window The window
+   * @param[in] size The new size of the window
+   */
+  void OnWindowResized(Dali::Window window, Dali::Window::WindowSize size);
 
 private:
+  Dali::NativeImageSourcePtr mNativeImageSourcePtr; ///< The pointer of the native image source
+  Dali::Texture              mNativeTexture;        ///< The texture for the native image
+  Dali::FrameBuffer          mFrameBuffer;          ///< The frame buffer for offscreen rendering
 
-  Dali::NativeImageSourcePtr mNativeImageSourcePtr;           ///< The pointer of the native image source
-  Dali::Texture              mNativeTexture;                  ///< The texture for the native image
-  Dali::FrameBuffer          mFrameBuffer;                    ///< The frame buffer for offscreen rendering
-
-  Dali::RenderTask mOffscreenRenderTask;                      ///< The offscreen render task
-  Dali::CameraActor mCameraActor;                             ///< The camera actor for the offscreen render task
-  Dali::WeakHandle< Dali::Layer > mWindow;                    ///< The weak handle of the window to be rendered
+  Dali::RenderTask              mOffscreenRenderTask; ///< The offscreen render task
+  Dali::CameraActor             mCameraActor;         ///< The camera actor for the offscreen render task
+  Dali::WeakHandle<Dali::Layer> mWindow;              ///< The weak handle of the window to be rendered
 };
 
 #endif // VISUAL_TEST_H
