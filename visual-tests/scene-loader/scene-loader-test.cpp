@@ -16,19 +16,19 @@
  */
 
 // EXTERNAL INCLUDES
-#include <string>
-#include <dali/dali.h>
-#include <dali/devel-api/rendering/frame-buffer-devel.h>
+#include <cstdio>
+#include <dali-scene-loader/public-api/animation-definition.h>
+#include <dali-scene-loader/public-api/camera-parameters.h>
+#include <dali-scene-loader/public-api/dli-loader.h>
+#include <dali-scene-loader/public-api/light-parameters.h>
+#include <dali-scene-loader/public-api/load-result.h>
+#include <dali-scene-loader/public-api/node-definition.h>
+#include <dali-scene-loader/public-api/scene-definition.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/image-loader/texture-manager.h>
-#include <dali-scene-loader/public-api/animation-definition.h>
-#include <dali-scene-loader/public-api/scene-definition.h>
-#include <dali-scene-loader/public-api/node-definition.h>
-#include <dali-scene-loader/public-api/camera-parameters.h>
-#include <dali-scene-loader/public-api/light-parameters.h>
-#include <dali-scene-loader/public-api/dli-loader.h>
-#include <dali-scene-loader/public-api/load-result.h>
-#include <cstdio>
+#include <dali/dali.h>
+#include <dali/devel-api/rendering/frame-buffer-devel.h>
+#include <string>
 
 // INTERNAL INCLUDES
 #include "visual-test.h"
@@ -37,31 +37,33 @@ using namespace Dali;
 using namespace Dali::Toolkit;
 using namespace Dali::SceneLoader;
 
-namespace
-{
+namespace {
 
 const Vector3 CAMERA_DEFAULT_POSITION(0.0f, 0.0f, 3.5f);
 const unsigned int DEFAULT_DELAY_TIME = 100;
 
 const std::string RESOURCE_TYPE_DIRS[]{
-  TEST_SCENE_DIR "environments/",
-  TEST_SCENE_DIR "shaders/",
-  TEST_SCENE_DIR "models/",
-  TEST_SCENE_DIR "images/",
+    TEST_SCENE_DIR "environments/",
+    TEST_SCENE_DIR "shaders/",
+    TEST_SCENE_DIR "models/",
+    TEST_SCENE_DIR "images/",
 };
 
-const std::string FIRST_IMAGE_FILE = TEST_IMAGE_DIR "scene-loader/expected-result-1.png";
-const std::string SECOND_IMAGE_FILE = TEST_IMAGE_DIR "scene-loader/expected-result-2.png";
-const std::string THIRD_IMAGE_FILE = TEST_IMAGE_DIR "scene-loader/expected-result-3.png";
-const std::string FOURTH_IMAGE_FILE = TEST_IMAGE_DIR "scene-loader/expected-result-4.png";
-const std::string FIFTH_IMAGE_FILE = TEST_IMAGE_DIR "scene-loader/expected-result-5.png";
-
+const std::string FIRST_IMAGE_FILE =
+    TEST_IMAGE_DIR "scene-loader/expected-result-1.png";
+const std::string SECOND_IMAGE_FILE =
+    TEST_IMAGE_DIR "scene-loader/expected-result-2.png";
+const std::string THIRD_IMAGE_FILE =
+    TEST_IMAGE_DIR "scene-loader/expected-result-3.png";
+const std::string FOURTH_IMAGE_FILE =
+    TEST_IMAGE_DIR "scene-loader/expected-result-4.png";
+const std::string FIFTH_IMAGE_FILE =
+    TEST_IMAGE_DIR "scene-loader/expected-result-5.png";
 
 const int WINDOW_WIDTH(480);
 const int WINDOW_HEIGHT(800);
 
-enum TestStep
-{
+enum TestStep {
   LOAD_FIRST_SCENE_AND_CAPTURE,
   FIRST_SCENE_ANIMATION,
   FIRST_SCENE_SECOND_CAPTURE,
@@ -75,13 +77,13 @@ enum TestStep
 
 static int gTestStep = -1;
 
-}  // namespace
+} // namespace
 
 /**
  * @brief Tests scene loading functionality
  *
- * This is made difficult by the native image renderer rendering upside down. Consequently the
- * actor tree looks like:
+ * This is made difficult by the native image renderer rendering upside down.
+ * Consequently the actor tree looks like:
  *
  * Window Root Layer
  *   +
@@ -91,26 +93,24 @@ static int gTestStep = -1;
  *   +
  *
  */
-class SceneLoaderTest: public VisualTest
-{
- public:
+class SceneLoaderTest : public VisualTest {
+public:
+  SceneLoaderTest(Application &application) : mApplication(application) {}
 
-  SceneLoaderTest( Application& application )
-    : mApplication( application )
-  {
-  }
-
-  void OnInit( Application& application )
-  {
+  void OnInit(Application &application) {
     Dali::Window window = mApplication.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
-    window.GetRootLayer().SetProperty( Layer::Property::BEHAVIOR, Layer::LAYER_3D );
+    window.GetRootLayer().SetProperty(Layer::Property::BEHAVIOR,
+                                      Layer::LAYER_3D);
 
-    // Create a custom layer for rendering a 3D scene (depth testing is enabled automatically)
+    // Create a custom layer for rendering a 3D scene (depth testing is enabled
+    // automatically)
     mSceneLayer = Layer::New();
-    mSceneLayer.SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
-    mSceneLayer.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
-    mSceneLayer.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
+    mSceneLayer.SetProperty(Actor::Property::PARENT_ORIGIN,
+                            ParentOrigin::CENTER);
+    mSceneLayer.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER);
+    mSceneLayer.SetResizePolicy(ResizePolicy::FILL_TO_PARENT,
+                                Dimension::ALL_DIMENSIONS);
     mSceneLayer[Layer::Property::BEHAVIOR] = Layer::LAYER_3D;
     window.Add(mSceneLayer);
 
@@ -118,8 +118,8 @@ class SceneLoaderTest: public VisualTest
     mSceneCamera = CameraActor::New();
     mSceneLayer.Add(mSceneCamera);
 
-    // Create a custom render task that _exclusively_ renders to a framebuffer with a
-    // depth attachment.
+    // Create a custom render task that _exclusively_ renders to a framebuffer
+    // with a depth attachment.
     auto renderTasks = window.GetRenderTaskList();
     mSceneRender = renderTasks.CreateTask();
     mSceneRender.SetCameraActor(mSceneCamera);
@@ -129,20 +129,24 @@ class SceneLoaderTest: public VisualTest
     mSceneRender.SetRefreshRate(RenderTask::REFRESH_ALWAYS);
     mSceneRender.SetExclusive(true);
 
-    mSceneFBO = FrameBuffer::New( WINDOW_WIDTH, WINDOW_HEIGHT, FrameBuffer::Attachment::COLOR_DEPTH);
-    Texture depthTexture = Texture::New(TextureType::TEXTURE_2D, Pixel::DEPTH_FLOAT, WINDOW_WIDTH, WINDOW_HEIGHT);
+    mSceneFBO = FrameBuffer::New(WINDOW_WIDTH, WINDOW_HEIGHT,
+                                 FrameBuffer::Attachment::COLOR_DEPTH);
+    Texture depthTexture =
+        Texture::New(TextureType::TEXTURE_2D, Pixel::DEPTH_FLOAT, WINDOW_WIDTH,
+                     WINDOW_HEIGHT);
     DevelFrameBuffer::AttachDepthTexture(mSceneFBO, depthTexture);
-    mSceneRender.SetFrameBuffer( mSceneFBO );
+    mSceneRender.SetFrameBuffer(mSceneFBO);
 
-    // Now render the color attachment to the main tree, but because fbo is "upside-down" compared to
-    // loaded images we need to invert the image.
+    // Now render the color attachment to the main tree, but because fbo is
+    // "upside-down" compared to loaded images we need to invert the image.
     auto offscreen = mSceneFBO.GetColorTexture();
     auto offscreenUrl = Toolkit::TextureManager::AddTexture(offscreen);
     auto offscreenImage = Toolkit::ImageView::New(offscreenUrl);
     offscreenImage[Actor::Property::PARENT_ORIGIN] = ParentOrigin::CENTER;
     offscreenImage[Actor::Property::ANCHOR_POINT] = AnchorPoint::CENTER;
-    offscreenImage.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
-    offscreenImage[Actor::Property::SCALE_Y]=-1; // Invert the image.
+    offscreenImage.SetResizePolicy(ResizePolicy::FILL_TO_PARENT,
+                                   Dimension::ALL_DIMENSIONS);
+    offscreenImage[Actor::Property::SCALE_Y] = -1; // Invert the image.
     window.Add(offscreenImage);
 
     // Start the test
@@ -151,32 +155,26 @@ class SceneLoaderTest: public VisualTest
   }
 
 private:
-
-  void ConfigureCamera(const CameraParameters& params, CameraActor camera)
-  {
-    if (params.isPerspective)
-    {
+  void ConfigureCamera(const CameraParameters &params, CameraActor camera) {
+    if (params.isPerspective) {
       camera.SetProjectionMode(Camera::PERSPECTIVE_PROJECTION);
       camera.SetNearClippingPlane(params.zNear);
       camera.SetFarClippingPlane(params.zFar);
       camera.SetFieldOfView(Radian(Degree(params.yFov)));
-    }
-    else
-    {
+    } else {
       camera.SetProjectionMode(Camera::ORTHOGRAPHIC_PROJECTION);
-      camera.SetOrthographicProjection(params.orthographicSize.x,
-        params.orthographicSize.y,
-        params.orthographicSize.z,
-        params.orthographicSize.w,
-        params.zNear,
-        params.zFar);
+      camera.SetOrthographicProjection(
+          params.orthographicSize.x, params.orthographicSize.y,
+          params.orthographicSize.z, params.orthographicSize.w, params.zNear,
+          params.zFar);
     }
 
     // model
     Vector3 camTranslation;
     Vector3 camScale;
     Quaternion camOrientation;
-    params.CalculateTransformComponents(camTranslation, camOrientation, camScale);
+    params.CalculateTransformComponents(camTranslation, camOrientation,
+                                        camScale);
 
     SetActorCentered(camera);
     camera.SetInvertYAxis(true);
@@ -187,10 +185,8 @@ private:
     camOrientation.Conjugate();
   }
 
-  Actor LoadScene(std::string sceneName, CameraActor camera)
-  {
-    ResourceBundle::PathProvider pathProvider = [](ResourceType::Value type)
-    {
+  Actor LoadScene(std::string sceneName, CameraActor camera) {
+    ResourceBundle::PathProvider pathProvider = [](ResourceType::Value type) {
       return RESOURCE_TYPE_DIRS[type];
     };
 
@@ -204,63 +200,45 @@ private:
     std::vector<AnimationDefinition> animations;
 
     DliLoader loader;
-    DliLoader::InputParams input
-    {
-      pathProvider(ResourceType::Mesh),
-      nullptr,
-      {},
-      {},
-      nullptr,
+    DliLoader::InputParams input{
+        pathProvider(ResourceType::Mesh), nullptr, {}, {}, nullptr,
     };
-    LoadResult output
-    {
-      resources,
-      scene,
-      animations,
-      animGroups,
-      cameraParameters,
-      lights
-    };
-    DliLoader::LoadParams loadParams{ input, output };
+    LoadResult output{resources,        scene, animations, animGroups,
+                      cameraParameters, lights};
+    DliLoader::LoadParams loadParams{input, output};
     DALI_ASSERT_ALWAYS(loader.LoadScene(path, loadParams));
 
-    if (cameraParameters.empty())
-    {
+    if (cameraParameters.empty()) {
       cameraParameters.push_back(CameraParameters());
       cameraParameters[0].matrix.SetTranslation(CAMERA_DEFAULT_POSITION);
     }
     ConfigureCamera(cameraParameters[0], camera);
 
     ViewProjection viewProjection = cameraParameters[0].GetViewProjection();
-    Transforms xforms
-    {
-      MatrixStack{},
-      viewProjection
-    };
-    NodeDefinition::CreateParams nodeParams
-    {
-      resources,
-      xforms,
+    Transforms xforms{MatrixStack{}, viewProjection};
+    NodeDefinition::CreateParams nodeParams{
+        resources,
+        xforms,
     };
     Customization::Choices choices;
 
     Actor sceneRoot = Actor::New();
     SetActorCentered(sceneRoot);
 
-    for (auto root : scene.GetRoots())
-    {
+    for (auto root : scene.GetRoots()) {
       auto resourceRefs = resources.CreateRefCounter();
       scene.CountResourceRefs(root, choices, resourceRefs);
       resources.CountEnvironmentReferences(resourceRefs);
 
       resources.LoadResources(resourceRefs, pathProvider);
 
-      if (auto actor = scene.CreateNodes(root, choices, nodeParams))
-      {
+      if (auto actor = scene.CreateNodes(root, choices, nodeParams)) {
         scene.ConfigureSkeletonJoints(root, resources.mSkeletons, actor);
-        scene.ConfigureSkinningShaders(resources, actor, std::move(nodeParams.mSkinnables));
+        scene.ConfigureSkinningShaders(resources, actor,
+                                       std::move(nodeParams.mSkinnables));
 
-        DALI_ASSERT_ALWAYS(scene.ConfigureBlendshapeShaders(resources, actor, std::move(nodeParams.mBlendshapeRequests)));
+        DALI_ASSERT_ALWAYS(scene.ConfigureBlendshapeShaders(
+            resources, actor, std::move(nodeParams.mBlendshapeRequests)));
 
         scene.ApplyConstraints(actor, std::move(nodeParams.mConstrainables));
 
@@ -268,193 +246,149 @@ private:
       }
     }
 
-    if (!animations.empty())
-    {
-      auto getActor = [&sceneRoot](const std::string& name)
-      {
+    if (!animations.empty()) {
+      auto getActor = [&sceneRoot](const std::string &name) {
         return sceneRoot.FindChildByName(name);
       };
 
       mAnimation = animations[0].ReAnimate(getActor);
       mAnimation.SetLooping(false);
-    }
-    else
-    {
+    } else {
       mAnimation.Reset();
     }
 
     return sceneRoot;
   }
 
-  void WaitForNextTest( unsigned int milliSecond )
-  {
+  void WaitForNextTest(unsigned int milliSecond) {
     gTestStep++;
 
-    if ( milliSecond == 0u )
-    {
+    if (milliSecond == 0u) {
       PerformTest();
-    }
-    else
-    {
-      mTimer = Timer::New( milliSecond ); // ms
-      mTimer.TickSignal().Connect( this, &SceneLoaderTest::OnTimer);
+    } else {
+      mTimer = Timer::New(milliSecond); // ms
+      mTimer.TickSignal().Connect(this, &SceneLoaderTest::OnTimer);
       mTimer.Start();
     }
   }
 
-  bool OnTimer()
-  {
+  bool OnTimer() {
     PerformTest();
     return false;
   }
 
-  void PerformTest()
-  {
+  void PerformTest() {
     Window window = mApplication.GetWindow();
 
     unsigned int delay = 0u;
-    if (mAnimation)
-    {
+    if (mAnimation) {
       delay = mAnimation.GetDuration() * 1000 + DEFAULT_DELAY_TIME;
     }
 
-    switch (gTestStep)
-    {
-      case LOAD_FIRST_SCENE_AND_CAPTURE:
-      {
-        mScene = LoadScene("exercise.dli", mSceneCamera);
-        mSceneLayer.Add(mScene);
+    switch (gTestStep) {
+    case LOAD_FIRST_SCENE_AND_CAPTURE: {
+      mScene = LoadScene("exercise.dli", mSceneCamera);
+      mSceneLayer.Add(mScene);
 
-        CaptureWindow(window);
-        break;
+      CaptureWindow(window);
+      break;
+    }
+    case FIRST_SCENE_ANIMATION: {
+      if (mAnimation) {
+        mAnimation.Play();
       }
-      case FIRST_SCENE_ANIMATION:
-      {
-        if (mAnimation)
-        {
-          mAnimation.Play();
-        }
 
-        WaitForNextTest(delay);
+      WaitForNextTest(delay);
 
-        break;
+      break;
+    }
+    case FIRST_SCENE_SECOND_CAPTURE: {
+      CaptureWindow(window, mSceneCamera);
+      break;
+    }
+    case LOAD_SECOND_SCENE_AND_CAPTURE: {
+      UnparentAndReset(mScene);
+      mScene = LoadScene("robot.dli", mSceneCamera);
+      mSceneLayer.Add(mScene);
+
+      CaptureWindow(window);
+
+      break;
+    }
+    case SECOND_SCENE_ANIMATION: {
+      if (mAnimation) {
+        mAnimation.Play();
       }
-      case FIRST_SCENE_SECOND_CAPTURE:
-      {
-        CaptureWindow(window, mSceneCamera);
-        break;
-      }
-      case LOAD_SECOND_SCENE_AND_CAPTURE:
-      {
-        UnparentAndReset(mScene);
-        mScene = LoadScene("robot.dli", mSceneCamera);
-        mSceneLayer.Add(mScene);
 
-        CaptureWindow(window);
+      WaitForNextTest(delay);
 
-        break;
-      }
-      case SECOND_SCENE_ANIMATION:
-      {
-        if (mAnimation)
-        {
-          mAnimation.Play();
-        }
+      break;
+    }
+    case SECOND_SCENE_SECOND_CAPTURE: {
+      CaptureWindow(window, mSceneCamera);
+      break;
+    }
+    case LOAD_THIRD_SCENE: {
+      UnparentAndReset(mScene);
+      mScene = LoadScene("beer.dli", mSceneCamera);
+      mSceneLayer.Add(mScene);
 
-        WaitForNextTest(delay);
+      WaitForNextTest(DEFAULT_DELAY_TIME * 2);
 
-        break;
-      }
-      case SECOND_SCENE_SECOND_CAPTURE:
-      {
-        CaptureWindow(window, mSceneCamera);
-        break;
-      }
-      case LOAD_THIRD_SCENE:
-      {
-        UnparentAndReset(mScene);
-        mScene = LoadScene("beer.dli", mSceneCamera);
-        mSceneLayer.Add(mScene);
-
-        WaitForNextTest(DEFAULT_DELAY_TIME*2);
-
-        break;
-      }
-      case THIRD_SCENE_CAPTURE:
-      {
-        CaptureWindow(window);
-        break;
-      }
-      default:
-        break;
+      break;
+    }
+    case THIRD_SCENE_CAPTURE: {
+      CaptureWindow(window);
+      break;
+    }
+    default:
+      break;
     }
   }
 
-  void PostRender()
-  {
-    if (gTestStep == LOAD_FIRST_SCENE_AND_CAPTURE)
-    {
-      if(CheckImage(FIRST_IMAGE_FILE, 0.99f))
-      {
+  void PostRender() {
+    if (gTestStep == LOAD_FIRST_SCENE_AND_CAPTURE) {
+      if (CheckImage(FIRST_IMAGE_FILE, 0.98f)) {
         WaitForNextTest(DEFAULT_DELAY_TIME);
-      }
-      else
-      {
+      } else {
         mApplication.Quit();
       }
-    }
-    else if (gTestStep == FIRST_SCENE_SECOND_CAPTURE)
-    {
-      if(CheckImage(SECOND_IMAGE_FILE, 0.99f))
-      {
+    } else if (gTestStep == FIRST_SCENE_SECOND_CAPTURE) {
+      if (CheckImage(SECOND_IMAGE_FILE, 0.98f)) {
         WaitForNextTest(DEFAULT_DELAY_TIME);
-      }
-      else
-      {
+      } else {
         mApplication.Quit();
       }
-    }
-    else if ( gTestStep == LOAD_SECOND_SCENE_AND_CAPTURE )
-    {
-      if(CheckImage(THIRD_IMAGE_FILE, 0.99f))
-      {
-         WaitForNextTest(DEFAULT_DELAY_TIME);
-      }
-      else
-      {
-        mApplication.Quit();
-      }
-    }
-    else if ( gTestStep == SECOND_SCENE_SECOND_CAPTURE )
-    {
-      if(CheckImage(FOURTH_IMAGE_FILE, 0.99f))
-      {
+    } else if (gTestStep == LOAD_SECOND_SCENE_AND_CAPTURE) {
+      if (CheckImage(THIRD_IMAGE_FILE, 0.99f)) {
         WaitForNextTest(DEFAULT_DELAY_TIME);
-      }
-      else
-      {
+      } else {
         mApplication.Quit();
       }
-    }
-    else if ( gTestStep == THIRD_SCENE_CAPTURE )
-    {
-      CheckImage(FIFTH_IMAGE_FILE, 0.98f);
+    } else if (gTestStep == SECOND_SCENE_SECOND_CAPTURE) {
+      if (CheckImage(FOURTH_IMAGE_FILE, 0.99f)) {
+        WaitForNextTest(DEFAULT_DELAY_TIME);
+      } else {
+        mApplication.Quit();
+      }
+    } else if (gTestStep == THIRD_SCENE_CAPTURE) {
+      CheckImage(FIFTH_IMAGE_FILE, 0.97f);
 
       // The last check has been done, so we can quit the test
       mApplication.Quit();
     }
   }
 
-
 private:
-  Application&      mApplication;
-  Timer             mTimer;
-  CameraActor       mSceneCamera;
-  Actor             mScene;
-  Layer             mSceneLayer;
-  RenderTask        mSceneRender;
-  FrameBuffer       mSceneFBO;
-  Animation         mAnimation;
+  Application &mApplication;
+  Timer mTimer;
+  CameraActor mSceneCamera;
+  Actor mScene;
+  Layer mSceneLayer;
+  RenderTask mSceneRender;
+  FrameBuffer mSceneFBO;
+  Animation mAnimation;
 };
 
-DALI_VISUAL_TEST_WITH_WINDOW_SIZE ( SceneLoaderTest, OnInit, WINDOW_WIDTH, WINDOW_HEIGHT )
+DALI_VISUAL_TEST_WITH_WINDOW_SIZE(SceneLoaderTest, OnInit, WINDOW_WIDTH,
+                                  WINDOW_HEIGHT)
