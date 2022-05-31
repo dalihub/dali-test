@@ -111,6 +111,7 @@ constexpr static Visual::Type VALID_VISUAL_TYPES[] =
 };
 constexpr static int NUMBER_OF_VALID_VISUAL_TYPES = sizeof(VALID_VISUAL_TYPES) / sizeof(VALID_VISUAL_TYPES[0]);
 
+constexpr static int TOTAL_RESOURCES = NUMBER_OF_PROPERTY_TYPES * NUMBER_OF_VALID_VISUAL_TYPES * 4; // Total amount of resource to ready
 
 enum TestStep
 {
@@ -126,6 +127,8 @@ enum TestStep
 };
 
 static int gTestStep = -1;
+static int gResourceReadyCount = 0;
+static bool gAnimationFinished = true;
 
 }  // namespace
 
@@ -165,6 +168,16 @@ private:
     mTimer.Start();
   }
 
+  void OnReady(Dali::Toolkit::Control control)
+  {
+    // Resource ready done. Check we need to go to next step
+    gResourceReadyCount++;
+    if(gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES)
+    {
+      WaitForNextTest();
+    }
+  }
+
   bool OnTimer()
   {
     PerformTest();
@@ -172,8 +185,12 @@ private:
   }
   void OnFinishedAnimation(Animation& animation)
   {
-    // Animation done. just go to next step
-    WaitForNextTest();
+    // Animation done. Check we need to go to next step
+    gAnimationFinished = true;
+    if(gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES)
+    {
+      WaitForNextTest();
+    }
   }
 
   void PerformTest()
@@ -249,10 +266,15 @@ private:
 private:
   void CreateVisuals(bool isAnimation, bool isRelative)
   {
+    // Reset resource ready count
+    gResourceReadyCount = 0;
+    gAnimationFinished = true;
+
     // If isAnimation, create new super-fast animation.
     if(isAnimation)
     {
       mAnimation = Animation::New(0.001f); // seconds
+      gAnimationFinished = false;
     }
 
     // Create Visuals for each testset types.
@@ -269,11 +291,6 @@ private:
       // Wait until all animations are finished.
       mAnimation.FinishedSignal().Connect(this, &CornerRadiusVisualTest::OnFinishedAnimation);
       mAnimation.Play();
-    }
-    else
-    {
-      // Scene uploaded done. just go to next step
-      WaitForNextTest();
     }
   }
 
@@ -298,6 +315,9 @@ private:
       control[Actor::Property::ANCHOR_POINT]  = AnchorPoint::TOP_LEFT;
       control[Actor::Property::SIZE]          = controlSize;
       control[Actor::Property::POSITION]      = controlPosition;
+
+      // Attach resource ready signal
+      control.ResourceReadySignal().Connect(this, &CornerRadiusVisualTest::OnReady);
 
       auto visualType = VALID_VISUAL_TYPES[visualTestTypeIndex];
 
