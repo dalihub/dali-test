@@ -125,10 +125,12 @@ enum TestStep
   TEST_ANIMATE_RELATIVE_STEP,
   NUMBER_OF_STEPS
 };
+constexpr static int TERMINATE_RUNTIME = 10 * 1000; // 10 seconds
 
 static int gTestStep = -1;
 static int gResourceReadyCount = 0;
 static bool gAnimationFinished = true;
+static bool gTermiatedTest = false;
 
 }  // namespace
 
@@ -153,11 +155,30 @@ public:
     mWindow = mApplication.GetWindow();
     mWindow.SetBackgroundColor(Color::BLACK); // Due to the dog-anim.webp is white background, we make window black.
 
+    mTerminateTimer = Timer::New(TERMINATE_RUNTIME);
+    mTerminateTimer.TickSignal().Connect(this, &CornerRadiusVisualTest::OnTerminateTimer);
+    mTerminateTimer.Start();
+
     // Start the test
     WaitForNextTest();
   }
 
 private:
+
+  bool OnTerminateTimer()
+  {
+    // Visual Test Timout!
+    printf("TIMEOUT corner-radius-visual.test spend more than %d ms\n",TERMINATE_RUNTIME);
+    
+    gTermiatedTest = true;
+    gExitValue = -1;
+    mTimer.Stop();
+    mApplication.Quit();
+
+    exit(gExitValue);
+
+    return false;
+  }
 
   void WaitForNextTest()
   {
@@ -243,11 +264,13 @@ private:
         if(!CheckImage(EXPECTED_IMAGE_FILE)) // should be identical
         {
           mTimer.Stop();
+          mTerminateTimer.Stop();
           mApplication.Quit();
         }
         else if(gTestStep + 1u == NUMBER_OF_STEPS)
         {
           // The last check has been done, so we can quit the test
+          mTerminateTimer.Stop();
           mApplication.Quit();
         }
         else
@@ -508,6 +531,7 @@ private:
   Application&         mApplication;
   Window               mWindow;
   Timer                mTimer;
+  Timer                mTerminateTimer;
   Animation            mAnimation;
   std::vector<Control> mControlList;
 };
