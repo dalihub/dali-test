@@ -17,13 +17,13 @@
 
 // EXTERNAL INCLUDES
 #include <cstdio>
-#include <dali-scene-loader/public-api/animation-definition.h>
-#include <dali-scene-loader/public-api/camera-parameters.h>
-#include <dali-scene-loader/public-api/dli-loader.h>
-#include <dali-scene-loader/public-api/light-parameters.h>
-#include <dali-scene-loader/public-api/load-result.h>
-#include <dali-scene-loader/public-api/node-definition.h>
-#include <dali-scene-loader/public-api/scene-definition.h>
+#include <dali-scene3d/public-api/loader/animation-definition.h>
+#include <dali-scene3d/public-api/loader/camera-parameters.h>
+#include <dali-scene3d/public-api/loader/dli-loader.h>
+#include <dali-scene3d/public-api/loader/light-parameters.h>
+#include <dali-scene3d/public-api/loader/load-result.h>
+#include <dali-scene3d/public-api/loader/node-definition.h>
+#include <dali-scene3d/public-api/loader/scene-definition.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/image-loader/texture-manager.h>
 #include <dali/dali.h>
@@ -35,7 +35,7 @@
 
 using namespace Dali;
 using namespace Dali::Toolkit;
-using namespace Dali::SceneLoader;
+using namespace Dali::Scene3D::Loader;
 
 namespace {
 
@@ -50,15 +50,15 @@ const std::string RESOURCE_TYPE_DIRS[]{
 };
 
 const std::string FIRST_IMAGE_FILE =
-    TEST_IMAGE_DIR "scene-loader/expected-result-1.png";
+    TEST_IMAGE_DIR "scene3d/expected-result-1.png";
 const std::string SECOND_IMAGE_FILE =
-    TEST_IMAGE_DIR "scene-loader/expected-result-2.png";
+    TEST_IMAGE_DIR "scene3d/expected-result-2.png";
 const std::string THIRD_IMAGE_FILE =
-    TEST_IMAGE_DIR "scene-loader/expected-result-3.png";
+    TEST_IMAGE_DIR "scene3d/expected-result-3.png";
 const std::string FOURTH_IMAGE_FILE =
-    TEST_IMAGE_DIR "scene-loader/expected-result-4.png";
+    TEST_IMAGE_DIR "scene3d/expected-result-4.png";
 const std::string FIFTH_IMAGE_FILE =
-    TEST_IMAGE_DIR "scene-loader/expected-result-5.png";
+    TEST_IMAGE_DIR "scene3d/expected-result-5.png";
 
 const int WINDOW_WIDTH(480);
 const int WINDOW_HEIGHT(800);
@@ -93,9 +93,9 @@ static int gTestStep = -1;
  *   +
  *
  */
-class SceneLoaderTest : public VisualTest {
+class Scene3DTest : public VisualTest {
 public:
-  SceneLoaderTest(Application &application) : mApplication(application) {}
+  Scene3DTest(Application &application) : mApplication(application) {}
 
   void OnInit(Application &application) {
     Dali::Window window = mApplication.GetWindow();
@@ -114,7 +114,7 @@ public:
     mSceneLayer[Layer::Property::BEHAVIOR] = Layer::LAYER_3D;
     window.Add(mSceneLayer);
 
-    // Create a custom camera (will be modified by scene loader, below)
+    // Create a custom camera (will be modified by Scene3d::Loader, below)
     mSceneCamera = CameraActor::New();
     mSceneLayer.Add(mSceneCamera);
 
@@ -267,7 +267,7 @@ private:
       PerformTest();
     } else {
       mTimer = Timer::New(milliSecond); // ms
-      mTimer.TickSignal().Connect(this, &SceneLoaderTest::OnTimer);
+      mTimer.TickSignal().Connect(this, &Scene3DTest::OnTimer);
       mTimer.Start();
     }
   }
@@ -390,5 +390,5 @@ private:
   Animation mAnimation;
 };
 
-DALI_VISUAL_TEST_WITH_WINDOW_SIZE(SceneLoaderTest, OnInit, WINDOW_WIDTH,
+DALI_VISUAL_TEST_WITH_WINDOW_SIZE(Scene3DTest, OnInit, WINDOW_WIDTH,
                                   WINDOW_HEIGHT)
