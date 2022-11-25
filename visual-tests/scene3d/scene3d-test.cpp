@@ -164,6 +164,7 @@ private:
 
     ResourceBundle resources;
     SceneDefinition scene;
+    SceneMetadata metaData;
     std::vector<AnimationGroupDefinition> animGroups;
     std::vector<CameraParameters> cameraParameters;
     std::vector<LightParameters> lights;
@@ -173,7 +174,7 @@ private:
     DliLoader::InputParams input{
         pathProvider(ResourceType::Mesh), nullptr, {}, {}, nullptr,
     };
-    LoadResult output{resources,        scene, animations, animGroups,
+    LoadResult output{resources, scene, metaData, animations, animGroups,
                       cameraParameters, lights};
     DliLoader::LoadParams loadParams{input, output};
     DALI_ASSERT_ALWAYS(loader.LoadScene(path, loadParams));
