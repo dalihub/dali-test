@@ -220,8 +220,8 @@ private:
     }
 
     if (!animations.empty()) {
-      auto getActor = [&sceneRoot](const std::string &name) {
-        return sceneRoot.FindChildByName(name);
+      auto getActor = [&sceneRoot](const Scene3D::Loader::AnimatedProperty& property) {
+      return sceneRoot.FindChildByName(property.mNodeName);
       };
 
       mAnimation = animations[0].ReAnimate(getActor);
