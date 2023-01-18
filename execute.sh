@@ -74,7 +74,7 @@ DEBUG=""
 for i in $tests ; do
     test=$(basename $i).test
     dimensions=$($test --get-dimensions 2>/dev/null)
-    command="xvfb-run -s \"-screen 0 $dimensions -fbdir /var/tmp\" $DEBUG $test --fb $dir ${REDIRECT_OUTPUT}"
+    command="timeout 3m xvfb-run -s \"-screen 0 $dimensions -fbdir /var/tmp\" $DEBUG $test --fb $dir ${REDIRECT_OUTPUT}"
     echo -e "${Bold}Executing: $command"
     eval $command
 
