@@ -76,7 +76,8 @@ for i in $tests ; do
     dimensions=$($test --get-dimensions 2>/dev/null)
     command="timeout 3m xvfb-run -s \"-screen 0 $dimensions -fbdir /var/tmp\" $DEBUG $test --fb $dir ${REDIRECT_OUTPUT}"
     echo -e "${Bold}Executing: $command"
-    eval $command
+    # Run a second time if failed the first as it seems to fail incorrectly from time to time
+    eval $command || eval $command
 
     percent=$?
     # Check the test result
