@@ -19,7 +19,7 @@
 #include <cstdio>
 #include <dali-scene3d/public-api/loader/animation-definition.h>
 #include <dali-scene3d/public-api/loader/camera-parameters.h>
-#include <dali-scene3d/public-api/loader/dli-loader.h>
+#include <dali-scene3d/public-api/loader/model-loader.h>
 #include <dali-scene3d/public-api/loader/light-parameters.h>
 #include <dali-scene3d/public-api/loader/load-result.h>
 #include <dali-scene3d/public-api/loader/node-definition.h>
@@ -37,45 +37,47 @@ using namespace Dali;
 using namespace Dali::Toolkit;
 using namespace Dali::Scene3D::Loader;
 
-namespace {
+namespace
+{
 
-const Vector3 CAMERA_DEFAULT_POSITION(0.0f, 0.0f, 3.5f);
-const unsigned int DEFAULT_DELAY_TIME = 100;
+  const Vector3 CAMERA_DEFAULT_POSITION(0.0f, 0.0f, 3.5f);
+  const unsigned int DEFAULT_DELAY_TIME = 100;
 
-const std::string RESOURCE_TYPE_DIRS[]{
-    TEST_SCENE_DIR "environments/",
-    TEST_SCENE_DIR "shaders/",
-    TEST_SCENE_DIR "models/",
-    TEST_SCENE_DIR "images/",
-};
+  const std::string RESOURCE_TYPE_DIRS[]{
+      TEST_SCENE_DIR "environments/",
+      TEST_SCENE_DIR "shaders/",
+      TEST_SCENE_DIR "models/",
+      TEST_SCENE_DIR "images/",
+  };
 
-const std::string FIRST_IMAGE_FILE =
-    TEST_IMAGE_DIR "scene3d/expected-result-1.png";
-const std::string SECOND_IMAGE_FILE =
-    TEST_IMAGE_DIR "scene3d/expected-result-2.png";
-const std::string THIRD_IMAGE_FILE =
-    TEST_IMAGE_DIR "scene3d/expected-result-3.png";
-const std::string FOURTH_IMAGE_FILE =
-    TEST_IMAGE_DIR "scene3d/expected-result-4.png";
-const std::string FIFTH_IMAGE_FILE =
-    TEST_IMAGE_DIR "scene3d/expected-result-5.png";
+  const std::string FIRST_IMAGE_FILE =
+      TEST_IMAGE_DIR "scene3d/expected-result-1.png";
+  const std::string SECOND_IMAGE_FILE =
+      TEST_IMAGE_DIR "scene3d/expected-result-2.png";
+  const std::string THIRD_IMAGE_FILE =
+      TEST_IMAGE_DIR "scene3d/expected-result-3.png";
+  const std::string FOURTH_IMAGE_FILE =
+      TEST_IMAGE_DIR "scene3d/expected-result-4.png";
+  const std::string FIFTH_IMAGE_FILE =
+      TEST_IMAGE_DIR "scene3d/expected-result-5.png";
 
-const int WINDOW_WIDTH(480);
-const int WINDOW_HEIGHT(800);
+  const int WINDOW_WIDTH(480);
+  const int WINDOW_HEIGHT(800);
 
-enum TestStep {
-  LOAD_FIRST_SCENE_AND_CAPTURE,
-  FIRST_SCENE_ANIMATION,
-  FIRST_SCENE_SECOND_CAPTURE,
-  LOAD_SECOND_SCENE_AND_CAPTURE,
-  SECOND_SCENE_ANIMATION,
-  SECOND_SCENE_SECOND_CAPTURE,
-  LOAD_THIRD_SCENE,
-  THIRD_SCENE_CAPTURE,
-  NUMBER_OF_STEPS
-};
+  enum TestStep
+  {
+    LOAD_FIRST_SCENE_AND_CAPTURE,
+    FIRST_SCENE_ANIMATION,
+    FIRST_SCENE_SECOND_CAPTURE,
+    LOAD_SECOND_SCENE_AND_CAPTURE,
+    SECOND_SCENE_ANIMATION,
+    SECOND_SCENE_SECOND_CAPTURE,
+    LOAD_THIRD_SCENE,
+    THIRD_SCENE_CAPTURE,
+    NUMBER_OF_STEPS
+  };
 
-static int gTestStep = -1;
+  static int gTestStep = -1;
 
 } // namespace
 
@@ -93,11 +95,13 @@ static int gTestStep = -1;
  *   +
  *
  */
-class Scene3DTest : public VisualTest {
+class Scene3DTest : public VisualTest
+{
 public:
   Scene3DTest(Application &application) : mApplication(application) {}
 
-  void OnInit(Application &application) {
+  void OnInit(Application &application)
+  {
     Dali::Window window = mApplication.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
     window.GetRootLayer().SetProperty(Layer::Property::BEHAVIOR,
@@ -155,8 +159,10 @@ public:
   }
 
 private:
-  Actor LoadScene(std::string sceneName, CameraActor camera) {
-    ResourceBundle::PathProvider pathProvider = [](ResourceType::Value type) {
+  Actor LoadScene(std::string sceneName, CameraActor camera)
+  {
+    ResourceBundle::PathProvider pathProvider = [](ResourceType::Value type)
+    {
       return RESOURCE_TYPE_DIRS[type];
     };
 
@@ -170,16 +176,13 @@ private:
     std::vector<LightParameters> lights;
     std::vector<AnimationDefinition> animations;
 
-    DliLoader loader;
-    DliLoader::InputParams input{
-        pathProvider(ResourceType::Mesh), nullptr, {}, {}, nullptr,
-    };
-    LoadResult output{resources, scene, metaData, animations, animGroups,
-                      cameraParameters, lights};
-    DliLoader::LoadParams loadParams{input, output};
-    DALI_ASSERT_ALWAYS(loader.LoadScene(path, loadParams));
+    LoadResult output{resources, scene, metaData, animations, animGroups, cameraParameters, lights};
 
-    if (cameraParameters.empty()) {
+    Dali::Scene3D::Loader::ModelLoader modelLoader(path, pathProvider(ResourceType::Mesh) + "/", output);
+    modelLoader.LoadModel(pathProvider);
+
+    if (cameraParameters.empty())
+    {
       cameraParameters.push_back(CameraParameters());
       cameraParameters[0].matrix.SetTranslation(CAMERA_DEFAULT_POSITION);
     }
@@ -198,14 +201,16 @@ private:
     Actor sceneRoot = Actor::New();
     SetActorCentered(sceneRoot);
 
-    for (auto root : scene.GetRoots()) {
+    for (auto root : scene.GetRoots())
+    {
       auto resourceRefs = resources.CreateRefCounter();
       scene.CountResourceRefs(root, choices, resourceRefs);
-      resources.CountEnvironmentReferences(resourceRefs);
+      resources.mReferenceCounts = std::move(resourceRefs);
+      resources.CountEnvironmentReferences();
+      resources.LoadResources(pathProvider);
 
-      resources.LoadResources(resourceRefs, pathProvider);
-
-      if (auto actor = scene.CreateNodes(root, choices, nodeParams)) {
+      if (auto actor = scene.CreateNodes(root, choices, nodeParams))
+      {
         scene.ConfigureSkeletonJoints(root, resources.mSkeletons, actor);
         scene.ConfigureSkinningShaders(resources, actor,
                                        std::move(nodeParams.mSkinnables));
@@ -219,55 +224,70 @@ private:
       }
     }
 
-    if (!animations.empty()) {
-      auto getActor = [&sceneRoot](const Scene3D::Loader::AnimatedProperty& property) {
-      return sceneRoot.FindChildByName(property.mNodeName);
+    if (!animations.empty())
+    {
+      auto getActor = [&sceneRoot](const Scene3D::Loader::AnimatedProperty &property)
+      {
+        return sceneRoot.FindChildByName(property.mNodeName);
       };
 
       mAnimation = animations[0].ReAnimate(getActor);
       mAnimation.SetLooping(false);
-    } else {
+    }
+    else
+    {
       mAnimation.Reset();
     }
 
     return sceneRoot;
   }
 
-  void WaitForNextTest(unsigned int milliSecond) {
+  void WaitForNextTest(unsigned int milliSecond)
+  {
     gTestStep++;
 
-    if (milliSecond == 0u) {
+    if (milliSecond == 0u)
+    {
       PerformTest();
-    } else {
+    }
+    else
+    {
       mTimer = Timer::New(milliSecond); // ms
       mTimer.TickSignal().Connect(this, &Scene3DTest::OnTimer);
       mTimer.Start();
     }
   }
 
-  bool OnTimer() {
+  bool OnTimer()
+  {
     PerformTest();
     return false;
   }
 
-  void PerformTest() {
+  void PerformTest()
+  {
     Window window = mApplication.GetWindow();
 
     unsigned int delay = 0u;
-    if (mAnimation) {
+    if (mAnimation)
+    {
       delay = mAnimation.GetDuration() * 1000 + DEFAULT_DELAY_TIME;
     }
 
-    switch (gTestStep) {
-    case LOAD_FIRST_SCENE_AND_CAPTURE: {
+    switch (gTestStep)
+    {
+    case LOAD_FIRST_SCENE_AND_CAPTURE:
+    {
       mScene = LoadScene("exercise.dli", mSceneCamera);
       mSceneLayer.Add(mScene);
 
       CaptureWindow(window);
       break;
     }
-    case FIRST_SCENE_ANIMATION: {
-      if (mAnimation) {
+    case FIRST_SCENE_ANIMATION:
+    {
+      if (mAnimation)
+      {
         mAnimation.Play();
       }
 
@@ -275,11 +295,13 @@ private:
 
       break;
     }
-    case FIRST_SCENE_SECOND_CAPTURE: {
+    case FIRST_SCENE_SECOND_CAPTURE:
+    {
       CaptureWindow(window, mSceneCamera);
       break;
     }
-    case LOAD_SECOND_SCENE_AND_CAPTURE: {
+    case LOAD_SECOND_SCENE_AND_CAPTURE:
+    {
       UnparentAndReset(mScene);
       mScene = LoadScene("robot.dli", mSceneCamera);
       mSceneLayer.Add(mScene);
@@ -288,8 +310,10 @@ private:
 
       break;
     }
-    case SECOND_SCENE_ANIMATION: {
-      if (mAnimation) {
+    case SECOND_SCENE_ANIMATION:
+    {
+      if (mAnimation)
+      {
         mAnimation.Play();
       }
 
@@ -297,11 +321,13 @@ private:
 
       break;
     }
-    case SECOND_SCENE_SECOND_CAPTURE: {
+    case SECOND_SCENE_SECOND_CAPTURE:
+    {
       CaptureWindow(window, mSceneCamera);
       break;
     }
-    case LOAD_THIRD_SCENE: {
+    case LOAD_THIRD_SCENE:
+    {
       UnparentAndReset(mScene);
       mScene = LoadScene("beer.dli", mSceneCamera);
       mSceneLayer.Add(mScene);
@@ -310,7 +336,8 @@ private:
 
       break;
     }
-    case THIRD_SCENE_CAPTURE: {
+    case THIRD_SCENE_CAPTURE:
+    {
       CaptureWindow(window);
       break;
     }
@@ -319,32 +346,54 @@ private:
     }
   }
 
-  void PostRender() {
-    if (gTestStep == LOAD_FIRST_SCENE_AND_CAPTURE) {
-      if (CheckImage(FIRST_IMAGE_FILE, 0.98f)) {
+  void PostRender()
+  {
+    if (gTestStep == LOAD_FIRST_SCENE_AND_CAPTURE)
+    {
+      if (CheckImage(FIRST_IMAGE_FILE, 0.98f))
+      {
         WaitForNextTest(DEFAULT_DELAY_TIME);
-      } else {
+      }
+      else
+      {
         mApplication.Quit();
       }
-    } else if (gTestStep == FIRST_SCENE_SECOND_CAPTURE) {
-      if (CheckImage(SECOND_IMAGE_FILE, 0.98f)) {
+    }
+    else if (gTestStep == FIRST_SCENE_SECOND_CAPTURE)
+    {
+      if (CheckImage(SECOND_IMAGE_FILE, 0.98f))
+      {
         WaitForNextTest(DEFAULT_DELAY_TIME);
-      } else {
+      }
+      else
+      {
         mApplication.Quit();
       }
-    } else if (gTestStep == LOAD_SECOND_SCENE_AND_CAPTURE) {
-      if (CheckImage(THIRD_IMAGE_FILE, 0.99f)) {
+    }
+    else if (gTestStep == LOAD_SECOND_SCENE_AND_CAPTURE)
+    {
+      if (CheckImage(THIRD_IMAGE_FILE, 0.99f))
+      {
         WaitForNextTest(DEFAULT_DELAY_TIME);
-      } else {
+      }
+      else
+      {
         mApplication.Quit();
       }
-    } else if (gTestStep == SECOND_SCENE_SECOND_CAPTURE) {
-      if (CheckImage(FOURTH_IMAGE_FILE, 0.99f)) {
+    }
+    else if (gTestStep == SECOND_SCENE_SECOND_CAPTURE)
+    {
+      if (CheckImage(FOURTH_IMAGE_FILE, 0.99f))
+      {
         WaitForNextTest(DEFAULT_DELAY_TIME);
-      } else {
+      }
+      else
+      {
         mApplication.Quit();
       }
-    } else if (gTestStep == THIRD_SCENE_CAPTURE) {
+    }
+    else if (gTestStep == THIRD_SCENE_CAPTURE)
+    {
       CheckImage(FIFTH_IMAGE_FILE, 0.97f);
 
       // The last check has been done, so we can quit the test
