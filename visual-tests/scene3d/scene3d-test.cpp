@@ -211,7 +211,6 @@ private:
 
       if (auto actor = scene.CreateNodes(root, choices, nodeParams))
       {
-        scene.ConfigureSkeletonJoints(root, resources.mSkeletons, actor);
         scene.ConfigureSkinningShaders(resources, actor,
                                        std::move(nodeParams.mSkinnables));
 
