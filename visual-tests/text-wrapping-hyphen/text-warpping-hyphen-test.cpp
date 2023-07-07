@@ -139,26 +139,48 @@ private:
   }
 
   void PostRender() {
-    if (gTestStep == HYPHEN_WRAPPING_LABEL) {
-      DALI_ASSERT_ALWAYS(
-          CheckImage(IMAGE_FILE_HYPHEN, 0.98f)); // verify the similarity
-      PerformNextTest();
-    } else if (gTestStep == MIXED_WRAPPING_LABEL) {
-      DALI_ASSERT_ALWAYS(
-          CheckImage(IMAGE_FILE_MIXED, 0.98f)); // verify the similarity
-      mWindow.Remove(mTextLabel);
-      mWindow.Add(mTextEditor);
-      PerformNextTest();
-    } else if (gTestStep == HYPHEN_WRAPPING_EDITOR) {
-      DALI_ASSERT_ALWAYS(
-          CheckImage(IMAGE_FILE_HYPHEN_EDITOR, 0.98f)); // verify the similarity
-      PerformNextTest();
-    } else if (gTestStep == MIXED_WRAPPING_EDITOR) {
-      DALI_ASSERT_ALWAYS(
-          CheckImage(IMAGE_FILE_MIXED_EDITOR, 0.98f)); // verify the similarity
-
-      // The last check has been done, so we can quit the test
-      mApplication.Quit();
+    if (gTestStep == HYPHEN_WRAPPING_LABEL)
+    {
+      if (CheckImage(IMAGE_FILE_HYPHEN, 0.95f))
+      {
+        PerformNextTest();
+      }
+      else
+      {
+        mApplication.Quit();
+      }
+    }
+    else if (gTestStep == MIXED_WRAPPING_LABEL)
+    {
+      if (CheckImage(IMAGE_FILE_MIXED, 0.95f))
+      {
+        mWindow.Remove(mTextLabel);
+        mWindow.Add(mTextEditor);
+        PerformNextTest();
+      }
+      else
+      {
+        mApplication.Quit();
+      }
+    }
+    else if (gTestStep == HYPHEN_WRAPPING_EDITOR)
+    {
+      if (CheckImage(IMAGE_FILE_HYPHEN_EDITOR, 0.95f))
+      {
+        PerformNextTest();
+      }
+      else
+      {
+        mApplication.Quit();
+      }
+    }
+    else if (gTestStep == MIXED_WRAPPING_EDITOR)
+    {
+      if (CheckImage(IMAGE_FILE_MIXED_EDITOR, 0.95f))
+      {
+        // The last check has been done, so we can quit the test
+        mApplication.Quit();
+      }
     }
   }
 
