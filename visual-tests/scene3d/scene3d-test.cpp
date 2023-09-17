@@ -224,6 +224,12 @@ private:
 
       mAnimation = animations[0].ReAnimate(getActor);
       mAnimation.SetLooping(false);
+
+      //Set speed to be x100
+      mAnimation.SetSpeedFactor(100.0f);
+
+      // Wait until all animations are finished.
+      mAnimation.FinishedSignal().Connect(this, &Scene3DTest::OnFinishedAnimation);
     }
     else
     {
@@ -255,15 +261,15 @@ private:
     return false;
   }
 
+  void OnFinishedAnimation(Animation& animation)
+  {
+    // Animation done. Check we need to go to next step
+    WaitForNextTest(DEFAULT_DELAY_TIME);
+  }
+
   void PerformTest()
   {
     Window window = mApplication.GetWindow();
-
-    unsigned int delay = 0u;
-    if (mAnimation)
-    {
-      delay = mAnimation.GetDuration() * 1000 + DEFAULT_DELAY_TIME;
-    }
 
     switch (gTestStep)
     {
@@ -281,8 +287,6 @@ private:
       {
         mAnimation.Play();
       }
-
-      WaitForNextTest(delay);
 
       break;
     }
@@ -307,8 +311,6 @@ private:
       {
         mAnimation.Play();
       }
-
-      WaitForNextTest(delay);
 
       break;
     }
