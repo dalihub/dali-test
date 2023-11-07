@@ -10,6 +10,7 @@ in vec3 aPosition;
 in vec2 aTexCoord;
 in vec3 aNormal;
 in vec3 aTangent;
+in vec4 aVertexColor;
 
 #ifdef MORPH
   uniform sampler2D sBlendShapeGeometry;
@@ -19,6 +20,7 @@ out vec2 vUV;
 out vec3 vNormal;
 out vec3 vTangent;
 out vec3 vViewVec;
+out vec4 vColor;
 
 
 uniform highp mat4 uMvpMatrix;
@@ -29,8 +31,8 @@ uniform mat4 uModelView;
 uniform mat4 uProjection;
 
 #ifdef SKINNING
-  in vec4 aJoints;
-  in vec4 aWeights;
+  in vec4 aJoints0;
+  in vec4 aWeights0;
   #define MAX_BONES 64
   uniform mat4 uBone[MAX_BONES];
 #endif
@@ -121,10 +123,10 @@ void main()
 #endif
 
 #ifdef SKINNING
-  mat4 bone = uBone[int(aJoints.x)] * aWeights.x +
-    uBone[int(aJoints.y)] * aWeights.y +
-    uBone[int(aJoints.z)] * aWeights.z +
-    uBone[int(aJoints.w)] * aWeights.w;
+  mat4 bone = uBone[int(aJoints0.x)] * aWeights0.x +
+    uBone[int(aJoints0.y)] * aWeights0.y +
+    uBone[int(aJoints0.z)] * aWeights0.z +
+    uBone[int(aJoints0.w)] * aWeights0.w;
   position = bone * position;
   normal = (bone * vec4(normal, 0.0)).xyz;
   tangent = (bone * vec4(tangent, 0.0)).xyz;
@@ -149,6 +151,8 @@ void main()
 #else
   vUV = aTexCoord;
 #endif
+
+  vColor = aVertexColor;
 
   vViewVec = viewPosition.xyz;
 }

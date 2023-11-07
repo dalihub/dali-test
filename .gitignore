@@ -6,3 +6,7 @@ CMakeFiles
 cmake_install.cmake
 install_manifest.txt
 visual-tests-results.xml
+/build/tizen/.ninja_deps
+/build/tizen/.ninja_log
+/build/tizen/build.ninja
+/build/tizen/rules.ninja
