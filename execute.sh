@@ -11,12 +11,13 @@ Usage()
 }
 
 # Initialise the options
-OPTS=$(getopt -o vhxd: --long directory:,verbose,help,xml -n "$(basename "$0")" -- "$@")
+OPTS=$(getopt -o vhxt:d: --long directory:,verbose,help,xml,test: -n "$(basename "$0")" -- "$@")
 if [ $? != 0 ]; then echo; Usage; fi
 eval set -- "$OPTS"
 
 REDIRECT_OUTPUT="> /dev/null 2>&1"
 GENERATE_XML=
+TEST_TO_EXECUTE=
 dir=""
 
 # Go through all the options
@@ -39,7 +40,10 @@ if [[ $* > 1 ]] ; then
                 GENERATE_XML=1
                 shift
                 ;;
-
+            -t|--test ) # Executes a single test
+                TEST_TO_EXECUTE="$2"
+                shift
+                ;;
             -- )
                 shift
                 ;;
@@ -69,6 +73,11 @@ testOutput=""
 
 DEBUG=""
 #DEBUG=gdb --args
+
+if [[ "$TEST_TO_EXECUTE" != "" ]] ; then
+  tests=$TEST_TO_EXECUTE
+  num_tests=1
+fi
 
 # Execute each test executable in turn
 for i in $tests ; do

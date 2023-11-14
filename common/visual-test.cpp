@@ -250,3 +250,11 @@ bool VisualTest::CompareImageFile(const std::string fileName1, const std::string
 
   return passed;
 }
+
+void VisualTest::EmitTouch( TouchPoint& touchPoint )
+{
+  touchPoint.state =Dali::PointState::DOWN;
+  Adaptor::Get().FeedTouchPoint(touchPoint, 0);
+  touchPoint.state =Dali::PointState::UP;
+  Adaptor::Get().FeedTouchPoint(touchPoint, 1);
+}

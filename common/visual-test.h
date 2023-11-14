@@ -21,6 +21,9 @@
 // EXTERNAL INCLUDES
 #include <dali/dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/events/point.h>
+#include <dali/integration-api/events/touch-event-integ.h>
 #include <cstdlib>
 #include <string>
 
@@ -100,6 +103,16 @@ protected:
    * @return Whether the similarity of the two images reaches the given threshold
    */
   bool CheckImage(const std::string fileName, const float similarityThreshold = DEFAULT_IMAGE_SIMILARITY_THRESHOLD, const Dali::Rect<uint16_t>& areaToCompare = Dali::Rect<uint16_t>(0u, 0u, 0u, 0u));
+
+  /**
+   * @brief Emits a single touch
+   *
+   * touchPoint is mutable.
+   * touchPoint state of TouchPoint is irrelevant upon input, EmitTouch() sets it internally
+   *
+   * @param[in] touchPoint Valid TouchPoint structure
+   */
+  void EmitTouch(Dali::TouchPoint& touchPoint);
 
 private:
   /**
