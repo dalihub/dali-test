@@ -113,13 +113,15 @@ private:
   {
     using Scene3D::Model;
     auto model = Model::DownCast(control);
-
     auto camera= model.GenerateCamera(0);
 
     mSceneView.AddCamera(camera);
     mSceneView.SelectCamera(mSceneView.GetCameraCount()-1);
 
     [[maybe_unused]] auto transform = Dali::DevelActor::GetWorldTransform(camera);
+
+    // Disconnect signal to avoid calling it recursively!
+    model.ResourceReadySignal().Disconnect(this, &ColliderMeshTest::LoadingReady );
 
     [[maybe_unused]] auto room0 = model.FindChildModelNodeByName("room0");
     [[maybe_unused]] auto room1 = model.FindChildModelNodeByName("room1");
@@ -129,9 +131,15 @@ private:
     auto collider1 = Scene3D::Loader::NavigationMeshFactory::CreateFromFile(TEST_RESOURCES_DIR "collider-mesh/room1.col");
     auto collider2 = Scene3D::Loader::NavigationMeshFactory::CreateFromFile(TEST_RESOURCES_DIR "collider-mesh/room2.col");
 
+    // unparent one node to simulate case of setting the collider mesh while node is not a part of model tree
+    model.RemoveModelNode(room2);
+
     room0.SetColliderMesh(std::move(collider0));
     room1.SetColliderMesh(std::move(collider1));
     room2.SetColliderMesh(std::move(collider2));
+
+    // put orphaned node back into the tree
+    model.AddModelNode(room2);
 
     model.MeshHitSignal().Connect(this, &ColliderMeshTest::OnModelHit );
     PerformNextTest(1000);
