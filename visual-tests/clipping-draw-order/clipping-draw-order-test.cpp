@@ -29,6 +29,8 @@ using namespace Dali::Toolkit;
 
 namespace
 {
+const int DRAW_TIME{1000};
+
 constexpr const char* IMAGES[] = {
   TEST_IMAGE_DIR "clipping-draw-order/gallery-small-1.jpg",
   TEST_IMAGE_DIR "clipping-draw-order/gallery-small-2.jpg",
@@ -165,20 +167,28 @@ private:
     readyCounter++;
     if(readyCounter == NUMBER_OF_IMAGE_VIEWS)
     {
-      Window window = mApplication.GetWindow();
-      CaptureWindow( window );
+      mTimer = Timer::New(DRAW_TIME);
+      mTimer.TickSignal().Connect(this, &ClippingDrawOrderVerification::OnTimer);
+      mTimer.Start();
     }
   }
 
-
-  void PostRender()
+  bool OnTimer()
   {
-    CheckImage(EXPECTED_RESULT_IMAGE); // should be identical
+    Window window = mApplication.GetWindow();
+    CaptureWindow( window );
+    return false;
+  }
+
+  void PostRender(std::string outputFile, bool success)
+  {
+    CompareImageFile(EXPECTED_RESULT_IMAGE, outputFile, 0.98f);
     mApplication.Quit();
   }
 
 private:
   Application&   mApplication;
+  Timer mTimer;
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE(ClippingDrawOrderVerification, OnInit, WINDOW_WIDTH, WINDOW_HEIGHT)

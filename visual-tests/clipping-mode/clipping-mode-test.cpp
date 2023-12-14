@@ -19,6 +19,7 @@
 #include <string>
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
 #include "visual-test.h"
@@ -192,28 +193,28 @@ private:
       case CLIP_CHILDREN_01:
       {
         CreateSimpleScene(ClippingMode::CLIP_CHILDREN);
-        CaptureWindow(window);
+        StartDrawTimer();
         break;
       }
       case CLIP_CHILDREN_02:
       {
         RemoveScene();
         CreateComplextScene(ClippingMode::CLIP_CHILDREN);
-        CaptureWindow(window);
+        StartDrawTimer();
         break;
       }
       case CLIP_TO_BOUNDING_BOX_01:
       {
         RemoveScene();
         CreateSimpleScene(ClippingMode::CLIP_TO_BOUNDING_BOX);
-        CaptureWindow(window);
+        StartDrawTimer();
         break;
       }
       case CLIP_TO_BOUNDING_BOX_02:
       {
         RemoveScene();
         CreateComplextScene(ClippingMode::CLIP_TO_BOUNDING_BOX);
-        CaptureWindow(window);
+        StartDrawTimer();
         break;
       }
       default:
@@ -223,46 +224,33 @@ private:
     }
   }
 
-  void PostRender()
+  void StartDrawTimer()
   {
-    if( gTestStep == CLIP_CHILDREN_01 )
-    {
-      if(CheckImage( IMAGE_FILE_1))
-      {
-        PerformNextTest();
-      }
-      else
-      {
-        mApplication.Quit();
-      }
-    }
-    else if( gTestStep == CLIP_CHILDREN_02 )
-    {
-      if(CheckImage( IMAGE_FILE_2))
-      {
-         PerformNextTest();
-      }
-      else
-      {
-        mApplication.Quit();
-      }
-    }
-    else if( gTestStep == CLIP_TO_BOUNDING_BOX_01 )
-    {
-      if(CheckImage( IMAGE_FILE_3 ))
-      {
-        PerformNextTest();
-      }
-      else
-      {
-        mApplication.Quit();
-      }
-    }
-    else if( gTestStep == CLIP_TO_BOUNDING_BOX_02 )
-    {
-      CheckImage( IMAGE_FILE_4 ); // ensure identical
+    mTimer = Timer::New(1000);
+    mTimer.TickSignal().Connect(this, &ClippingModeTest::OnTimer);
+    mTimer.Start();
+  }
 
-      // The last check has been done, so we can quit the test
+  bool OnTimer()
+  {
+    Window window = mApplication.GetWindow();
+    Debug::LogMessage(Debug::INFO, "Draw timer finished. Capturing window\n");
+    CaptureWindow(window);
+    return false;
+  }
+
+  void PostRender(std::string outputFile, bool success)
+  {
+    const std::string images[] = { IMAGE_FILE_1, IMAGE_FILE_2, IMAGE_FILE_3, IMAGE_FILE_4 };
+
+    CompareImageFile(images[gTestStep], outputFile, 0.98f);
+
+    if(gTestStep < NUMBER_OF_STEPS-1)
+    {
+      PerformNextTest();
+    }
+    else
+    {
       mApplication.Quit();
     }
   }
@@ -271,6 +259,7 @@ private:
 
   Application& mApplication;
   Actor mContainer;
+  Timer mTimer;
 };
 
 DALI_VISUAL_TEST( ClippingModeTest, OnInit )

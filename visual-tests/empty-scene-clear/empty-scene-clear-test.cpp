@@ -91,7 +91,8 @@ private:
     {
       case FIRST_WINDOW:
       {
-        CaptureWindow( mApplication.GetWindow() );
+        mTestWindow = mApplication.GetWindow();
+        StartDrawTimer();
         break;
       }
       case SECOND_WINDOW:
@@ -99,8 +100,8 @@ private:
         // Create an empty window with no renderable actors
         mSecondWindow = CreateNewWindow();
         mSecondWindow.SetBackgroundColor( Color::CYAN );
-
-        CaptureWindow( mSecondWindow );
+        mTestWindow = mSecondWindow;
+        StartDrawTimer();
         break;
       }
       case THIRD_WINDOW:
@@ -109,8 +110,8 @@ private:
         // Create another empty window with no renderable actors
         mThirdWindow = CreateNewWindow();
         mThirdWindow.SetBackgroundColor( Color::RED );
-
-        CaptureWindow( mThirdWindow );
+        mTestWindow = mThirdWindow;
+        StartDrawTimer();
         break;
       }
       default:
@@ -118,27 +119,29 @@ private:
     }
   }
 
-  void PostRender()
+  void StartDrawTimer()
   {
-    if ( gTestStep == FIRST_WINDOW )
-    {
-      if(CheckImage( IMAGE_FILE_1, 0.95f ) ) // verify the similarity
-        PerformNextTest();
-      else
-        mApplication.Quit();
-    }
-    else if ( gTestStep == SECOND_WINDOW )
-    {
-      if( CheckImage( IMAGE_FILE_2 ) ) // ensure identical
-        PerformNextTest();
-      else
-        mApplication.Quit();
-    }
-    else if ( gTestStep == THIRD_WINDOW )
-    {
-      CheckImage( IMAGE_FILE_3 ); // ensure identical
+    mTimer = Timer::New(1000); // Plenty of time to draw to fb
+    mTimer.TickSignal().Connect(this, &EmptySceneClearTest::OnTimer);
+    mTimer.Start();
+  }
 
-      // The last check has been done, so we can quit the test
+  bool OnTimer()
+  {
+    CaptureWindow(mTestWindow);
+    return false;
+  }
+
+  void PostRender(std::string outputFile, bool success)
+  {
+    const std::string images[] = { IMAGE_FILE_1, IMAGE_FILE_2, IMAGE_FILE_3 };
+    CompareImageFile(images[gTestStep], outputFile, 0.95f);
+    if(gTestStep < THIRD_WINDOW)
+    {
+      PerformNextTest();
+    }
+    else
+    {
       mApplication.Quit();
     }
   }
@@ -146,9 +149,11 @@ private:
 private:
 
   Application& mApplication;
+  Dali::Window mTestWindow;
   Dali::Window mSecondWindow;
   Dali::Window mThirdWindow;
   TextLabel    mTextLabel;
+  Timer mTimer;
 };
 
 DALI_VISUAL_TEST( EmptySceneClearTest, OnInit )

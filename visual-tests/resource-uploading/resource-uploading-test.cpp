@@ -19,6 +19,7 @@
 #include <string>
 #include <dali/dali.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/debug.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/visuals/image-visual-properties-devel.h>
 #include <dali-toolkit/devel-api/visual-factory/visual-factory.h>
@@ -47,6 +48,7 @@ const unsigned int NUMBER_OF_IMAGES = 2;
 
 enum TestStep
 {
+  SMALL_IMAGES,
   IMAGE_CHANGE,
   ADAPTOR_PAUSE,
   ADAPTOR_RESUME,
@@ -102,44 +104,30 @@ class ResourceUploadingTest: public VisualTest
     }
 
     // Start the test
-    WaitForNextTest();
+    PerformNextTest();
   }
 
 private:
 
-  void WaitForNextTest()
+  void PerformNextTest()
   {
+    Debug::LogMessage(Debug::INFO, "PerformNextTest()\n");
     gTestStep++;
 
-    mTimer = Timer::New( 1000 ); // ms
-    mTimer.TickSignal().Connect( this, &ResourceUploadingTest::OnTimer);
-    mTimer.Start();
-  }
-
-  bool OnTimer()
-  {
-    PerformTest();
-    return false;
-  }
-
-  void PerformTest()
-  {
     Window window = mApplication.GetWindow();
 
     switch ( gTestStep )
     {
+      case SMALL_IMAGES:
+      {
+        StartDrawTimer();
+        break;
+      }
       case IMAGE_CHANGE:
       {
         // Change the images
-        ChangeImage();
-
-        // We check the content of the window immediately after the changing the images in the image view.
-        // As the images are very large, it will take some time for the textures to be uploaded to GPU
-        // before rendering,　so the new images will not be rendered yet when we check the content of
-        // the window　here.
-        CaptureWindow( window );
-
-        WaitForNextTest();
+        ChangeImage(); // May take time to upload.
+        StartDrawTimer();
         break;
       }
       case ADAPTOR_PAUSE:
@@ -149,21 +137,11 @@ private:
 
         // Change the images in the image view again when adaptor is paused
         ChangeImage();
-
-        // After the adaptor is paused, we must wait for a while before resuming the adaptor
-        // This will allow enough time for the textures to be uploaded while the adaptor is paused
-        WaitForNextTest();
+        StartDrawTimer();
         break;
       }
       case ADAPTOR_RESUME:
       {
-        // Resume the adaptor
-        Adaptor::Get().Resume();
-
-        // We check the content of the window immediately after the adaptor is resumed.
-        // The textures should be uploaded already when the adaptor is paused, so the
-        // rendering of the images should be instant.
-        CaptureWindow( window );
         break;
       }
       default:
@@ -171,8 +149,33 @@ private:
     }
   }
 
+  void StartDrawTimer()
+  {
+    Debug::LogMessage(Debug::INFO, "StartDrawTimer()\n");
+    mTimer = Timer::New( 1000 ); // ms
+    mTimer.TickSignal().Connect( this, &ResourceUploadingTest::OnTimer);
+    mTimer.Start();
+  }
+
+  bool OnTimer()
+  {
+    Debug::LogMessage(Debug::INFO, "OnTimer()\n");
+    if(gTestStep == ADAPTOR_PAUSE)
+    {
+      Adaptor::Get().Resume();
+      gTestStep++;
+      // We check the content of the window immediately after the adaptor is resumed.
+      // The textures should be uploaded already when the adaptor is paused, so the
+      // rendering of the images should be instant.
+    }
+    CaptureWindow(mApplication.GetWindow());
+    return false;
+  }
+
+
   void ChangeImage()
   {
+    Debug::LogMessage(Debug::INFO, "ChangeImage()\n");
     int index = ( mImageIndex % 2 ) * NUMBER_OF_IMAGES + 1;
 
     for ( unsigned int i = 0; i < NUMBER_OF_IMAGES; i++ )
@@ -190,22 +193,19 @@ private:
     mImageIndex++;
   }
 
-  void PostRender()
+  void PostRender(std::string outputFile, bool success)
   {
+    Debug::LogMessage(Debug::INFO, "PostRender(%s, %s)\n", outputFile.c_str(), success?"T":"F");
+    std::string images[] = { FIRST_IMAGE_FILE, SECOND_IMAGE_FILE, SECOND_IMAGE_FILE, SECOND_IMAGE_FILE };
+    CompareImageFile(images[gTestStep], outputFile, 0.98f);
+
     if ( gTestStep == ADAPTOR_RESUME )
     {
-      CheckImage( SECOND_IMAGE_FILE ); // should be identical
-
-      // The last check has been done, so we can quit the test
       mApplication.Quit();
     }
     else
     {
-      if(!CheckImage( FIRST_IMAGE_FILE)) // should be identical
-      {
-        mTimer.Stop();
-        mApplication.Quit();
-      }
+      PerformNextTest();
     }
   }
 

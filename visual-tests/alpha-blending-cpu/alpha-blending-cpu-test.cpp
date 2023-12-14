@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <string>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/debug.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 // INTERNAL INCLUDES
@@ -51,7 +52,7 @@ constexpr MaskMode MASK_MODES[] =
 };
 constexpr auto  MASK_MODE_COUNT = sizeof(MASK_MODES) / sizeof(MASK_MODES[0]);
 constexpr float IMAGE_SIZE = 200.0f;
-constexpr const char* IMAGE_FILE = TEST_IMAGE_DIR "alpha-blending-cpu/expected-result-1.png";
+constexpr const char* EXPECTED_IMAGE_FILE = TEST_IMAGE_DIR "alpha-blending-cpu/expected-result-1.png";
 
 constexpr auto NUMBER_OF_IMAGES = IMAGE_COUNT * MASK_MODE_COUNT;
 constexpr int WINDOW_WIDTH = MASK_MODE_COUNT * IMAGE_SIZE;
@@ -117,19 +118,29 @@ private:
     readyCounter++;
     if(readyCounter == NUMBER_OF_IMAGES)
     {
-      Window window = mApplication.GetWindow();
-      CaptureWindow( window );
+      mTimer = Timer::New(1000);
+      mTimer.TickSignal().Connect(this, &AlphaBlendingCpuTest::OnTimer);
+      mTimer.Start();
     }
   }
 
-  void PostRender()
+  bool OnTimer()
   {
-    CheckImage( IMAGE_FILE ); // should be identical
+    Window window = mApplication.GetWindow();
+    Debug::LogMessage(Debug::INFO, "Draw timer finished. Capturing window\n");
+    CaptureWindow(window);
+    return false;
+  }
+
+  void PostRender(std::string outputFile, bool success)
+  {
+    CompareImageFile(EXPECTED_IMAGE_FILE, outputFile, 0.98f);
     mApplication.Quit();
   }
 
 private:
   Application&   mApplication;
+  Timer mTimer;
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE(AlphaBlendingCpuTest, OnInit, WINDOW_WIDTH, WINDOW_HEIGHT)

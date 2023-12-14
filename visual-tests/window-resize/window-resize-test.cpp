@@ -38,9 +38,8 @@ const std::string SECOND_IMAGE_FILE =
 
 enum TestStep
 {
-  FIRST_CAPTURE,
-  WINDOW_RESIZE,
-  SECOND_CAPTURE,
+  FULL_WINDOW_CAPTURE,
+  PARTIAL_WINDOW_CAPTURE,
   NUMBER_OF_STEPS
 };
 
@@ -71,73 +70,49 @@ public:
     window.Add(mActor);
 
     // Start the test
-    WaitForNextTest();
+    PrepareNextTest();
   }
 
 private:
-  void WaitForNextTest()
+
+  void PrepareNextTest()
   {
     gTestStep++;
+    if(gTestStep == PARTIAL_WINDOW_CAPTURE)
+    {
+      // Resize the window
+      Window window = mApplication.GetWindow();
+      Window::WindowSize WINDOW_SIZE(300, 600);
+      window.SetSize(WINDOW_SIZE);
+    }
+    StartDrawTimer();
+  }
 
-    mTimer = Timer::New(200); // ms
+  void StartDrawTimer()
+  {
+    mTimer = Timer::New(1000);
     mTimer.TickSignal().Connect(this, &WindowResizeTest::OnTimer);
     mTimer.Start();
   }
 
   bool OnTimer()
   {
-    PerformTest();
+    CaptureWindow(mApplication.GetWindow());
     return false;
   }
 
-  void PerformTest()
+  void PostRender(std::string outputFile, bool success)
   {
-    Window window = mApplication.GetWindow();
+    std::string images[] = { FIRST_IMAGE_FILE, SECOND_IMAGE_FILE };
 
-    switch(gTestStep)
+    CompareImageFile(images[gTestStep], outputFile, 0.98f);
+    if(gTestStep + 1u == NUMBER_OF_STEPS)
     {
-      case FIRST_CAPTURE:
-      {
-        CaptureWindow(window);
-
-        WaitForNextTest();
-        break;
-      }
-      case WINDOW_RESIZE:
-      {
-        // Resize the window
-        Window::WindowSize WINDOW_SIZE(300, 600);
-        window.SetSize(WINDOW_SIZE);
-
-        WaitForNextTest();
-        break;
-      }
-      case SECOND_CAPTURE:
-      {
-        CaptureWindow(window);
-        break;
-      }
-      default:
-        break;
-    }
-  }
-
-  void PostRender()
-  {
-    if(gTestStep == SECOND_CAPTURE)
-    {
-      CheckImage(SECOND_IMAGE_FILE); // should be identical
-
-      // The last check has been done, so we can quit the test
       mApplication.Quit();
     }
     else
     {
-      if(!CheckImage(FIRST_IMAGE_FILE)) // should be identical
-      {
-        mTimer.Stop();
-        mApplication.Quit();
-      }
+      PrepareNextTest();
     }
   }
 

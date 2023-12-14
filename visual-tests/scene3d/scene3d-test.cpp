@@ -20,6 +20,7 @@
 #include <dali-scene3d/dali-scene3d.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/image-loader/texture-manager.h>
+#include <dali/integration-api/debug.h>
 #include <dali/dali.h>
 #include <dali/devel-api/rendering/frame-buffer-devel.h>
 #include <string>
@@ -35,7 +36,7 @@ namespace
 {
 
   const Vector3 CAMERA_DEFAULT_POSITION(0.0f, 0.0f, 3.5f);
-  const unsigned int DEFAULT_DELAY_TIME = 100;
+  const unsigned int DEFAULT_DRAW_TIMER = 1000;
 
   const std::string RESOURCE_TYPE_DIRS[]{
       TEST_SCENE_DIR "environments/",
@@ -44,30 +45,22 @@ namespace
       TEST_SCENE_DIR "images/",
   };
 
-  const std::string FIRST_IMAGE_FILE =
-      TEST_IMAGE_DIR "scene3d/expected-result-1.png";
-  const std::string SECOND_IMAGE_FILE =
-      TEST_IMAGE_DIR "scene3d/expected-result-2.png";
-  const std::string THIRD_IMAGE_FILE =
-      TEST_IMAGE_DIR "scene3d/expected-result-3.png";
-  const std::string FOURTH_IMAGE_FILE =
-      TEST_IMAGE_DIR "scene3d/expected-result-4.png";
-  const std::string FIFTH_IMAGE_FILE =
-      TEST_IMAGE_DIR "scene3d/expected-result-5.png";
+  const std::string FIRST_IMAGE_FILE  = TEST_IMAGE_DIR "scene3d/expected-result-1.png";
+  const std::string SECOND_IMAGE_FILE = TEST_IMAGE_DIR "scene3d/expected-result-2.png";
+  const std::string THIRD_IMAGE_FILE  = TEST_IMAGE_DIR "scene3d/expected-result-3.png";
+  const std::string FOURTH_IMAGE_FILE = TEST_IMAGE_DIR "scene3d/expected-result-4.png";
+  const std::string FIFTH_IMAGE_FILE  = TEST_IMAGE_DIR "scene3d/expected-result-5.png";
 
   const int WINDOW_WIDTH(480);
   const int WINDOW_HEIGHT(800);
 
   enum TestStep
   {
-    LOAD_FIRST_SCENE_AND_CAPTURE,
+    LOAD_FIRST_SCENE,
     FIRST_SCENE_ANIMATION,
-    FIRST_SCENE_SECOND_CAPTURE,
-    LOAD_SECOND_SCENE_AND_CAPTURE,
+    LOAD_SECOND_SCENE,
     SECOND_SCENE_ANIMATION,
-    SECOND_SCENE_SECOND_CAPTURE,
     LOAD_THIRD_SCENE,
-    THIRD_SCENE_CAPTURE,
     NUMBER_OF_STEPS
   };
 
@@ -148,11 +141,105 @@ public:
     window.Add(offscreenImage);
 
     // Start the test
-    gTestStep++;
-    PerformTest();
+    PrepareNextTest();
   }
 
 private:
+  void PrepareNextTest()
+  {
+    gTestStep++;
+    switch(gTestStep)
+    {
+      case LOAD_FIRST_SCENE:
+      {
+        mScene = LoadScene("exercise.dli", mSceneCamera);
+        mSceneLayer.Add(mScene);
+
+        StartDrawTimer(DEFAULT_DRAW_TIMER);
+        break;
+      }
+    case FIRST_SCENE_ANIMATION:
+    {
+      if (mAnimation)
+      {
+        mAnimation.Play();
+      }
+      else
+      {
+        StartDrawTimer(DEFAULT_DRAW_TIMER);
+      }
+      break;
+    }
+    case LOAD_SECOND_SCENE:
+    {
+      UnparentAndReset(mScene);
+      mScene = LoadScene("robot.dli", mSceneCamera);
+      mSceneLayer.Add(mScene);
+      StartDrawTimer(DEFAULT_DRAW_TIMER);
+      break;
+    }
+    case SECOND_SCENE_ANIMATION:
+    {
+      if (mAnimation)
+      {
+        mAnimation.Play();
+      }
+      else
+      {
+        StartDrawTimer(DEFAULT_DRAW_TIMER);
+      }
+      break;
+    }
+    case LOAD_THIRD_SCENE:
+    {
+      UnparentAndReset(mScene);
+      mScene = LoadScene("beer.dli", mSceneCamera);
+      mSceneLayer.Add(mScene);
+
+      StartDrawTimer(DEFAULT_DRAW_TIMER);
+      break;
+    }
+    default:
+      break;
+    }
+  }
+
+  void StartDrawTimer(int millisecond)
+  {
+    mTimer = Timer::New(millisecond);
+    mTimer.TickSignal().Connect(this, &Scene3DTest::OnTimer);
+    mTimer.Start();
+  }
+
+  bool OnTimer()
+  {
+    Window window = mApplication.GetWindow();
+    Debug::LogMessage(Debug::INFO, "Draw timer finished. Capturing window\n");
+    CaptureWindow(window);
+    return false;
+  }
+
+  void OnFinishedAnimation(Animation& animation)
+  {
+    StartDrawTimer(DEFAULT_DRAW_TIMER);
+  }
+
+  void PostRender(std::string outputFile, bool success)
+  {
+    const std::string images[] = {FIRST_IMAGE_FILE, SECOND_IMAGE_FILE, THIRD_IMAGE_FILE, FOURTH_IMAGE_FILE, FIFTH_IMAGE_FILE};
+
+    CompareImageFile(images[gTestStep], outputFile, 0.98f);
+
+    if(gTestStep + 1 < NUMBER_OF_STEPS)
+    {
+      PrepareNextTest();
+    }
+    else
+    {
+      mApplication.Quit();
+    }
+  }
+
   Actor LoadScene(std::string sceneName, CameraActor camera)
   {
     ResourceBundle::PathProvider pathProvider = [](ResourceType::Value type)
@@ -160,7 +247,7 @@ private:
       return RESOURCE_TYPE_DIRS[type];
     };
 
-    auto path = pathProvider(ResourceType::Mesh) + sceneName;
+    auto sceneFile = pathProvider(ResourceType::Mesh) + sceneName;
 
     ResourceBundle resources;
     SceneDefinition scene;
@@ -172,7 +259,7 @@ private:
 
     LoadResult output{resources, scene, metaData, animations, animGroups, cameraParameters, lights};
 
-    Dali::Scene3D::Loader::ModelLoader modelLoader(path, pathProvider(ResourceType::Mesh) + "/", output);
+    Dali::Scene3D::Loader::ModelLoader modelLoader(sceneFile, pathProvider(ResourceType::Mesh) + "/", output);
     modelLoader.LoadModel(pathProvider);
 
     if (cameraParameters.empty())
@@ -237,161 +324,6 @@ private:
     }
 
     return sceneRoot;
-  }
-
-  void WaitForNextTest(unsigned int milliSecond)
-  {
-    gTestStep++;
-
-    if (milliSecond == 0u)
-    {
-      PerformTest();
-    }
-    else
-    {
-      mTimer = Timer::New(milliSecond); // ms
-      mTimer.TickSignal().Connect(this, &Scene3DTest::OnTimer);
-      mTimer.Start();
-    }
-  }
-
-  bool OnTimer()
-  {
-    PerformTest();
-    return false;
-  }
-
-  void OnFinishedAnimation(Animation& animation)
-  {
-    // Animation done. Check we need to go to next step
-    WaitForNextTest(DEFAULT_DELAY_TIME);
-  }
-
-  void PerformTest()
-  {
-    Window window = mApplication.GetWindow();
-
-    switch (gTestStep)
-    {
-    case LOAD_FIRST_SCENE_AND_CAPTURE:
-    {
-      mScene = LoadScene("exercise.dli", mSceneCamera);
-      mSceneLayer.Add(mScene);
-
-      CaptureWindow(window);
-      break;
-    }
-    case FIRST_SCENE_ANIMATION:
-    {
-      if (mAnimation)
-      {
-        mAnimation.Play();
-      }
-
-      break;
-    }
-    case FIRST_SCENE_SECOND_CAPTURE:
-    {
-      CaptureWindow(window, mSceneCamera);
-      break;
-    }
-    case LOAD_SECOND_SCENE_AND_CAPTURE:
-    {
-      UnparentAndReset(mScene);
-      mScene = LoadScene("robot.dli", mSceneCamera);
-      mSceneLayer.Add(mScene);
-
-      CaptureWindow(window);
-
-      break;
-    }
-    case SECOND_SCENE_ANIMATION:
-    {
-      if (mAnimation)
-      {
-        mAnimation.Play();
-      }
-
-      break;
-    }
-    case SECOND_SCENE_SECOND_CAPTURE:
-    {
-      CaptureWindow(window, mSceneCamera);
-      break;
-    }
-    case LOAD_THIRD_SCENE:
-    {
-      UnparentAndReset(mScene);
-      mScene = LoadScene("beer.dli", mSceneCamera);
-      mSceneLayer.Add(mScene);
-
-      WaitForNextTest(DEFAULT_DELAY_TIME * 2);
-
-      break;
-    }
-    case THIRD_SCENE_CAPTURE:
-    {
-      CaptureWindow(window);
-      break;
-    }
-    default:
-      break;
-    }
-  }
-
-  void PostRender()
-  {
-    if (gTestStep == LOAD_FIRST_SCENE_AND_CAPTURE)
-    {
-      if (CheckImage(FIRST_IMAGE_FILE, 0.98f))
-      {
-        WaitForNextTest(DEFAULT_DELAY_TIME);
-      }
-      else
-      {
-        mApplication.Quit();
-      }
-    }
-    else if (gTestStep == FIRST_SCENE_SECOND_CAPTURE)
-    {
-      if (CheckImage(SECOND_IMAGE_FILE, 0.98f))
-      {
-        WaitForNextTest(DEFAULT_DELAY_TIME);
-      }
-      else
-      {
-        mApplication.Quit();
-      }
-    }
-    else if (gTestStep == LOAD_SECOND_SCENE_AND_CAPTURE)
-    {
-      if (CheckImage(THIRD_IMAGE_FILE, 0.99f))
-      {
-        WaitForNextTest(DEFAULT_DELAY_TIME);
-      }
-      else
-      {
-        mApplication.Quit();
-      }
-    }
-    else if (gTestStep == SECOND_SCENE_SECOND_CAPTURE)
-    {
-      if (CheckImage(FOURTH_IMAGE_FILE, 0.99f))
-      {
-        WaitForNextTest(DEFAULT_DELAY_TIME);
-      }
-      else
-      {
-        mApplication.Quit();
-      }
-    }
-    else if (gTestStep == THIRD_SCENE_CAPTURE)
-    {
-      CheckImage(FIFTH_IMAGE_FILE, 0.97f);
-
-      // The last check has been done, so we can quit the test
-      mApplication.Quit();
-    }
   }
 
 private:

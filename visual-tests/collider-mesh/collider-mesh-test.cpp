@@ -182,13 +182,12 @@ private:
     mTimer.Start();
   }
 
-  void PostRender() override
+  void PostRender(std::string outputFile, bool success) override
   {
-
     std::string fname(IMAGE_FILE);
     fname += std::to_string(mTestStep +1);
     fname += ".png";
-    CheckImage(fname);
+    CompareImageFile(fname, outputFile, 0.98f);
     PerformNextTest(1000);
   }
 

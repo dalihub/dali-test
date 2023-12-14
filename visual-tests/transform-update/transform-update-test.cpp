@@ -107,12 +107,12 @@ class TransformUpdateTest: public VisualTest
     mAnimation.AnimateTo(Property(mAnimIcon, mPositionFactorIndex), 0.8f, AlphaFunction(point1, point2));
 
     // Start the test
-    WaitForNextTest(DEFAULT_DELAY_TIME);
+    PrepareNextTest(DEFAULT_DELAY_TIME);
   }
 
 private:
 
-  void WaitForNextTest( unsigned int milliSecond )
+  void PrepareNextTest( unsigned int milliSecond )
   {
     gTestStep++;
 
@@ -158,7 +158,7 @@ private:
           mAnimation.Play();
         }
 
-        WaitForNextTest(delay); // play until half of the animation
+        PrepareNextTest(delay); // play until half of the animation
 
         break;
       }
@@ -169,7 +169,7 @@ private:
           mAnimation.Pause();
         }
 
-        WaitForNextTest(DEFAULT_DELAY_TIME);
+        PrepareNextTest(DEFAULT_DELAY_TIME);
 
         break;
       }
@@ -185,7 +185,7 @@ private:
           mAnimation.Play();
         }
 
-        WaitForNextTest(delay + DEFAULT_DELAY_TIME);
+        PrepareNextTest(delay + DEFAULT_DELAY_TIME);
 
         break;
       }
@@ -199,33 +199,21 @@ private:
     }
   }
 
-  void PostRender()
+  void PostRender(std::string outputImage, bool success)
   {
     if (gTestStep == PRE_ANIMATION)
     {
-      if(CheckImage(FIRST_IMAGE_FILE, 0.99f))
-      {
-        WaitForNextTest(DEFAULT_DELAY_TIME);
-      }
-      else
-      {
-        mApplication.Quit();
-      }
+      CompareImageFile(FIRST_IMAGE_FILE, outputImage, 0.99f);
+      PrepareNextTest(DEFAULT_DELAY_TIME);
     }
     else if (gTestStep == CAPTURE_MID_ANIMATION)
     {
-      if(CheckImage(SECOND_IMAGE_FILE, 0.99f))
-      {
-        WaitForNextTest(DEFAULT_DELAY_TIME);
-      }
-      else
-      {
-        mApplication.Quit();
-      }
+      CompareImageFile(SECOND_IMAGE_FILE, outputImage, 0.99f);
+      PrepareNextTest(DEFAULT_DELAY_TIME);
     }
     else if ( gTestStep == POST_ANIMATION )
     {
-      CheckImage(THIRD_IMAGE_FILE, 0.99f);
+      CompareImageFile(THIRD_IMAGE_FILE, outputImage, 0.99f);
 
       // The last check has been done, so we can quit the test
       mApplication.Quit();

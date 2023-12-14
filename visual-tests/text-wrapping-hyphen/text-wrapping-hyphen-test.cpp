@@ -85,102 +85,93 @@ public:
   }
 
 private:
-  void PerformNextTest() {
+  void PerformNextTest()
+  {
     gTestStep++;
 
-    switch (gTestStep) {
-    case HYPHEN_WRAPPING_LABEL: {
+    switch (gTestStep)
+    {
+    case HYPHEN_WRAPPING_LABEL:
+    {
       HyphenWrappingTestLabel();
       break;
     }
-    case MIXED_WRAPPING_LABEL: {
+    case MIXED_WRAPPING_LABEL:
+    {
       MixedWrappingTestLabel();
       break;
     }
-    case HYPHEN_WRAPPING_EDITOR: {
+    case HYPHEN_WRAPPING_EDITOR:
+    {
+      mWindow.Remove(mTextLabel);
+      mWindow.Add(mTextEditor);
       HyphenWrappingTestEditor();
       break;
     }
-    case MIXED_WRAPPING_EDITOR: {
+    case MIXED_WRAPPING_EDITOR:
+    {
       MixedWrappingTestEditor();
       break;
     }
     default:
       break;
     }
+    StartDrawTimer();
   }
 
-  void HyphenWrappingTestLabel() {
+
+  void HyphenWrappingTestLabel()
+  {
     mTextLabel.SetProperty(TextLabel::Property::LINE_WRAP_MODE,
                            DevelText::LineWrap::HYPHENATION);
     mTextLabel.SetProperty(TextLabel::Property::TEXT, "Hi Experiment");
-    CaptureWindow(mWindow);
   }
 
-  void MixedWrappingTestLabel() {
+  void MixedWrappingTestLabel()
+  {
     mTextLabel.SetProperty(TextLabel::Property::LINE_WRAP_MODE,
                            DevelText::LineWrap::MIXED);
     mTextLabel.SetProperty(TextLabel::Property::TEXT, "Hi Experiment");
-    CaptureWindow(mWindow);
   }
 
-  void HyphenWrappingTestEditor() {
+  void HyphenWrappingTestEditor()
+  {
     mTextEditor.SetProperty(TextEditor::Property::LINE_WRAP_MODE,
                             DevelText::LineWrap::HYPHENATION);
     mTextEditor.SetProperty(TextEditor::Property::TEXT, "Hi Experiment");
-    CaptureWindow(mWindow);
   }
 
-  void MixedWrappingTestEditor() {
+  void MixedWrappingTestEditor()
+  {
     mTextEditor.SetProperty(TextEditor::Property::LINE_WRAP_MODE,
                             DevelText::LineWrap::MIXED);
     mTextEditor.SetProperty(TextEditor::Property::TEXT, "Hi Experiment");
-    CaptureWindow(mWindow);
   }
 
-  void PostRender() {
-    if (gTestStep == HYPHEN_WRAPPING_LABEL)
+  void StartDrawTimer()
+  {
+    mTimer = Timer::New(1000);
+    mTimer.TickSignal().Connect(this, &TextWrappingTest::OnTimer);
+    mTimer.Start();
+  }
+
+  bool OnTimer()
+  {
+    CaptureWindow(mWindow);
+    return false;
+  }
+
+  void PostRender(std::string outputFile, bool success)
+  {
+    const std::string images[] = {IMAGE_FILE_HYPHEN ,IMAGE_FILE_MIXED ,IMAGE_FILE_HYPHEN_EDITOR ,IMAGE_FILE_MIXED_EDITOR};
+    CompareImageFile(images[gTestStep], outputFile, 0.95f);
+    if(gTestStep < NUMBER_OF_STEPS-1)
     {
-      if (CheckImage(IMAGE_FILE_HYPHEN, 0.95f))
-      {
-        PerformNextTest();
-      }
-      else
-      {
-        mApplication.Quit();
-      }
+      PerformNextTest();
     }
-    else if (gTestStep == MIXED_WRAPPING_LABEL)
+    else
     {
-      if (CheckImage(IMAGE_FILE_MIXED, 0.95f))
-      {
-        mWindow.Remove(mTextLabel);
-        mWindow.Add(mTextEditor);
-        PerformNextTest();
-      }
-      else
-      {
-        mApplication.Quit();
-      }
-    }
-    else if (gTestStep == HYPHEN_WRAPPING_EDITOR)
-    {
-      if (CheckImage(IMAGE_FILE_HYPHEN_EDITOR, 0.95f))
-      {
-        PerformNextTest();
-      }
-      else
-      {
-        mApplication.Quit();
-      }
-    }
-    else if (gTestStep == MIXED_WRAPPING_EDITOR)
-    {
-      if (CheckImage(IMAGE_FILE_MIXED_EDITOR, 0.95f))
-      {
-        // The last check has been done, so we can quit the test
-        mApplication.Quit();
-      }
+      mApplication.Quit();
     }
   }
 
@@ -189,6 +180,7 @@ private:
   Dali::Window mWindow;
   TextLabel mTextLabel;
   TextEditor mTextEditor;
+  Timer mTimer;
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE(TextWrappingTest, OnInit, 900, 900)

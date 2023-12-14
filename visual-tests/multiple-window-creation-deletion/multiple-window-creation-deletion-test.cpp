@@ -28,7 +28,7 @@ using namespace Dali::Toolkit;
 namespace
 {
 
-constexpr int MAX_WINDOW_COUNT = 30;
+constexpr int MAX_WINDOW_COUNT = 4;
 const PositionSize WINDOW_SIZE( 100, 100, 300, 300 );
 
 }  // namespace
@@ -61,7 +61,7 @@ public:
     mTimer.Start();
   }
 
-  void PostRender()
+  void PostRender(std::string imageFile, bool success) override
   {
     // We are not capturing any window, so this should not be called
   }

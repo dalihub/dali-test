@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2023 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 // INTERNAL INCLUDES
 #include "visual-test.h"
 #include "image-util.h"
+#include <dali/integration-api/debug.h>
 
 // EXTERNAL INCLUDES
 #include <Magick++.h>
@@ -26,8 +27,10 @@
 #include <unistd.h>
 #include <cerrno>
 #include <cstdio>
+#include <filesystem>
 
 using namespace Dali;
+namespace fs = std::filesystem;
 
 char*       gTempDir;
 char*       gTempFilename;
@@ -55,7 +58,7 @@ bool ParseEnvironment(int argc, char** argv, int WindowWidth, int WindowHeight)
     {
       if(c + 1 < argc)
       {
-        asprintf(&gTempDir, "%s", argv[c + 1]);
+        gTempDir = strdup(argv[c+1]);
       }
       c += 2;
     }
@@ -151,59 +154,38 @@ void VisualTest::CaptureWindow(Dali::Window window, Dali::CameraActor customCame
 void VisualTest::OnOffscreenRenderFinished(RenderTask& task)
 {
   task.FinishedSignal().Disconnect(this, &VisualTest::OnOffscreenRenderFinished);
-  PostRender();
-}
-
-bool VisualTest::CheckImage(const std::string fileName, const float similarityThreshold, const Rect<uint16_t>& areaToCompare)
-{
-  bool success = false;
-
-  // Compare the image in the given area
-  char* imageName;
+  Debug::LogMessage(Debug::INFO, "VisualTest::OnOffscreenRenderFinished(), capturing offscreen\n");
 
   // Ensure there's a directory to write to:
-  struct stat statBuffer;
-  errno = 0;
-  if(-1 == stat(gTempDir, &statBuffer))
+  if(!fs::exists(fs::path(gTempDir)))
   {
-    if(errno == ENOENT)
+    fs::create_directory(fs::path(gTempDir));
+  }
+
+  char* imageName;
+  int n = asprintf(&imageName, "%s%02d.png", gTempFilename, gImageNumber);
+  bool success=false;
+  if(n > 0)
+  {
+    gImageNumber++;
+
+    if(gFB)
     {
-      if(-1 == mkdir(gTempDir, 0755))
-      {
-        fprintf(stderr, "%s\n", strerror(errno));
-      }
+      Magick::Image image;
+      image.magick("xwd");
+      image.read(gVirtualFramebuffer);
+      image.magick("png");
+      image.write(imageName);
+      success = true;
     }
     else
     {
-      fprintf(stderr, "%s\n", strerror(errno));
+      success = mNativeImageSourcePtr->EncodeToFile(imageName);
     }
   }
-
-  asprintf(&imageName, "%s%02d.png", gTempFilename, gImageNumber);
-  gImageNumber++;
-
-  if(gFB)
-  {
-    Magick::Image image;
-    image.magick("xwd");
-    image.read(gVirtualFramebuffer);
-    image.magick("png");
-    image.write(imageName);
-    success = true;
-  }
-  else
-  {
-    success = mNativeImageSourcePtr->EncodeToFile(imageName);
-  }
-
-  if(success)
-  {
-    success = CompareImageFile(fileName, imageName, similarityThreshold, areaToCompare);
-  }
-
+  task.SetRefreshRate(RenderTask::REFRESH_ALWAYS);
+  PostRender(imageName, success);
   free(imageName);
-
-  return success;
 }
 
 bool VisualTest::CompareImageFile(const std::string fileName1, const std::string fileName2, const float similarityThreshold, const Rect<uint16_t>& areaToCompare)

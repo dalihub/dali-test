@@ -116,13 +116,9 @@ constexpr static int TOTAL_RESOURCES = NUMBER_OF_PROPERTY_TYPES * NUMBER_OF_VALI
 enum TestStep
 {
   CREATE_STATIC_ABSOLUTE_STEP,
-  TEST_STATIC_ABSOLUTE_STEP,
   CREATE_STATIC_RELATIVE_STEP,
-  TEST_STATIC_RELATIVE_STEP,
   CREATE_ANIMATE_ABSOLUTE_STEP,
-  TEST_ANIMATE_ABSOLUTE_STEP,
   CREATE_ANIMATE_RELATIVE_STEP,
-  TEST_ANIMATE_RELATIVE_STEP,
   NUMBER_OF_STEPS
 };
 constexpr static int TERMINATE_RUNTIME = 10 * 1000; // 10 seconds
@@ -130,7 +126,7 @@ constexpr static int TERMINATE_RUNTIME = 10 * 1000; // 10 seconds
 static int gTestStep = -1;
 static int gResourceReadyCount = 0;
 static bool gAnimationFinished = true;
-static bool gTermiatedTest = false;
+static bool gTerminatedTest = false;
 
 }  // namespace
 
@@ -160,7 +156,7 @@ public:
     mTerminateTimer.Start();
 
     // Start the test
-    WaitForNextTest();
+    PrepareNextTest();
   }
 
 private:
@@ -169,8 +165,8 @@ private:
   {
     // Visual Test Timout!
     printf("TIMEOUT corner-radius-visual.test spend more than %d ms\n",TERMINATE_RUNTIME);
-    
-    gTermiatedTest = true;
+
+    gTerminatedTest = true;
     gExitValue = -1;
     mTimer.Stop();
     mApplication.Quit();
@@ -180,42 +176,10 @@ private:
     return false;
   }
 
-  void WaitForNextTest()
+  void PrepareNextTest()
   {
     gTestStep++;
 
-    mTimer = Timer::New(100); // ms
-    mTimer.TickSignal().Connect(this, &CornerRadiusVisualTest::OnTimer);
-    mTimer.Start();
-  }
-
-  void OnReady(Dali::Toolkit::Control control)
-  {
-    // Resource ready done. Check we need to go to next step
-    gResourceReadyCount++;
-    if(gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES)
-    {
-      WaitForNextTest();
-    }
-  }
-
-  bool OnTimer()
-  {
-    PerformTest();
-    return false;
-  }
-  void OnFinishedAnimation(Animation& animation)
-  {
-    // Animation done. Check we need to go to next step
-    gAnimationFinished = true;
-    if(gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES)
-    {
-      WaitForNextTest();
-    }
-  }
-
-  void PerformTest()
-  {
     Window window = mApplication.GetWindow();
 
     switch(gTestStep)
@@ -230,59 +194,59 @@ private:
           (gTestStep == CREATE_STATIC_RELATIVE_STEP)  || (gTestStep == CREATE_ANIMATE_RELATIVE_STEP));
         break;
       }
-      case TEST_STATIC_ABSOLUTE_STEP:
-      case TEST_STATIC_RELATIVE_STEP:
-      case TEST_ANIMATE_ABSOLUTE_STEP:
-      case TEST_ANIMATE_RELATIVE_STEP:
-      {
-        CaptureWindow(window);
-        break;
-      }
       default:
         break;
     }
   }
 
-  void PostRender()
+  void OnReady(Dali::Toolkit::Control control)
   {
-    switch(gTestStep)
+    // Resource ready done. Check we need to go to next step
+    gResourceReadyCount++;
+    if(gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES)
     {
-      case CREATE_STATIC_ABSOLUTE_STEP:
-      case CREATE_STATIC_RELATIVE_STEP:
-      case CREATE_ANIMATE_ABSOLUTE_STEP:
-      case CREATE_ANIMATE_RELATIVE_STEP:
-      {
-        // Just Create step. ignore
-        break;
-      }
-      case TEST_STATIC_ABSOLUTE_STEP:
-      case TEST_STATIC_RELATIVE_STEP:
-      case TEST_ANIMATE_ABSOLUTE_STEP:
-      case TEST_ANIMATE_RELATIVE_STEP:
-      {
-        // All steps will have same result.
-        if(!CheckImage(EXPECTED_IMAGE_FILE)) // should be identical
-        {
-          mTimer.Stop();
-          mTerminateTimer.Stop();
-          mApplication.Quit();
-        }
-        else if(gTestStep + 1u == NUMBER_OF_STEPS)
-        {
-          // The last check has been done, so we can quit the test
-          mTerminateTimer.Stop();
-          mApplication.Quit();
-        }
-        else
-        {
-          // Test done. Let's do next test!
-          UnparentAllControls();
-          WaitForNextTest();
-        }
-        break;
-      }
-      default:
-        break;
+      StartDrawTimer();
+    }
+  }
+
+  void OnFinishedAnimation(Animation& animation)
+  {
+    // Animation done. Check we need to go to next step
+    gAnimationFinished = true;
+    if(gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES)
+    {
+      StartDrawTimer();
+    }
+  }
+
+  void StartDrawTimer()
+  {
+    mTimer = Timer::New(1000); // Plenty of time to draw to fb
+    mTimer.TickSignal().Connect(this, &CornerRadiusVisualTest::OnTimer);
+    mTimer.Start();
+  }
+
+  bool OnTimer()
+  {
+    CaptureWindow(mApplication.GetWindow());
+    return false;
+  }
+
+  void PostRender(std::string outputFile, bool success)
+  {
+    // All steps will have same result.
+    CompareImageFile(EXPECTED_IMAGE_FILE, outputFile, 0.98f);
+    if(gTestStep + 1u == NUMBER_OF_STEPS)
+    {
+      // The last check has been done, so we can quit the test
+      mTerminateTimer.Stop();
+      mApplication.Quit();
+    }
+    else
+    {
+      // Test done. Let's do next test!
+      UnparentAllControls();
+      PrepareNextTest();
     }
   }
 
@@ -329,7 +293,7 @@ private:
       // Calculate controls size and position from TOP_LEFT
       Vector2 controlSize     = Vector2(subSizeTestTypeIndex & 1 ? NORMAL_VISUAL_SIZE : SMALL_VISUAL_SIZE,
                                         subSizeTestTypeIndex & 2 ? NORMAL_VISUAL_SIZE : SMALL_VISUAL_SIZE);
-      Vector2 controlPosition = topLeftPosition + 
+      Vector2 controlPosition = topLeftPosition +
                                 Vector2(subSizeTestTypeIndex & 1 ? SMALL_VISUAL_SIZE + MARGIN_VISUALS * 2 : MARGIN_VISUALS,
                                         subSizeTestTypeIndex & 2 ? SMALL_VISUAL_SIZE + MARGIN_VISUALS * 2 : MARGIN_VISUALS);
       // Create new Control and setup default data

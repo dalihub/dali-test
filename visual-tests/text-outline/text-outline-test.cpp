@@ -94,11 +94,13 @@ private:
       case ENGLISH_OUTLINE:
       {
         EnglishOutlineTest();
+        StartDrawTimer();
         break;
       }
       case MULTI_LANGUAGE_OUTLINE:
       {
         MultiLanguageOutlineTest();
+        StartDrawTimer();
         break;
       }
       default:
@@ -131,8 +133,6 @@ private:
     mTextLabel[5].SetProperty( TextLabel::Property::TEXT, "uVWXYZ" );
     mTextLabel[5].SetProperty( Actor::Property::POSITION, Vector2( 80.f, 605.f ) );
     mTextLabel[5].SetProperty(TextLabel::Property::POINT_SIZE, 80.f);
-
-    CaptureWindow( mApplication.GetWindow() );
   }
 
   void MultiLanguageOutlineTest()
@@ -161,28 +161,34 @@ private:
     mTextLabel[5].SetProperty( TextLabel::Property::TEXT, "보기 방식을 격자 보기(직접 설정)로" );
     mTextLabel[5].SetProperty( Actor::Property::POSITION, Vector2( 20.f, 605.f ) );
     mTextLabel[5].SetProperty(TextLabel::Property::POINT_SIZE, 26.f);
-
-    CaptureWindow( mApplication.GetWindow() );
   }
 
-  void PostRender()
+  void StartDrawTimer()
   {
-    if( gTestStep == ENGLISH_OUTLINE )
-    {
-      if(CheckImage(IMAGE_FILE_1, 0.95f))
-      {
-        PerformNextTest();
-      }
-      else
-      {
-        mApplication.Quit();
-      }
-    }
-    else if( gTestStep == MULTI_LANGUAGE_OUTLINE )
-    {
-      CheckImage( IMAGE_FILE_2, 0.95f ); // verify the similarity
+    mTimer = Timer::New(1000); // Plenty of time to draw to fb
+    mTimer.TickSignal().Connect(this, &TextOutlineTest::OnTimer);
+    mTimer.Start();
+  }
 
-      // The last check has been done, so we can quit the test
+  bool OnTimer()
+  {
+    CaptureWindow(mApplication.GetWindow());
+    return false;
+  }
+
+  void PostRender(std::string outputFile, bool success)
+  {
+    std::string images[] = {IMAGE_FILE_1, IMAGE_FILE_2};
+
+    // All steps will have same result.
+    CompareImageFile(images[gTestStep], outputFile, 0.98f);
+
+    if( gTestStep < MULTI_LANGUAGE_OUTLINE )
+    {
+      PerformNextTest();
+    }
+    else
+    {
       mApplication.Quit();
     }
   }
@@ -190,6 +196,7 @@ private:
 private:
   Application&            mApplication;
   TextLabel               mTextLabel[6];
+  Timer mTimer;
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE( TextOutlineTest, OnInit, 1000, 850 )

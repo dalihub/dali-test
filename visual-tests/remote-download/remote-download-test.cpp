@@ -92,15 +92,27 @@ private:
     readyCounter++;
     if(readyCounter == NUMBER_OF_IMAGES)
     {
-      Window window = mApplication.GetWindow();
-      CaptureWindow( window );
+      StartDrawTimer();
     }
   }
 
-
-  void PostRender()
+  void StartDrawTimer()
   {
-    CheckImage( IMAGE_FILE ); // should be identical
+    mTimer = Timer::New(1000); // Plenty of time to draw to fb
+    mTimer.TickSignal().Connect(this, &RemoteDownloadTest::OnTimer);
+    mTimer.Start();
+  }
+
+  bool OnTimer()
+  {
+    CaptureWindow(mApplication.GetWindow());
+    return false;
+  }
+
+  void PostRender(std::string outputFile, bool success)
+  {
+    // All steps will have same result.
+    CompareImageFile(IMAGE_FILE, outputFile, 0.98f);
     mApplication.Quit();
   }
 

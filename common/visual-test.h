@@ -46,17 +46,20 @@ bool ParseEnvironment(int argc, char** argv, int width, int height);
 #define DALI_VISUAL_TEST_WITH_WINDOW_SIZE(VisualTestName, InitFunction, WindowWidth, WindowHeight)                                          \
   int DALI_EXPORT_API main(int argc, char** argv)                                                                                           \
   {                                                                                                                                         \
-    asprintf(&gTempDir, "/tmp/dali-tests");                                                                                                 \
-    bool cont = ParseEnvironment(argc, argv, WindowWidth, WindowHeight);                                                                    \
-    if(!cont) return 0;                                                                                                                     \
-    asprintf(&gTempFilename, "%s/%s", gTempDir, #VisualTestName);                                                                           \
-    setenv("DALI_DPI_HORIZONTAL", "96", true);                                                                                              \
-    setenv("DALI_DPI_VERTICAL", "96", true);                                                                                                \
-    Application    application = Application::New(&argc, &argv, "", Application::OPAQUE, Dali::Rect<int>(0, 0, WindowWidth, WindowHeight)); \
-    VisualTestName test(application);                                                                                                       \
-    application.InitSignal().Connect(&test, &VisualTestName::InitFunction);                                                                 \
-    application.MainLoop();                                                                                                                 \
-    return gExitValue;                                                                                                                      \
+    int n=asprintf(&gTempDir, "/tmp/dali-tests");                                                                                                 \
+    if(n>0)\
+    {\
+      bool cont = ParseEnvironment(argc, argv, WindowWidth, WindowHeight);                                                                    \
+      if(!cont) return 0;                                                                                                                     \
+      n=asprintf(&gTempFilename, "%s/%s", gTempDir, #VisualTestName);                                                                           \
+      setenv("DALI_DPI_HORIZONTAL", "96", true);                                                                                              \
+      setenv("DALI_DPI_VERTICAL", "96", true);                                                                                                \
+      Application    application = Application::New(&argc, &argv, "", Application::OPAQUE, Dali::Rect<int>(0, 0, WindowWidth, WindowHeight)); \
+      VisualTestName test(application);                                                                                                       \
+      application.InitSignal().Connect(&test, &VisualTestName::InitFunction);                                                                 \
+      application.MainLoop();                                                                                                                 \
+      return gExitValue;                                                                                                                      \
+    }\
   }
 
 /**
@@ -96,13 +99,14 @@ protected:
   void CaptureWindow(Dali::Window window, Dali::CameraActor customCamera = Dali::CameraActor());
 
   /**
-   * @brief Compare the result of the window capture with the given image file
-   * @param[in] fileName The image file to be compared with
-   * @param[in] similarityThreshold The threshold for similarity comparison (The default value is 1 which means all the pixels in the two images must be identical)
-   * @param[in] areaToCompare The area in the image to be compared (The default value is an empty rectangle which means the whole area of the image will be compared)
-   * @return Whether the similarity of the two images reaches the given threshold
+   * @brief Compare the given area in the two image files.
+   * @param[in] fileName1 The first image file
+   * @param[in] fileName2 The second image file
+   * @param[in] similarityThreshold The threshold for similarity comparison
+   * @param[in] areaToCompare The area to be compared
+   * @return Whether the similarity of the given area in the two images reaches the given threshold
    */
-  bool CheckImage(const std::string fileName, const float similarityThreshold = DEFAULT_IMAGE_SIMILARITY_THRESHOLD, const Dali::Rect<uint16_t>& areaToCompare = Dali::Rect<uint16_t>(0u, 0u, 0u, 0u));
+  bool CompareImageFile(const std::string fileName1, const std::string fileName2, const float similarityThreshold, const Dali::Rect<uint16_t>& areaToCompare=Dali::Rect<uint16_t>(0u, 0u, 0u, 0u));
 
   /**
    * @brief Emits a single touch
@@ -117,9 +121,13 @@ protected:
 private:
   /**
    * @brief This virtual function will be called after the offscreen window frame buffer has been rendered.
+   *
+   * @param[in] outputFile The output file that the offscreen has been rendered to.
+   * @param[in] writeSuccess True if the file was written successfully.
+   *
    * @note  The visual test case must implement this function to check the result of the offscreen frame buffer.
    */
-  virtual void PostRender() = 0;
+  virtual void PostRender(std::string outputFile, bool writeSuccess) = 0;
 
   /**
    * @brief Set up the native image for offscreen rendering.
@@ -133,16 +141,6 @@ private:
    * @param[in] task The render task
    */
   void OnOffscreenRenderFinished(Dali::RenderTask& task);
-
-  /**
-   * @brief Compare the given area in the two image files.
-   * @param[in] fileName1 The first image file
-   * @param[in] fileName2 The second image file
-   * @param[in] similarityThreshold The threshold for similarity comparison
-   * @param[in] areaToCompare The area to be compared
-   * @return Whether the similarity of the given area in the two images reaches the given threshold
-   */
-  bool CompareImageFile(const std::string fileName1, const std::string fileName2, const float similarityThreshold, const Dali::Rect<uint16_t>& areaToCompare);
 
   /**
    * @brief Callback function when a window has been resized

@@ -110,18 +110,30 @@ public:
   void OnReady(Dali::Toolkit::Control control)
   {
     Window window = mApplication.GetWindow();
-    CaptureWindow( window );
+    Debug::LogMessage(Debug::INFO, "Resource loaded\n");
+    Debug::LogMessage(Debug::INFO, "Starting draw timer()\n");
+    mTimer = Timer::New(1000);
+    mTimer.TickSignal().Connect(this, &AdvancedBlendingModeTest::OnTimer);
+    mTimer.Start();
   }
 
-  void PostRender()
+  bool OnTimer()
   {
-    CheckImage(EXPECTED_IMAGE_FILE);
+    Window window = mApplication.GetWindow();
+    Debug::LogMessage(Debug::INFO, "Draw timer finished. Capturing window\n");
+    CaptureWindow(window);
+    return false;
+  }
 
+  void PostRender(std::string outputFile, bool success)
+  {
+    CompareImageFile(EXPECTED_IMAGE_FILE, outputFile, 0.98f);
     mApplication.Quit();
   }
 
 private:
   Application& mApplication;
+  Timer mTimer;
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE( AdvancedBlendingModeTest, OnInit, 720, 800 )
