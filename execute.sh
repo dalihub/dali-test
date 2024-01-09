@@ -6,7 +6,7 @@ Usage()
     echo "Usage: $(basename ${BASH_SOURCE[0]}) [OPTIONS]"
     echo " Optional Options:"
     # Just do a simple grep of this file so we can keep the command with the comment together
-    grep ". )\ #" ${BASH_SOURCE[0]} | sed 's/# //' | awk -F ")" '{ printf "%-25s %s\n", $1, $2 }'
+    grep ". )\ #" ${BASH_SOURCE[0]} | sed 's/# //' | awk -F ")" '{ printf "%-30s %s\n", $1, $2 }'
     exit 0
 }
 
@@ -25,7 +25,10 @@ if [[ $* > 1 ]] ; then
     while true;
     do
         case "$1" in
-            -d|--directory) dir="--directory $2" ; shift 2 ;;
+            -d|--directory ) # Outputs captured images to this directory
+                dir="--directory $2"
+                shift 2
+                ;;
             -v|--verbose ) # Verbose output for every test case
                 REDIRECT_OUTPUT=
                 shift
