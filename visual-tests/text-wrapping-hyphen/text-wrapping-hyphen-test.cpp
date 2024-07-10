@@ -17,6 +17,8 @@
 
 // EXTERNAL INCLUDES
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali-toolkit/devel-api/controls/text-controls/text-editor-devel.h>
+#include <dali-toolkit/devel-api/controls/text-controls/text-label-devel.h>
 #include <dali-toolkit/devel-api/text/text-enumerations-devel.h>
 #include <dali/dali.h>
 #include <string>
@@ -71,6 +73,8 @@ public:
     mTextLabel.SetProperty(TextLabel::Property::POINT_SIZE, 200);
     mTextLabel.SetProperty(TextLabel::Property::ELLIPSIS, false);
     mTextLabel.SetProperty(TextLabel::Property::MULTI_LINE, true);
+    mTextLabel.SetProperty(DevelTextLabel::Property::REMOVE_FRONT_INSET, true);
+    mTextLabel.SetProperty(DevelTextLabel::Property::REMOVE_BACK_INSET, true);
 
     mTextEditor = TextEditor::New();
     mTextEditor.SetProperty(Actor::Property::PARENT_ORIGIN,
@@ -79,6 +83,8 @@ public:
                             AnchorPoint::TOP_LEFT);
     mTextEditor.SetProperty(Actor::Property::POSITION, Vector3(0.f, 0.0f, 0.f));
     mTextEditor.SetProperty(TextEditor::Property::POINT_SIZE, 200);
+    mTextEditor.SetProperty(DevelTextEditor::Property::REMOVE_FRONT_INSET, true);
+    mTextEditor.SetProperty(DevelTextEditor::Property::REMOVE_BACK_INSET, true);
 
     mWindow.Add(mTextLabel);
     PerformNextTest();

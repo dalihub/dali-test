@@ -20,6 +20,7 @@
 #include <dali/dali.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali-toolkit/devel-api/controls/text-controls/text-label-devel.h>
 #include <cstdlib>
 
 // INTERNAL INCLUDES
@@ -76,6 +77,8 @@ class TextOutlineTest: public VisualTest
       mTextLabel[i] = TextLabel::New();
       mTextLabel[i].SetProperty( Actor::Property::PARENT_ORIGIN,ParentOrigin::TOP_LEFT);
       mTextLabel[i].SetProperty( Actor::Property::ANCHOR_POINT,AnchorPoint::TOP_LEFT);
+      mTextLabel[i].SetProperty( DevelTextLabel::Property::REMOVE_FRONT_INSET, true);
+      mTextLabel[i].SetProperty( DevelTextLabel::Property::REMOVE_BACK_INSET, true);
       mTextLabel[i].SetProperty( TextLabel::Property::OUTLINE, outlineMap );
       window.Add( mTextLabel[i] );
     }
