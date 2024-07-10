@@ -73,6 +73,8 @@ public:
     mTextLabel.SetProperty(TextLabel::Property::POINT_SIZE, 200);
     mTextLabel.SetProperty(TextLabel::Property::ELLIPSIS, false);
     mTextLabel.SetProperty(TextLabel::Property::MULTI_LINE, true);
+
+    // TODO : Since 2.3.32, we change the default value of REMOVE_FRONT_INSET and REMOVE_BACK_INSET as false.
     mTextLabel.SetProperty(DevelTextLabel::Property::REMOVE_FRONT_INSET, true);
     mTextLabel.SetProperty(DevelTextLabel::Property::REMOVE_BACK_INSET, true);
 
@@ -83,6 +85,8 @@ public:
                             AnchorPoint::TOP_LEFT);
     mTextEditor.SetProperty(Actor::Property::POSITION, Vector3(0.f, 0.0f, 0.f));
     mTextEditor.SetProperty(TextEditor::Property::POINT_SIZE, 200);
+
+    // TODO : Since 2.3.32, we change the default value of REMOVE_FRONT_INSET and REMOVE_BACK_INSET as false.
     mTextEditor.SetProperty(DevelTextEditor::Property::REMOVE_FRONT_INSET, true);
     mTextEditor.SetProperty(DevelTextEditor::Property::REMOVE_BACK_INSET, true);
 
