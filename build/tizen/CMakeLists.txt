@@ -41,6 +41,7 @@ SET(PKG_LIST dali2-core
              dali2-adaptor
              dali2-toolkit
              dali2-scene3d
+             dali2-usd-loader
              Magick++
              ${OPENCV})
 
