@@ -39,12 +39,11 @@ struct ImageData
   std::string url;
   Vector2 position;
 };
-const ImageData IMAGES[NUMBER_OF_IMAGES] =
-{
-  {"http://static.midomi.com/s/s/images/000/000/000/000/293/259/19/520_000000000000293259191500x1500_72dpi_RGB_q70.jpg", Vector2(0, 100)},
-  {"http://static.midomi.com/s/s/images/000/000/000/000/212/651/88/520_000000000000212651881500x1500_72dpi_RGB_q70.jpg", Vector2(400,100)},
-  {"http://static.midomi.com/s/s/images/000/000/000/000/212/353/21/520_000000000000212353211500x1500_72dpi_RGB_q70.jpg", Vector2(0, 400)},
-  {"http://static.midomi.com/h/images/w/weather_sunny.png",Vector2(800, 100)}
+const ImageData IMAGES[NUMBER_OF_IMAGES] = {
+    {"https://raw.githubusercontent.com/dalihub/dali-test/refs/heads/master/visual-tests/remote-download/images/rockstar.jpg", Vector2(0, 50)},
+    {"https://raw.githubusercontent.com/dalihub/dali-test/refs/heads/master/visual-tests/remote-download/images/stars.jpg", Vector2(400, 100)},
+    {"https://raw.githubusercontent.com/dalihub/dali-test/refs/heads/master/visual-tests/remote-download/images/stormtrooper.jpg", Vector2(0, 400)},
+    {"http://static.midomi.com/h/images/w/weather_sunny.png", Vector2(800, 100)}
 };
 
 
