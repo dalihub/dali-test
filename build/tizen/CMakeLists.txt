@@ -37,13 +37,36 @@ IF(NOT OPENCV_PKG_FOUND)
   SET(OPENCV opencv4 )
 ENDIF()
 
+# Search for OpenUSD headers and libraries
+find_path(OpenUSD_INCLUDE_DIR pxr/usd/usd/stage.h
+          PATHS ${CMAKE_INSTALL_PREFIX}/ /usr/local/USD /usr/USD
+          PATH_SUFFIXES include)
+
+find_library(OpenUSD_LIB usd_usd
+             PATHS ${CMAKE_INSTALL_PREFIX}/ /usr/local/USD /usr/USD
+             PATH_SUFFIXES lib)
+
+# Check if both include and library are found
+if(OpenUSD_INCLUDE_DIR AND OpenUSD_LIB)
+    get_filename_component(USD_ROOT_DIR ${OpenUSD_INCLUDE_DIR} DIRECTORY)
+    message(STATUS "OpenUSD found at: ${USD_ROOT_DIR}")
+    SET(USD_LOADER_ENABLED ON)
+else()
+    message(WARNING "OpenUSD not found. Skipping the compilation of usd-loader files.")
+    SET(USD_LOADER_ENABLED OFF)
+endif()
+
 SET(PKG_LIST dali2-core
              dali2-adaptor
              dali2-toolkit
              dali2-scene3d
-             dali2-usd-loader
              Magick++
              ${OPENCV})
+
+if( USD_LOADER_ENABLED )
+  SET(PKG_LIST ${PKG_LIST} 
+               dali2-usd-loader)
+endif()
 
 PKG_CHECK_MODULES(REQUIRED_PKGS REQUIRED ${PKG_LIST})
 
