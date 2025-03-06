@@ -111,18 +111,26 @@ public:
   {
     Window window = mApplication.GetWindow();
     Debug::LogMessage(Debug::INFO, "Resource loaded\n");
-    Debug::LogMessage(Debug::INFO, "Starting draw timer()\n");
-    mTimer = Timer::New(1000);
-    mTimer.TickSignal().Connect(this, &AdvancedBlendingModeTest::OnTimer);
-    mTimer.Start();
+    Debug::LogMessage(Debug::INFO, "Starting draw and check()\n");
+
+    Animation firstFrameAnimator = Animation::New(0);
+    firstFrameAnimator.FinishedSignal().Connect(this, &AdvancedBlendingModeTest::OnAnimationFinished1);
+    firstFrameAnimator.Play();
   }
 
-  bool OnTimer()
+  void OnAnimationFinished1(Animation& /* not used */)
+  {
+    Debug::LogMessage(Debug::INFO, "First Update done()\n");
+    Animation secondFrameAnimator = Animation::New(0);
+    secondFrameAnimator.FinishedSignal().Connect(this, &AdvancedBlendingModeTest::OnAnimationFinished2);
+    secondFrameAnimator.Play();
+  }
+
+  void OnAnimationFinished2(Animation& /* not used */)
   {
     Window window = mApplication.GetWindow();
-    Debug::LogMessage(Debug::INFO, "Draw timer finished. Capturing window\n");
+    Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now. Capturing window\n");
     CaptureWindow(window);
-    return false;
   }
 
   void PostRender(std::string outputFile, bool success)
@@ -133,7 +141,6 @@ public:
 
 private:
   Application& mApplication;
-  Timer mTimer;
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE( AdvancedBlendingModeTest, OnInit, 720, 800 )

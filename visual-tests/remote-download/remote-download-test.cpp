@@ -19,6 +19,7 @@
 #include <string>
 #include <dali/dali.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/debug.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/visuals/image-visual-properties-devel.h>
 #include <dali-toolkit/devel-api/visual-factory/visual-factory.h>
@@ -97,15 +98,26 @@ private:
 
   void StartDrawTimer()
   {
-    mTimer = Timer::New(1000); // Plenty of time to draw to fb
-    mTimer.TickSignal().Connect(this, &RemoteDownloadTest::OnTimer);
-    mTimer.Start();
+    Debug::LogMessage(Debug::INFO, "Starting draw and check()\n");
+
+    Animation firstFrameAnimator = Animation::New(0);
+    firstFrameAnimator.FinishedSignal().Connect(this, &RemoteDownloadTest::OnAnimationFinished1);
+    firstFrameAnimator.Play();
   }
 
-  bool OnTimer()
+  void OnAnimationFinished1(Animation& /* not used */)
   {
-    CaptureWindow(mApplication.GetWindow());
-    return false;
+    Debug::LogMessage(Debug::INFO, "First Update done()\n");
+    Animation secondFrameAnimator = Animation::New(0);
+    secondFrameAnimator.FinishedSignal().Connect(this, &RemoteDownloadTest::OnAnimationFinished2);
+    secondFrameAnimator.Play();
+  }
+
+  void OnAnimationFinished2(Animation& /* not used */)
+  {
+    Window window = mApplication.GetWindow();
+    Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now. Capturing window\n");
+    CaptureWindow(window);
   }
 
   void PostRender(std::string outputFile, bool success)
@@ -118,7 +130,6 @@ private:
 private:
   Application&   mApplication;
   ImageView      mImageViews[NUMBER_OF_IMAGES];
-  Timer          mTimer;
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE( RemoteDownloadTest, OnInit, 1024, 960 )

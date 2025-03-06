@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <string>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/debug.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/controls/table-view/table-view.h>
 
@@ -29,8 +30,6 @@ using namespace Dali::Toolkit;
 
 namespace
 {
-const int DRAW_TIME{1000};
-
 constexpr const char* IMAGES[] = {
   TEST_IMAGE_DIR "clipping-draw-order/gallery-small-1.jpg",
   TEST_IMAGE_DIR "clipping-draw-order/gallery-small-2.jpg",
@@ -167,17 +166,27 @@ private:
     readyCounter++;
     if(readyCounter == NUMBER_OF_IMAGE_VIEWS)
     {
-      mTimer = Timer::New(DRAW_TIME);
-      mTimer.TickSignal().Connect(this, &ClippingDrawOrderVerification::OnTimer);
-      mTimer.Start();
+      Debug::LogMessage(Debug::INFO, "Starting draw and check()\n");
+
+      Animation firstFrameAnimator = Animation::New(0);
+      firstFrameAnimator.FinishedSignal().Connect(this, &ClippingDrawOrderVerification::OnAnimationFinished1);
+      firstFrameAnimator.Play();
     }
   }
 
-  bool OnTimer()
+  void OnAnimationFinished1(Animation& /* not used */)
+  {
+    Debug::LogMessage(Debug::INFO, "First Update done()\n");
+    Animation secondFrameAnimator = Animation::New(0);
+    secondFrameAnimator.FinishedSignal().Connect(this, &ClippingDrawOrderVerification::OnAnimationFinished2);
+    secondFrameAnimator.Play();
+  }
+
+  void OnAnimationFinished2(Animation& /* not used */)
   {
     Window window = mApplication.GetWindow();
-    CaptureWindow( window );
-    return false;
+    Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now. Capturing window\n");
+    CaptureWindow(window);
   }
 
   void PostRender(std::string outputFile, bool success)

@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali/dali.h>
+#include <dali/integration-api/debug.h>
 
 #include <string>
 
@@ -90,15 +91,26 @@ private:
 
   void StartDrawTimer()
   {
-    mTimer = Timer::New(1000);
-    mTimer.TickSignal().Connect(this, &WindowResizeTest::OnTimer);
-    mTimer.Start();
+    Debug::LogMessage(Debug::INFO, "Starting draw and check()\n");
+
+    Animation firstFrameAnimator = Animation::New(0);
+    firstFrameAnimator.FinishedSignal().Connect(this, &WindowResizeTest::OnAnimationFinished1);
+    firstFrameAnimator.Play();
   }
 
-  bool OnTimer()
+  void OnAnimationFinished1(Animation& /* not used */)
   {
-    CaptureWindow(mApplication.GetWindow());
-    return false;
+    Debug::LogMessage(Debug::INFO, "First Update done()\n");
+    Animation secondFrameAnimator = Animation::New(0);
+    secondFrameAnimator.FinishedSignal().Connect(this, &WindowResizeTest::OnAnimationFinished2);
+    secondFrameAnimator.Play();
+  }
+
+  void OnAnimationFinished2(Animation& /* not used */)
+  {
+    Window window = mApplication.GetWindow();
+    Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now. Capturing window\n");
+    CaptureWindow(window);
   }
 
   void PostRender(std::string outputFile, bool success)
@@ -119,7 +131,6 @@ private:
 private:
   Application& mApplication;
   Actor        mActor;
-  Timer        mTimer;
 };
 
 DALI_VISUAL_TEST(WindowResizeTest, OnInit)

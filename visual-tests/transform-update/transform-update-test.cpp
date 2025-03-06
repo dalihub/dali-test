@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <string>
 #include <dali/dali.h>
+#include <dali/integration-api/debug.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 // INTERNAL INCLUDES

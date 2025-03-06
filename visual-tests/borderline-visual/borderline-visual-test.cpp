@@ -34,8 +34,6 @@ using namespace Dali::Toolkit;
 
 namespace
 {
-const int DRAW_TIME{1000};
-
 // Resource for drawing
 const std::string JPG_FILENAME             = TEST_IMAGE_DIR "corner-radius-visual/gallery-medium-16.jpg";
 const std::string SVG_FILENAME             = TEST_IMAGE_DIR "corner-radius-visual/Contacts.svg";
@@ -180,7 +178,6 @@ private:
 
     gTermiatedTest = true;
     gExitValue = -1;
-    mTimer.Stop();
     mApplication.Quit();
 
     exit(gExitValue);
@@ -217,9 +214,7 @@ private:
     gAnimationFinished = true;
     if(gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES)
     {
-      mTimer = Timer::New(DRAW_TIME); // ms
-      mTimer.TickSignal().Connect(this, &BorderineVisualTest::OnTimer);
-      mTimer.Start();
+      StartDrawTimer();
     }
   }
 
@@ -229,18 +224,32 @@ private:
     gResourceReadyCount++;
     if(gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES)
     {
-      mTimer = Timer::New(DRAW_TIME); // ms
-      mTimer.TickSignal().Connect(this, &BorderineVisualTest::OnTimer);
-      mTimer.Start();
+      StartDrawTimer();
     }
   }
 
-  bool OnTimer()
+  void StartDrawTimer()
+  {
+    Debug::LogMessage(Debug::INFO, "Starting draw and check()\n");
+
+    Animation firstFrameAnimator = Animation::New(0);
+    firstFrameAnimator.FinishedSignal().Connect(this, &BorderineVisualTest::OnAnimationFinished1);
+    firstFrameAnimator.Play();
+  }
+
+  void OnAnimationFinished1(Animation& /* not used */)
+  {
+    Debug::LogMessage(Debug::INFO, "First Update done()\n");
+    Animation secondFrameAnimator = Animation::New(0);
+    secondFrameAnimator.FinishedSignal().Connect(this, &BorderineVisualTest::OnAnimationFinished2);
+    secondFrameAnimator.Play();
+  }
+
+  void OnAnimationFinished2(Animation& /* not used */)
   {
     Window window = mApplication.GetWindow();
-    Debug::LogMessage(Debug::INFO, "Draw timer finished. Capturing window\n");
+    Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now. Capturing window\n");
     CaptureWindow(window);
-    return false;
   }
 
   void PostRender(std::string outputFile, bool success)
@@ -472,7 +481,6 @@ private:
 private:
   Application&         mApplication;
   Window               mWindow;
-  Timer                mTimer;
   Timer                mTerminateTimer;
   Animation            mAnimation;
   std::vector<Control> mControlList;

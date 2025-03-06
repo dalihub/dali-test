@@ -21,6 +21,7 @@
 #include <dali-toolkit/devel-api/controls/text-controls/text-label-devel.h>
 #include <dali-toolkit/devel-api/text/text-enumerations-devel.h>
 #include <dali/dali.h>
+#include <dali/integration-api/debug.h>
 #include <string>
 
 // INTERNAL INCLUDES
@@ -160,15 +161,26 @@ private:
 
   void StartDrawTimer()
   {
-    mTimer = Timer::New(1000);
-    mTimer.TickSignal().Connect(this, &TextWrappingTest::OnTimer);
-    mTimer.Start();
+    Debug::LogMessage(Debug::INFO, "Starting draw and check()\n");
+
+    Animation firstFrameAnimator = Animation::New(0);
+    firstFrameAnimator.FinishedSignal().Connect(this, &TextWrappingTest::OnAnimationFinished1);
+    firstFrameAnimator.Play();
   }
 
-  bool OnTimer()
+  void OnAnimationFinished1(Animation& /* not used */)
   {
-    CaptureWindow(mWindow);
-    return false;
+    Debug::LogMessage(Debug::INFO, "First Update done()\n");
+    Animation secondFrameAnimator = Animation::New(0);
+    secondFrameAnimator.FinishedSignal().Connect(this, &TextWrappingTest::OnAnimationFinished2);
+    secondFrameAnimator.Play();
+  }
+
+  void OnAnimationFinished2(Animation& /* not used */)
+  {
+    Window window = mApplication.GetWindow();
+    Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now. Capturing window\n");
+    CaptureWindow(window);
   }
 
   void PostRender(std::string outputFile, bool success)
@@ -190,7 +202,6 @@ private:
   Dali::Window mWindow;
   TextLabel mTextLabel;
   TextEditor mTextEditor;
-  Timer mTimer;
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE(TextWrappingTest, OnInit, 900, 900)

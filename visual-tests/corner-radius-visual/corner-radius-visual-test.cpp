@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <string>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/debug.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/controls/control-devel.h>
 #include <dali-toolkit/devel-api/visuals/visual-properties-devel.h>
@@ -168,7 +169,6 @@ private:
 
     gTerminatedTest = true;
     gExitValue = -1;
-    mTimer.Stop();
     mApplication.Quit();
 
     exit(gExitValue);
@@ -221,15 +221,26 @@ private:
 
   void StartDrawTimer()
   {
-    mTimer = Timer::New(1000); // Plenty of time to draw to fb
-    mTimer.TickSignal().Connect(this, &CornerRadiusVisualTest::OnTimer);
-    mTimer.Start();
+    Debug::LogMessage(Debug::INFO, "Starting draw and check()\n");
+
+    Animation firstFrameAnimator = Animation::New(0);
+    firstFrameAnimator.FinishedSignal().Connect(this, &CornerRadiusVisualTest::OnAnimationFinished1);
+    firstFrameAnimator.Play();
   }
 
-  bool OnTimer()
+  void OnAnimationFinished1(Animation& /* not used */)
   {
-    CaptureWindow(mApplication.GetWindow());
-    return false;
+    Debug::LogMessage(Debug::INFO, "First Update done()\n");
+    Animation secondFrameAnimator = Animation::New(0);
+    secondFrameAnimator.FinishedSignal().Connect(this, &CornerRadiusVisualTest::OnAnimationFinished2);
+    secondFrameAnimator.Play();
+  }
+
+  void OnAnimationFinished2(Animation& /* not used */)
+  {
+    Window window = mApplication.GetWindow();
+    Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now. Capturing window\n");
+    CaptureWindow(window);
   }
 
   void PostRender(std::string outputFile, bool success)
@@ -494,7 +505,6 @@ private:
 private:
   Application&         mApplication;
   Window               mWindow;
-  Timer                mTimer;
   Timer                mTerminateTimer;
   Animation            mAnimation;
   std::vector<Control> mControlList;

@@ -36,7 +36,6 @@ namespace
 {
 
   const Vector3 CAMERA_DEFAULT_POSITION(0.0f, 0.0f, 3.5f);
-  const unsigned int DEFAULT_DRAW_TIMER = 1000;
 
   const std::string RESOURCE_TYPE_DIRS[]{
       TEST_SCENE_DIR "environments/",
@@ -155,7 +154,7 @@ private:
         mScene = LoadScene("exercise.dli", mSceneCamera);
         mSceneLayer.Add(mScene);
 
-        StartDrawTimer(DEFAULT_DRAW_TIMER);
+        StartDrawTimer();
         break;
       }
     case FIRST_SCENE_ANIMATION:
@@ -166,7 +165,7 @@ private:
       }
       else
       {
-        StartDrawTimer(DEFAULT_DRAW_TIMER);
+        StartDrawTimer();
       }
       break;
     }
@@ -175,7 +174,7 @@ private:
       UnparentAndReset(mScene);
       mScene = LoadScene("robot.dli", mSceneCamera);
       mSceneLayer.Add(mScene);
-      StartDrawTimer(DEFAULT_DRAW_TIMER);
+      StartDrawTimer();
       break;
     }
     case SECOND_SCENE_ANIMATION:
@@ -186,7 +185,7 @@ private:
       }
       else
       {
-        StartDrawTimer(DEFAULT_DRAW_TIMER);
+        StartDrawTimer();
       }
       break;
     }
@@ -196,7 +195,7 @@ private:
       mScene = LoadScene("beer.dli", mSceneCamera);
       mSceneLayer.Add(mScene);
 
-      StartDrawTimer(DEFAULT_DRAW_TIMER);
+      StartDrawTimer();
       break;
     }
     default:
@@ -204,24 +203,33 @@ private:
     }
   }
 
-  void StartDrawTimer(int millisecond)
+  void StartDrawTimer()
   {
-    mTimer = Timer::New(millisecond);
-    mTimer.TickSignal().Connect(this, &Scene3DTest::OnTimer);
-    mTimer.Start();
+    Debug::LogMessage(Debug::INFO, "Starting draw and check()\n");
+
+    Animation firstFrameAnimator = Animation::New(0);
+    firstFrameAnimator.FinishedSignal().Connect(this, &Scene3DTest::OnAnimationFinished1);
+    firstFrameAnimator.Play();
   }
 
-  bool OnTimer()
+  void OnAnimationFinished1(Animation& /* not used */)
+  {
+    Debug::LogMessage(Debug::INFO, "First Update done()\n");
+    Animation secondFrameAnimator = Animation::New(0);
+    secondFrameAnimator.FinishedSignal().Connect(this, &Scene3DTest::OnAnimationFinished2);
+    secondFrameAnimator.Play();
+  }
+
+  void OnAnimationFinished2(Animation& /* not used */)
   {
     Window window = mApplication.GetWindow();
-    Debug::LogMessage(Debug::INFO, "Draw timer finished. Capturing window\n");
+    Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now. Capturing window\n");
     CaptureWindow(window);
-    return false;
   }
 
   void OnFinishedAnimation(Animation& animation)
   {
-    StartDrawTimer(DEFAULT_DRAW_TIMER);
+    StartDrawTimer();
   }
 
   void PostRender(std::string outputFile, bool success)
@@ -328,7 +336,6 @@ private:
 
 private:
   Application &mApplication;
-  Timer mTimer;
   CameraActor mSceneCamera;
   Actor mScene;
   Layer mSceneLayer;

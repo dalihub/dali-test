@@ -118,18 +118,27 @@ private:
     readyCounter++;
     if(readyCounter == NUMBER_OF_IMAGES)
     {
-      mTimer = Timer::New(1000);
-      mTimer.TickSignal().Connect(this, &AlphaBlendingCpuTest::OnTimer);
-      mTimer.Start();
+      Debug::LogMessage(Debug::INFO, "Starting draw and check()\n");
+
+      Animation firstFrameAnimator = Animation::New(0);
+      firstFrameAnimator.FinishedSignal().Connect(this, &AlphaBlendingCpuTest::OnAnimationFinished1);
+      firstFrameAnimator.Play();
     }
   }
 
-  bool OnTimer()
+  void OnAnimationFinished1(Animation& /* not used */)
+  {
+    Debug::LogMessage(Debug::INFO, "First Update done()\n");
+    Animation secondFrameAnimator = Animation::New(0);
+    secondFrameAnimator.FinishedSignal().Connect(this, &AlphaBlendingCpuTest::OnAnimationFinished2);
+    secondFrameAnimator.Play();
+  }
+
+  void OnAnimationFinished2(Animation& /* not used */)
   {
     Window window = mApplication.GetWindow();
-    Debug::LogMessage(Debug::INFO, "Draw timer finished. Capturing window\n");
+    Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now. Capturing window\n");
     CaptureWindow(window);
-    return false;
   }
 
   void PostRender(std::string outputFile, bool success)
@@ -139,8 +148,7 @@ private:
   }
 
 private:
-  Application&   mApplication;
-  Timer mTimer;
+  Application& mApplication;
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE(AlphaBlendingCpuTest, OnInit, WINDOW_WIDTH, WINDOW_HEIGHT)
