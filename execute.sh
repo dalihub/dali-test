@@ -18,6 +18,8 @@ eval set -- "$OPTS"
 REDIRECT_OUTPUT="> /dev/null 2>&1"
 GENERATE_XML=
 TEST_TO_EXECUTE=
+export DALI_DISABLE_PARTIAL_UPDATE=1
+
 dir=""
 
 # Go through all the options
@@ -45,7 +47,7 @@ if [[ $* > 1 ]] ; then
                 ;;
             -t|--test ) # Executes a single test
                 TEST_TO_EXECUTE="$2"
-                shift
+                shift 2
                 ;;
             -- )
                 shift
