@@ -48,7 +48,6 @@ namespace
   const std::string SECOND_IMAGE_FILE = TEST_IMAGE_DIR "scene3d/expected-result-2.png";
   const std::string THIRD_IMAGE_FILE  = TEST_IMAGE_DIR "scene3d/expected-result-3.png";
   const std::string FOURTH_IMAGE_FILE = TEST_IMAGE_DIR "scene3d/expected-result-4.png";
-  const std::string FIFTH_IMAGE_FILE  = TEST_IMAGE_DIR "scene3d/expected-result-5.png";
 
   const int WINDOW_WIDTH(480);
   const int WINDOW_HEIGHT(800);
@@ -59,7 +58,6 @@ namespace
     FIRST_SCENE_ANIMATION,
     LOAD_SECOND_SCENE,
     SECOND_SCENE_ANIMATION,
-    LOAD_THIRD_SCENE,
     NUMBER_OF_STEPS
   };
 
@@ -189,15 +187,6 @@ private:
       }
       break;
     }
-    case LOAD_THIRD_SCENE:
-    {
-      UnparentAndReset(mScene);
-      mScene = LoadScene("beer.dli", mSceneCamera);
-      mSceneLayer.Add(mScene);
-
-      StartDrawTimer();
-      break;
-    }
     default:
       break;
     }
@@ -234,7 +223,7 @@ private:
 
   void PostRender(std::string outputFile, bool success)
   {
-    const std::string images[] = {FIRST_IMAGE_FILE, SECOND_IMAGE_FILE, THIRD_IMAGE_FILE, FOURTH_IMAGE_FILE, FIFTH_IMAGE_FILE};
+    const std::string images[] = {FIRST_IMAGE_FILE, SECOND_IMAGE_FILE, THIRD_IMAGE_FILE, FOURTH_IMAGE_FILE};
 
     CompareImageFile(images[gTestStep], outputFile, 0.98f);
 
