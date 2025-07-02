@@ -168,7 +168,7 @@ private:
       // The textures should be uploaded already when the adaptor is paused, so the
       // rendering of the images should be instant.
     }
-    CaptureWindow(mApplication.GetWindow());
+    CaptureWindowAfterFrameRendered(mApplication.GetWindow());
     return false;
   }
 

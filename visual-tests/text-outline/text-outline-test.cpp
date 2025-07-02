@@ -101,13 +101,13 @@ private:
       case ENGLISH_OUTLINE:
       {
         EnglishOutlineTest();
-        StartDrawTimer();
+        CaptureWindowAfterFrameRendered(mApplication.GetWindow());
         break;
       }
       case MULTI_LANGUAGE_OUTLINE:
       {
         MultiLanguageOutlineTest();
-        StartDrawTimer();
+        CaptureWindowAfterFrameRendered(mApplication.GetWindow());
         break;
       }
       default:
@@ -168,30 +168,6 @@ private:
     mTextLabel[5].SetProperty( TextLabel::Property::TEXT, "보기 방식을 격자 보기(직접 설정)로" );
     mTextLabel[5].SetProperty( Actor::Property::POSITION, Vector2( 20.f, 605.f ) );
     mTextLabel[5].SetProperty(TextLabel::Property::POINT_SIZE, 26.f);
-  }
-
-  void StartDrawTimer()
-  {
-    Debug::LogMessage(Debug::INFO, "Starting draw and check()\n");
-
-    Animation firstFrameAnimator = Animation::New(0);
-    firstFrameAnimator.FinishedSignal().Connect(this, &TextOutlineTest::OnAnimationFinished1);
-    firstFrameAnimator.Play();
-  }
-
-  void OnAnimationFinished1(Animation& /* not used */)
-  {
-    Debug::LogMessage(Debug::INFO, "First Update done()\n");
-    Animation secondFrameAnimator = Animation::New(0);
-    secondFrameAnimator.FinishedSignal().Connect(this, &TextOutlineTest::OnAnimationFinished2);
-    secondFrameAnimator.Play();
-  }
-
-  void OnAnimationFinished2(Animation& /* not used */)
-  {
-    Window window = mApplication.GetWindow();
-    Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now. Capturing window\n");
-    CaptureWindow(window);
   }
 
   void PostRender(std::string outputFile, bool success)

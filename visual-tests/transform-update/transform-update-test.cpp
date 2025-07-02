@@ -149,7 +149,7 @@ private:
     {
       case PRE_ANIMATION:
       {
-        CaptureWindow(window);
+        CaptureWindowAfterFrameRendered(window);
         break;
       }
       case START_ANIMATION:
@@ -176,7 +176,7 @@ private:
       }
       case CAPTURE_MID_ANIMATION:
       {
-        CaptureWindow(window);
+        CaptureWindowAfterFrameRendered(window);
         break;
       }
       case RESUME_ANIMATION:
@@ -192,7 +192,7 @@ private:
       }
       case POST_ANIMATION:
       {
-        CaptureWindow(window);
+        CaptureWindowAfterFrameRendered(window);
         break;
       }
       default:

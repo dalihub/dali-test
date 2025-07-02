@@ -135,14 +135,65 @@ void VisualTest::OnWindowResized(Dali::Window window, Dali::Window::WindowSize s
     mOffscreenRenderTask.Reset();
   }
 }
+void VisualTest::CaptureWindowAfterFrameRendered(Dali::Window window, Dali::CameraActor customCamera)
+{
+  Debug::LogMessage(Debug::INFO, "Starting draw and check()\n");
+
+  mCaptureRequestedWindow = window;
+  mCaptureRequestedCamera = customCamera;
+
+  Dali::Animation firstFrameAnimator = Dali::Animation::New(0);
+  firstFrameAnimator.FinishedSignal().Connect(this, &VisualTest::OnAnimationFinished1);
+  firstFrameAnimator.Play();
+  firstFrameAnimator.Stop();
+}
+
+void VisualTest::OnAnimationFinished1(Dali::Animation& /* not used */)
+{
+  Debug::LogMessage(Debug::INFO, "First Update done()\n");
+  Dali::Animation secondFrameAnimator = Dali::Animation::New(0);
+  secondFrameAnimator.FinishedSignal().Connect(this, &VisualTest::OnAnimationFinished2);
+  secondFrameAnimator.Play();
+  secondFrameAnimator.Stop();
+}
+
+void VisualTest::OnAnimationFinished2(Dali::Animation& /* not used */)
+{
+  Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now.\n");
+  Debug::LogMessage(Debug::INFO, "But GPU might not be rendered to buffer well. Render 2 more frames.\n");
+  Dali::Animation thirdFrameAnimator = Dali::Animation::New(0);
+  thirdFrameAnimator.FinishedSignal().Connect(this, &VisualTest::OnAnimationFinished3);
+  thirdFrameAnimator.Play();
+  thirdFrameAnimator.Stop();
+}
+
+void VisualTest::OnAnimationFinished3(Dali::Animation& /* not used */)
+{
+  Debug::LogMessage(Debug::INFO, "Third Update done()\n");
+  Dali::Animation fourthFrameAnimator = Dali::Animation::New(0);
+  fourthFrameAnimator.FinishedSignal().Connect(this, &VisualTest::OnAnimationFinished4);
+  fourthFrameAnimator.Play();
+  fourthFrameAnimator.Stop();
+}
+
+void VisualTest::OnAnimationFinished4(Dali::Animation& /* not used */)
+{
+  Debug::LogMessage(Debug::INFO, "Fourth Update done(). We can assume that at least 1 frame rendered to surface now. Capturing window\n");
+
+  auto window = mCaptureRequestedWindow;
+  auto customCamera = mCaptureRequestedCamera;
+  mCaptureRequestedWindow.Reset();
+  mCaptureRequestedCamera.Reset();
+
+  CaptureWindow(window, customCamera);
+}
 
 void VisualTest::CaptureWindow(Dali::Window window, Dali::CameraActor customCamera)
 {
   if(gFB)
   {
     RenderTask renderTask = window.GetRenderTaskList().GetTask(0);
-    renderTask.SetRefreshRate(RenderTask::REFRESH_ONCE);
-    renderTask.FinishedSignal().Connect(this, &VisualTest::OnOffscreenRenderFinished);
+    OnOffscreenRenderFinished(renderTask);
   }
   else
   {
@@ -153,7 +204,6 @@ void VisualTest::CaptureWindow(Dali::Window window, Dali::CameraActor customCame
 
 void VisualTest::OnOffscreenRenderFinished(RenderTask& task)
 {
-  task.FinishedSignal().Disconnect(this, &VisualTest::OnOffscreenRenderFinished);
   Debug::LogMessage(Debug::INFO, "VisualTest::OnOffscreenRenderFinished(), capturing offscreen\n");
 
   // Ensure there's a directory to write to:
@@ -183,7 +233,12 @@ void VisualTest::OnOffscreenRenderFinished(RenderTask& task)
       success = mNativeImageSourcePtr->EncodeToFile(imageName);
     }
   }
-  task.SetRefreshRate(RenderTask::REFRESH_ALWAYS);
+
+  if(!gFB)
+  {
+    task.SetRefreshRate(RenderTask::REFRESH_ALWAYS);
+    task.FinishedSignal().Disconnect(this, &VisualTest::OnOffscreenRenderFinished);
+  }
   PostRender(imageName, success);
   free(imageName);
 }

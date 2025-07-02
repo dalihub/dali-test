@@ -127,7 +127,7 @@ private:
     default:
       break;
     }
-    StartDrawTimer();
+    CaptureWindowAfterFrameRendered(mApplication.GetWindow());
   }
 
 
@@ -157,30 +157,6 @@ private:
     mTextEditor.SetProperty(TextEditor::Property::LINE_WRAP_MODE,
                             DevelText::LineWrap::MIXED);
     mTextEditor.SetProperty(TextEditor::Property::TEXT, "Hi Experiment");
-  }
-
-  void StartDrawTimer()
-  {
-    Debug::LogMessage(Debug::INFO, "Starting draw and check()\n");
-
-    Animation firstFrameAnimator = Animation::New(0);
-    firstFrameAnimator.FinishedSignal().Connect(this, &TextWrappingTest::OnAnimationFinished1);
-    firstFrameAnimator.Play();
-  }
-
-  void OnAnimationFinished1(Animation& /* not used */)
-  {
-    Debug::LogMessage(Debug::INFO, "First Update done()\n");
-    Animation secondFrameAnimator = Animation::New(0);
-    secondFrameAnimator.FinishedSignal().Connect(this, &TextWrappingTest::OnAnimationFinished2);
-    secondFrameAnimator.Play();
-  }
-
-  void OnAnimationFinished2(Animation& /* not used */)
-  {
-    Window window = mApplication.GetWindow();
-    Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now. Capturing window\n");
-    CaptureWindow(window);
   }
 
   void PostRender(std::string outputFile, bool success)

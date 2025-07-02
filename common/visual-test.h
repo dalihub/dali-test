@@ -99,6 +99,13 @@ protected:
   void CaptureWindow(Dali::Window window, Dali::CameraActor customCamera = Dali::CameraActor());
 
   /**
+   * @brief Capture the content of the given window rendered by GPU after 1 frame rendered
+   * @param[in] window The window to be captured
+   * @param[in] customCamera The custom camera to be used to render the offscreen frame buffer (or otherwise a default camera will be created and used )
+   */
+  void CaptureWindowAfterFrameRendered(Dali::Window window, Dali::CameraActor customCamera = Dali::CameraActor());
+
+  /**
    * @brief Compare the given area in the two image files.
    * @param[in] fileName1 The first image file
    * @param[in] fileName2 The second image file
@@ -149,6 +156,11 @@ private:
    */
   void OnWindowResized(Dali::Window window, Dali::Window::WindowSize size);
 
+  void OnAnimationFinished1(Dali::Animation& /* not used */);
+  void OnAnimationFinished2(Dali::Animation& /* not used */);
+  void OnAnimationFinished3(Dali::Animation& /* not used */);
+  void OnAnimationFinished4(Dali::Animation& /* not used */);
+
 private:
   Dali::NativeImageSourcePtr mNativeImageSourcePtr; ///< The pointer of the native image source
   Dali::Texture              mNativeTexture;        ///< The texture for the native image
@@ -157,6 +169,9 @@ private:
   Dali::RenderTask              mOffscreenRenderTask; ///< The offscreen render task
   Dali::CameraActor             mCameraActor;         ///< The camera actor for the offscreen render task
   Dali::WeakHandle<Dali::Layer> mWindow;              ///< The weak handle of the window to be rendered
+
+  Dali::Window      mCaptureRequestedWindow;
+  Dali::CameraActor mCaptureRequestedCamera;
 };
 
 #endif // VISUAL_TEST_H

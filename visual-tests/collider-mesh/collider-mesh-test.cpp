@@ -165,7 +165,7 @@ private:
     {
       mApplication.Quit();
     }
-    CaptureWindow( mWindow);
+    CaptureWindowAfterFrameRendered(mWindow);
     mTestStep++;
     return false;
   }
