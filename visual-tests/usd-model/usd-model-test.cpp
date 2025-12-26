@@ -206,7 +206,11 @@ private:
     cameraParameters[0].ConfigureCamera(camera);
     SetActorCentered(camera);
 
-    Scene3D::Loader::ShaderManagerPtr shaderManager  = new Scene3D::Loader::ShaderManager();
+    if(!mShaderManager)
+    {
+      mShaderManager = new Scene3D::Loader::ShaderManager();
+    }
+
     ViewProjection                    viewProjection = cameraParameters[0].GetViewProjection();
     Transforms                        xforms{
       MatrixStack{},
@@ -214,7 +218,7 @@ private:
     NodeDefinition::CreateParams nodeParams{
       resources,
       xforms,
-      shaderManager,
+      mShaderManager,
       {},
       {},
       {}};
@@ -255,6 +259,8 @@ private:
   RenderTask   mSceneRender;
   FrameBuffer  mSceneFBO;
   Animation    mAnimation;
+
+  Scene3D::Loader::ShaderManagerPtr mShaderManager;
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE(UsdModelTest, OnInit, WINDOW_WIDTH, WINDOW_HEIGHT)

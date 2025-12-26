@@ -244,10 +244,14 @@ private:
     cameraParameters[0].ConfigureCamera(camera);
     SetActorCentered(camera);
 
+    if(!mShaderManager)
+    {
+      mShaderManager = new Scene3D::Loader::ShaderManager();
+    }
+
     ViewProjection viewProjection = cameraParameters[0].GetViewProjection();
     Transforms xforms{MatrixStack{}, viewProjection};
-    Scene3D::Loader::ShaderManagerPtr   shaderManager = new Scene3D::Loader::ShaderManager();
-    NodeDefinition::CreateParams nodeParams{resources, xforms, shaderManager, {}, {}, {}};
+    NodeDefinition::CreateParams nodeParams{resources, xforms, mShaderManager, {}, {}, {}};
     Customization::Choices choices;
 
     Actor sceneRoot = Actor::New();
@@ -307,6 +311,8 @@ private:
   RenderTask mSceneRender;
   FrameBuffer mSceneFBO;
   Animation mAnimation;
+
+  Scene3D::Loader::ShaderManagerPtr mShaderManager;
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE(Scene3DTest, OnInit, WINDOW_WIDTH,
