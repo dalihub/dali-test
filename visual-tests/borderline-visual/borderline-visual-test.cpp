@@ -297,8 +297,6 @@ private:
       control[Actor::Property::SIZE]          = controlSize;
       control[Actor::Property::POSITION]      = controlPosition;
 
-      control[ImageView::Property::PRE_MULTIPLIED_ALPHA] = requiredPreMulitpliedAlpha;
-
       // Attach resource ready signal
       control.ResourceReadySignal().Connect(this, &BorderineVisualTest::OnReady);
 
@@ -318,10 +316,10 @@ private:
           basicVisualMap.Insert(DevelVisual::Property::CORNER_RADIUS_POLICY, testVisualMap[DevelVisual::Property::CORNER_RADIUS_POLICY]);
         }
 
-        // Set properties into background
-        control[Control::Property::BACKGROUND] = basicVisualMap;
+        // Set properties into image
+        control[ImageView::Property::IMAGE] = basicVisualMap;
 
-        // Create animation after create background visual
+        // Create animation after create image visual
         for(std::uint32_t mapIndex = 0; mapIndex < testVisualMap.Count(); ++mapIndex)
         {
           KeyValuePair pair = testVisualMap.GetKeyValue(mapIndex);
@@ -334,7 +332,7 @@ private:
               (pair.first.indexKey == DevelVisual::Property::BORDERLINE_OFFSET) ||
               (pair.first.indexKey == DevelVisual::Property::CORNER_RADIUS))
             {
-              mAnimation.AnimateTo(DevelControl::GetVisualProperty(control, Control::Property::BACKGROUND, pair.first.indexKey), pair.second);
+              mAnimation.AnimateTo(DevelControl::GetVisualProperty(control, ImageView::Property::IMAGE, pair.first.indexKey), pair.second);
             }
           }
         }
@@ -344,15 +342,17 @@ private:
         // if isAnimation false, just merge property values into basicVisualMap
         basicVisualMap.Merge(testVisualMap);
 
-        // Set background
-        control[Control::Property::BACKGROUND] = basicVisualMap;
+        // Set image
+        control[ImageView::Property::IMAGE] = basicVisualMap;
       }
 
       // Send STOP action for animate image and animate vector image.
       if(visualType == Visual::ANIMATED_IMAGE)
       {
-        DevelControl::DoAction(control, Control::Property::BACKGROUND, DevelAnimatedImageVisual::Action::STOP, Property::Value());
+        DevelControl::DoAction(control, ImageView::Property::IMAGE, DevelAnimatedImageVisual::Action::STOP, Property::Value());
       }
+
+      control[ImageView::Property::PRE_MULTIPLIED_ALPHA] = requiredPreMulitpliedAlpha;
 
       mWindow.Add(control);
       // For clean up
