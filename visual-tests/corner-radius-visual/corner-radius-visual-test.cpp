@@ -129,6 +129,8 @@ static int gResourceReadyCount = 0;
 static bool gAnimationFinished = true;
 static bool gTerminatedTest = false;
 
+static std::unordered_set<int32_t> gResourceReadySet;
+
 }  // namespace
 
 /**
@@ -202,10 +204,14 @@ private:
   void OnReady(Dali::Toolkit::Control control)
   {
     // Resource ready done. Check we need to go to next step
-    gResourceReadyCount++;
-    if(gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES)
+    if(gResourceReadySet.find(control.GetProperty<int>(Actor::Property::ID)) != gResourceReadySet.end())
     {
-      CaptureWindowAfterFrameRendered(mApplication.GetWindow());
+      gResourceReadySet.erase(control.GetProperty<int>(Actor::Property::ID));
+      gResourceReadyCount++;
+      if(gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES)
+      {
+        CaptureWindowAfterFrameRendered(mApplication.GetWindow());
+      }
     }
   }
 
@@ -290,6 +296,8 @@ private:
       control[Actor::Property::SIZE]          = controlSize;
       control[Actor::Property::POSITION]      = controlPosition;
 
+      gResourceReadySet.insert(control.GetProperty<int>(Actor::Property::ID));
+
       // Attach resource ready signal
       control.ResourceReadySignal().Connect(this, &CornerRadiusVisualTest::OnReady);
 
@@ -340,10 +348,10 @@ private:
       }
       else
       {
-        // if isAnimation false, just merge property values into basicVisualMap
+        // Merge properties
         basicVisualMap.Merge(testVisualMap);
 
-        // Set background
+        // Set properties into background
         control[Control::Property::BACKGROUND] = basicVisualMap;
       }
 
