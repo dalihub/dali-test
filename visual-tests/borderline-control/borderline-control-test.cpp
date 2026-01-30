@@ -42,7 +42,7 @@ const std::string SVG_FILENAME             = TEST_IMAGE_DIR "corner-radius-visua
 const std::string ANIMATED_WEBP_FILENAME   = TEST_IMAGE_DIR "corner-radius-visual/dog-anim.webp";
 
 // Resource for visual comparison
-const std::string EXPECTED_IMAGE_FILE = TEST_IMAGE_DIR "borderline-visual/expected-result.png";
+const std::string EXPECTED_IMAGE_FILE = TEST_IMAGE_DIR "borderline-control/expected-result.png";
 
 /**
  * @brief Test area for each visuals
@@ -148,16 +148,16 @@ static std::unordered_set<int32_t> gResourceReadySet;
 /**
  * @brief This is to test the functionality of native image and image visual
  */
-class BorderlineVisualTest: public VisualTest
+class BorderlineControlTest: public VisualTest
 {
 public:
 
-  BorderlineVisualTest( Application& application )
+  BorderlineControlTest( Application& application )
     : mApplication( application )
   {
   }
 
-  ~BorderlineVisualTest()
+  ~BorderlineControlTest()
   {
   }
 
@@ -167,7 +167,7 @@ public:
     mWindow.SetBackgroundColor(Color::BLACK); // Due to the dog-anim.webp is white background, we make window black.
 
     mTerminateTimer = Timer::New(TERMINATE_RUNTIME);
-    mTerminateTimer.TickSignal().Connect(this, &BorderlineVisualTest::OnTerminateTimer);
+    mTerminateTimer.TickSignal().Connect(this, &BorderlineControlTest::OnTerminateTimer);
     mTerminateTimer.Start();
 
     PrepareNextTest();
@@ -178,7 +178,7 @@ private:
   bool OnTerminateTimer()
   {
     // Visual Test Timout!
-    printf("TIMEOUT borderine-visual.test spend more than %d ms\n",TERMINATE_RUNTIME);
+    printf("TIMEOUT borderine-control.test spend more than %d ms\n",TERMINATE_RUNTIME);
 
     gTermiatedTest = true;
     gExitValue = -1;
@@ -278,7 +278,7 @@ private:
     if(isAnimation)
     {
       // Wait until all animations are finished.
-      mAnimation.FinishedSignal().Connect(this, &BorderlineVisualTest::OnFinishedAnimation);
+      mAnimation.FinishedSignal().Connect(this, &BorderlineControlTest::OnFinishedAnimation);
       mAnimation.Play();
     }
   }
@@ -308,7 +308,7 @@ private:
       gResourceReadySet.insert(imageView.GetProperty<int>(Actor::Property::ID));
 
       // Attach resource ready signal
-      imageView.ResourceReadySignal().Connect(this, &BorderlineVisualTest::OnReady);
+      imageView.ResourceReadySignal().Connect(this, &BorderlineControlTest::OnReady);
 
       auto visualType = VALID_VISUAL_TYPES[visualTestTypeIndex];
 
@@ -321,13 +321,10 @@ private:
       if(isAnimation)
       {
         // Merge non-animatable properties first.
-        if(testVisualMap.Find(DevelVisual::Property::CORNER_RADIUS_POLICY))
+        if(testVisualMap.Find(DevelControl::Property::CORNER_RADIUS_POLICY))
         {
-          basicVisualMap.Insert(DevelVisual::Property::CORNER_RADIUS_POLICY, testVisualMap[DevelVisual::Property::CORNER_RADIUS_POLICY]);
+          imageView[DevelControl::Property::CORNER_RADIUS_POLICY] = testVisualMap[DevelControl::Property::CORNER_RADIUS_POLICY];
         }
-
-        // Set properties into background
-        imageView[ImageView::Property::IMAGE] = basicVisualMap;
 
         for(std::uint32_t mapIndex = 0; mapIndex < testVisualMap.Count(); ++mapIndex)
         {
@@ -336,24 +333,24 @@ private:
           if(pair.first.type == Property::Key::Type::INDEX)
           {
             // We want to animate CornerRadius or Borderline only in this sample
-            if((pair.first.indexKey == DevelVisual::Property::BORDERLINE_WIDTH) ||
-              (pair.first.indexKey == DevelVisual::Property::BORDERLINE_COLOR) ||
-              (pair.first.indexKey == DevelVisual::Property::BORDERLINE_OFFSET) ||
-              (pair.first.indexKey == DevelVisual::Property::CORNER_RADIUS))
+            if((pair.first.indexKey == DevelControl::Property::BORDERLINE_WIDTH) ||
+              (pair.first.indexKey == DevelControl::Property::BORDERLINE_COLOR) ||
+              (pair.first.indexKey == DevelControl::Property::BORDERLINE_OFFSET) ||
+              (pair.first.indexKey == DevelControl::Property::CORNER_RADIUS))
             {
-              mAnimation.AnimateTo(DevelControl::GetVisualProperty(imageView, ImageView::Property::IMAGE, pair.first.indexKey), pair.second);
+              mAnimation.AnimateTo(Property(imageView, pair.first.indexKey), pair.second);
             }
           }
         }
       }
       else
       {
-        // Merge properties
-        basicVisualMap.Merge(testVisualMap);
-
-        // Set properties into background
-        imageView[ImageView::Property::IMAGE] = basicVisualMap;
+        // Set properties
+        imageView.SetProperties(testVisualMap);
       }
+
+      // Set properties into image
+      imageView[ImageView::Property::IMAGE] = basicVisualMap;
 
       // Send STOP action for animate image and animate vector image.
       if(visualType == Visual::ANIMATED_IMAGE)
@@ -452,14 +449,14 @@ private:
     auto colorValue = BORDERLINE_COLOR_LIST[propertyTestTypeIndex %  (NUMBER_OF_PROPERTY_TYPES / 2)];
     auto widthValue = BORDERLINE_WIDTH_LIST[propertyTestTypeIndex %  (NUMBER_OF_PROPERTY_TYPES / 2)];
 
-    visualMap[DevelVisual::Property::BORDERLINE_WIDTH]  = widthValue;
-    visualMap[DevelVisual::Property::BORDERLINE_COLOR]  = colorValue;
-    visualMap[DevelVisual::Property::BORDERLINE_OFFSET] = offsetValue;
+    visualMap[DevelControl::Property::BORDERLINE_WIDTH]  = widthValue;
+    visualMap[DevelControl::Property::BORDERLINE_COLOR]  = colorValue;
+    visualMap[DevelControl::Property::BORDERLINE_OFFSET] = offsetValue;
     if(propertyTestTypeIndex >= (NUMBER_OF_PROPERTY_TYPES / 2))
     {
       // Note : We should set CornerRadius as Vector4 type due to the animation TC.
-      visualMap[DevelVisual::Property::CORNER_RADIUS]        = CORNER_RADIUS_RATES;
-      visualMap[DevelVisual::Property::CORNER_RADIUS_POLICY] = Visual::Transform::Policy::RELATIVE;
+      visualMap[DevelControl::Property::CORNER_RADIUS]        = CORNER_RADIUS_RATES;
+      visualMap[DevelControl::Property::CORNER_RADIUS_POLICY] = Visual::Transform::Policy::RELATIVE;
     }
     return visualMap;
   }
@@ -472,4 +469,4 @@ private:
   std::vector<Control> mControlList;
 };
 
-DALI_VISUAL_TEST_WITH_WINDOW_SIZE( BorderlineVisualTest, OnInit, TESTSET_VISUAL_SIZE * NUMBER_OF_PROPERTY_TYPES, TESTSET_VISUAL_SIZE * NUMBER_OF_VALID_VISUAL_TYPES )
+DALI_VISUAL_TEST_WITH_WINDOW_SIZE( BorderlineControlTest, OnInit, TESTSET_VISUAL_SIZE * NUMBER_OF_PROPERTY_TYPES, TESTSET_VISUAL_SIZE * NUMBER_OF_VALID_VISUAL_TYPES )

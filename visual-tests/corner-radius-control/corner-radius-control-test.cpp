@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2021 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <string>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali-toolkit/dali-toolkit.h>
@@ -24,9 +25,7 @@
 #include <dali-toolkit/devel-api/visuals/image-visual-properties-devel.h>
 
 #include <dali-toolkit/devel-api/visuals/animated-image-visual-actions-devel.h>
-
-#include <string>
-#include <unordered_set>
+#include <dali-toolkit/devel-api/visuals/animated-vector-image-visual-actions-devel.h>
 
 // INTERNAL INCLUDES
 #include "visual-test.h"
@@ -40,9 +39,10 @@ namespace
 const std::string JPG_FILENAME             = TEST_IMAGE_DIR "corner-radius-visual/gallery-medium-16.jpg";
 const std::string SVG_FILENAME             = TEST_IMAGE_DIR "corner-radius-visual/Contacts.svg";
 const std::string ANIMATED_WEBP_FILENAME   = TEST_IMAGE_DIR "corner-radius-visual/dog-anim.webp";
+//const std::string ANIMATED_LOTTIE_FILENAME = TEST_IMAGE_DIR "corner-radius-visual/jolly_walker.json"; ///< We need rlottie and dali-extension. so just skip
 
 // Resource for visual comparison
-const std::string EXPECTED_IMAGE_FILE = TEST_IMAGE_DIR "borderline-visual/expected-result.png";
+const std::string EXPECTED_IMAGE_FILE = TEST_IMAGE_DIR "corner-radius-control/expected-result.png";
 
 /**
  * @brief Test area for each visuals
@@ -85,33 +85,20 @@ const std::string EXPECTED_IMAGE_FILE = TEST_IMAGE_DIR "borderline-visual/expect
  * NUMBER_OF_VALID_VISUAL_TYPES
  *
  */
-constexpr static int NORMAL_VISUAL_SIZE = 100;
-constexpr static int SMALL_VISUAL_SIZE  = 20;
-constexpr static int MARGIN_VISUALS     = 11;
+constexpr static int NORMAL_VISUAL_SIZE = 150;
+constexpr static int SMALL_VISUAL_SIZE  = 40;
+constexpr static int MARGIN_VISUALS     = 5;
 
 constexpr static int TESTSET_VISUAL_SIZE =  NORMAL_VISUAL_SIZE + SMALL_VISUAL_SIZE + MARGIN_VISUALS * 3;
 
-// Want to test propeties about borderline offset list
-const static Property::Value BORDERLINE_OFFSET_LIST[] =
+// Want to test propeties about corner radius list
+const static Property::Value CORNER_RADIUS_RATES[] =
 {
-  Property::Value(-1.0f),
-  Property::Value(1.0f),
-  Property::Value(0.0f),
+  Property::Value(0.15f),                             ///< Small rated corner radius
+  Property::Value(Vector4(0.5f, 0.0f, 0.33f, 0.17f)), ///< Difference radius per each corner
+  Property::Value(Vector4(0.5f, 0.5f, 0.5f, 0.5f)),   ///< Perfact circle
 };
-const static Property::Value BORDERLINE_COLOR_LIST[] =
-{
-  Property::Value(Vector4(0.7f, 0.7f, 1.0f, 0.5f)),
-  Property::Value(Vector4(0.0f, 1.0f, 0.5f, 1.0f)),
-  Property::Value(Vector4(1.0f, 0.0f, 0.0f, 0.5f)),
-};
-const static Property::Value BORDERLINE_WIDTH_LIST[] =
-{
-  Property::Value(5.0f),
-  Property::Value(5.0f),
-  Property::Value(10.0f),
-};
-constexpr static Vector4 CORNER_RADIUS_RATES = Vector4(0.5f, 0.0f, 0.33f, 0.17f);
-constexpr static int NUMBER_OF_PROPERTY_TYPES = sizeof(BORDERLINE_OFFSET_LIST) / sizeof(BORDERLINE_OFFSET_LIST[0]) * 2;
+constexpr static int NUMBER_OF_PROPERTY_TYPES = sizeof(CORNER_RADIUS_RATES) / sizeof(CORNER_RADIUS_RATES[0]);
 
 // Valid visual type list
 constexpr static Visual::Type VALID_VISUAL_TYPES[] =
@@ -121,6 +108,7 @@ constexpr static Visual::Type VALID_VISUAL_TYPES[] =
   Visual::Type::GRADIENT,
   Visual::Type::SVG,
   Visual::Type::ANIMATED_IMAGE,
+  //DevelVisual::Type::ANIMATED_VECTOR_IMAGE, ///< We need rlottie and dali-extension. so just skip
 };
 constexpr static int NUMBER_OF_VALID_VISUAL_TYPES = sizeof(VALID_VISUAL_TYPES) / sizeof(VALID_VISUAL_TYPES[0]);
 
@@ -128,10 +116,10 @@ constexpr static int TOTAL_RESOURCES = NUMBER_OF_PROPERTY_TYPES * NUMBER_OF_VALI
 
 enum TestStep
 {
-  CREATE_STATIC_PREMULTIPLIED_STEP,
-  CREATE_STATIC_NO_PREMULTIPLIED_STEP,
-  CREATE_ANIMATE_PREMULTIPLIED_STEP,
-  CREATE_ANIMATE_NO_PREMULTIPLIED_STEP,
+  CREATE_STATIC_ABSOLUTE_STEP,
+  CREATE_STATIC_RELATIVE_STEP,
+  CREATE_ANIMATE_ABSOLUTE_STEP,
+  CREATE_ANIMATE_RELATIVE_STEP,
   NUMBER_OF_STEPS
 };
 constexpr static int TERMINATE_RUNTIME = 10 * 1000; // 10 seconds
@@ -139,7 +127,7 @@ constexpr static int TERMINATE_RUNTIME = 10 * 1000; // 10 seconds
 static int gTestStep = -1;
 static int gResourceReadyCount = 0;
 static bool gAnimationFinished = true;
-static bool gTermiatedTest = false;
+static bool gTerminatedTest = false;
 
 static std::unordered_set<int32_t> gResourceReadySet;
 
@@ -148,16 +136,16 @@ static std::unordered_set<int32_t> gResourceReadySet;
 /**
  * @brief This is to test the functionality of native image and image visual
  */
-class BorderlineVisualTest: public VisualTest
+class CornerRadiusControlTest: public VisualTest
 {
 public:
 
-  BorderlineVisualTest( Application& application )
+  CornerRadiusControlTest( Application& application )
     : mApplication( application )
   {
   }
 
-  ~BorderlineVisualTest()
+  ~CornerRadiusControlTest()
   {
   }
 
@@ -167,9 +155,10 @@ public:
     mWindow.SetBackgroundColor(Color::BLACK); // Due to the dog-anim.webp is white background, we make window black.
 
     mTerminateTimer = Timer::New(TERMINATE_RUNTIME);
-    mTerminateTimer.TickSignal().Connect(this, &BorderlineVisualTest::OnTerminateTimer);
+    mTerminateTimer.TickSignal().Connect(this, &CornerRadiusControlTest::OnTerminateTimer);
     mTerminateTimer.Start();
 
+    // Start the test
     PrepareNextTest();
   }
 
@@ -178,9 +167,9 @@ private:
   bool OnTerminateTimer()
   {
     // Visual Test Timout!
-    printf("TIMEOUT borderine-visual.test spend more than %d ms\n",TERMINATE_RUNTIME);
+    printf("TIMEOUT corner-radius-visual.test spend more than %d ms\n",TERMINATE_RUNTIME);
 
-    gTermiatedTest = true;
+    gTerminatedTest = true;
     gExitValue = -1;
     mApplication.Quit();
 
@@ -191,34 +180,24 @@ private:
 
   void PrepareNextTest()
   {
-    Window window = mApplication.GetWindow();
-
     gTestStep++;
+
+    Window window = mApplication.GetWindow();
 
     switch(gTestStep)
     {
-      case CREATE_STATIC_PREMULTIPLIED_STEP:
-      case CREATE_STATIC_NO_PREMULTIPLIED_STEP:
-      case CREATE_ANIMATE_PREMULTIPLIED_STEP:
-      case CREATE_ANIMATE_NO_PREMULTIPLIED_STEP:
+      case CREATE_STATIC_ABSOLUTE_STEP:
+      case CREATE_STATIC_RELATIVE_STEP:
+      case CREATE_ANIMATE_ABSOLUTE_STEP:
+      case CREATE_ANIMATE_RELATIVE_STEP:
       {
         CreateVisuals(
-          (gTestStep == CREATE_ANIMATE_PREMULTIPLIED_STEP) || (gTestStep == CREATE_ANIMATE_NO_PREMULTIPLIED_STEP),
-          (gTestStep == CREATE_STATIC_PREMULTIPLIED_STEP) || (gTestStep == CREATE_ANIMATE_PREMULTIPLIED_STEP));
+          (gTestStep == CREATE_ANIMATE_ABSOLUTE_STEP) || (gTestStep == CREATE_ANIMATE_RELATIVE_STEP),
+          (gTestStep == CREATE_STATIC_RELATIVE_STEP)  || (gTestStep == CREATE_ANIMATE_RELATIVE_STEP));
         break;
       }
       default:
         break;
-    }
-  }
-
-  void OnFinishedAnimation(Animation& animation)
-  {
-    // Animation done. Check we need to go to next step
-    gAnimationFinished = true;
-    if(gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES)
-    {
-      CaptureWindowAfterFrameRendered(mApplication.GetWindow());
     }
   }
 
@@ -236,24 +215,36 @@ private:
     }
   }
 
+  void OnFinishedAnimation(Animation& animation)
+  {
+    // Animation done. Check we need to go to next step
+    gAnimationFinished = true;
+    if(gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES)
+    {
+      CaptureWindowAfterFrameRendered(mApplication.GetWindow());
+    }
+  }
+
   void PostRender(std::string outputFile, bool success)
   {
+    // All steps will have same result.
     CompareImageFile(EXPECTED_IMAGE_FILE, outputFile, 0.98f);
-    if(gTestStep < NUMBER_OF_STEPS-1)
-    {
-      UnparentAllControls();
-      PrepareNextTest();
-    }
-    else
+    if(gTestStep + 1u == NUMBER_OF_STEPS)
     {
       // The last check has been done, so we can quit the test
       mTerminateTimer.Stop();
       mApplication.Quit();
     }
+    else
+    {
+      // Test done. Let's do next test!
+      UnparentAllControls();
+      PrepareNextTest();
+    }
   }
 
 private:
-  void CreateVisuals(bool isAnimation, bool requiredPreMulitpliedAlpha)
+  void CreateVisuals(bool isAnimation, bool isRelative)
   {
     // Reset resource ready count
     gResourceReadyCount = 0;
@@ -271,21 +262,21 @@ private:
     {
       for(std::uint32_t propertyTestTypeIndex = 0; propertyTestTypeIndex < NUMBER_OF_PROPERTY_TYPES; ++propertyTestTypeIndex)
       {
-        CreateTestSet(visualTestTypeIndex, propertyTestTypeIndex, isAnimation, requiredPreMulitpliedAlpha);
+        CreateTestSet(visualTestTypeIndex, propertyTestTypeIndex, isAnimation, isRelative);
       }
     }
 
     if(isAnimation)
     {
       // Wait until all animations are finished.
-      mAnimation.FinishedSignal().Connect(this, &BorderlineVisualTest::OnFinishedAnimation);
+      mAnimation.FinishedSignal().Connect(this, &CornerRadiusControlTest::OnFinishedAnimation);
       mAnimation.Play();
     }
   }
 
   // Main setup here!
   // Costumize here if you want
-  void CreateTestSet(std::uint32_t visualTestTypeIndex, std::uint32_t propertyTestTypeIndex, bool isAnimation, bool requiredPreMulitpliedAlpha)
+  void CreateTestSet(std::uint32_t visualTestTypeIndex, std::uint32_t propertyTestTypeIndex, bool isAnimation, bool isRelative)
   {
     Vector2 topLeftPosition = Vector2(propertyTestTypeIndex * TESTSET_VISUAL_SIZE, visualTestTypeIndex * TESTSET_VISUAL_SIZE);
 
@@ -299,72 +290,84 @@ private:
                                 Vector2(subSizeTestTypeIndex & 1 ? SMALL_VISUAL_SIZE + MARGIN_VISUALS * 2 : MARGIN_VISUALS,
                                         subSizeTestTypeIndex & 2 ? SMALL_VISUAL_SIZE + MARGIN_VISUALS * 2 : MARGIN_VISUALS);
       // Create new Control and setup default data
-      ImageView imageView = ImageView::New();
-      imageView[Actor::Property::PARENT_ORIGIN] = ParentOrigin::TOP_LEFT;
-      imageView[Actor::Property::ANCHOR_POINT]  = AnchorPoint::TOP_LEFT;
-      imageView[Actor::Property::SIZE]          = controlSize;
-      imageView[Actor::Property::POSITION]      = controlPosition;
+      Control control = Control::New();
+      control[Actor::Property::PARENT_ORIGIN] = ParentOrigin::TOP_LEFT;
+      control[Actor::Property::ANCHOR_POINT]  = AnchorPoint::TOP_LEFT;
+      control[Actor::Property::SIZE]          = controlSize;
+      control[Actor::Property::POSITION]      = controlPosition;
 
-      gResourceReadySet.insert(imageView.GetProperty<int>(Actor::Property::ID));
+      gResourceReadySet.insert(control.GetProperty<int>(Actor::Property::ID));
 
       // Attach resource ready signal
-      imageView.ResourceReadySignal().Connect(this, &BorderlineVisualTest::OnReady);
+      control.ResourceReadySignal().Connect(this, &CornerRadiusControlTest::OnReady);
 
       auto visualType = VALID_VISUAL_TYPES[visualTestTypeIndex];
 
       // Basic informations of current visual expects
-      Property::Map basicVisualMap = CreateBasicVisualMap(visualType, requiredPreMulitpliedAlpha);
+      Property::Map basicVisualMap = CreateBasicVisualMap(visualType);
 
       // Specific information of current property testset.
-      Property::Map testVisualMap = CreateTestVisualMap(propertyTestTypeIndex, subSizeTestTypeIndex == 3 ? NORMAL_VISUAL_SIZE : SMALL_VISUAL_SIZE);
+      Property::Map testVisualMap = CreateTestVisualMap(propertyTestTypeIndex, isRelative, subSizeTestTypeIndex == 3 ? NORMAL_VISUAL_SIZE : SMALL_VISUAL_SIZE);
 
       if(isAnimation)
       {
         // Merge non-animatable properties first.
-        if(testVisualMap.Find(DevelVisual::Property::CORNER_RADIUS_POLICY))
+        if(testVisualMap.Find(DevelControl::Property::CORNER_RADIUS_POLICY))
         {
-          basicVisualMap.Insert(DevelVisual::Property::CORNER_RADIUS_POLICY, testVisualMap[DevelVisual::Property::CORNER_RADIUS_POLICY]);
+          control[DevelControl::Property::CORNER_RADIUS_POLICY] = testVisualMap[DevelControl::Property::CORNER_RADIUS_POLICY];
         }
 
-        // Set properties into background
-        imageView[ImageView::Property::IMAGE] = basicVisualMap;
-
+        // Create animation after create background visual
         for(std::uint32_t mapIndex = 0; mapIndex < testVisualMap.Count(); ++mapIndex)
         {
           KeyValuePair pair = testVisualMap.GetKeyValue(mapIndex);
           // We can assume that we only use index key in this sample
           if(pair.first.type == Property::Key::Type::INDEX)
           {
-            // We want to animate CornerRadius or Borderline only in this sample
-            if((pair.first.indexKey == DevelVisual::Property::BORDERLINE_WIDTH) ||
-              (pair.first.indexKey == DevelVisual::Property::BORDERLINE_COLOR) ||
-              (pair.first.indexKey == DevelVisual::Property::BORDERLINE_OFFSET) ||
-              (pair.first.indexKey == DevelVisual::Property::CORNER_RADIUS))
+            // We want to animate CornerRadius only in this sample
+            if(pair.first.indexKey == DevelControl::Property::CORNER_RADIUS)
             {
-              mAnimation.AnimateTo(DevelControl::GetVisualProperty(imageView, ImageView::Property::IMAGE, pair.first.indexKey), pair.second);
+              if(pair.second.GetType() == Property::FLOAT)
+              {
+                float   inputValue;
+                Vector4 convertedValue;
+                pair.second.Get(inputValue);
+                convertedValue = Vector4(inputValue, inputValue, inputValue, inputValue);
+                mAnimation.AnimateTo(Property(control, pair.first.indexKey), convertedValue);
+              }
+              else
+              {
+                mAnimation.AnimateTo(Property(control, pair.first.indexKey), pair.second);
+              }
             }
           }
         }
       }
       else
       {
-        // Merge properties
-        basicVisualMap.Merge(testVisualMap);
-
-        // Set properties into background
-        imageView[ImageView::Property::IMAGE] = basicVisualMap;
+        // Set properties
+        control.SetProperties(testVisualMap);
       }
+
+      // Set properties into background
+      control[Control::Property::BACKGROUND] = basicVisualMap;
 
       // Send STOP action for animate image and animate vector image.
       if(visualType == Visual::ANIMATED_IMAGE)
       {
-        DevelControl::DoAction(imageView, ImageView::Property::IMAGE, DevelAnimatedImageVisual::Action::STOP, Property::Value());
+        DevelControl::DoAction(control, Control::Property::BACKGROUND, DevelAnimatedImageVisual::Action::STOP, Property::Value());
       }
+      /* We need rlottie and dali-extension. so just skip */
+      /*
+      if(visualType == DevelVisual::ANIMATED_VECTOR_IMAGE)
+      {
+        DevelControl::DoAction(control, Control::Property::BACKGROUND, DevelAnimatedVectorImageVisual::Action::STOP, Property::Value());
+      }
+      */
 
-      mWindow.Add(imageView);
-
+      mWindow.Add(control);
       // For clean up
-      mControlList.emplace_back(imageView);
+      mControlList.emplace_back(control);
     }
   }
 
@@ -379,7 +382,7 @@ private:
   }
 
 private:
-  Property::Map CreateBasicVisualMap(Visual::Type type, bool requiredPreMulitpliedAlpha)
+  Property::Map CreateBasicVisualMap(Visual::Type type)
   {
     Property::Map visualMap;
     switch(type)
@@ -388,7 +391,6 @@ private:
       {
         visualMap[Visual::Property::TYPE]     = Visual::IMAGE;
         visualMap[ImageVisual::Property::URL] = JPG_FILENAME;
-        visualMap[Visual::Property::PREMULTIPLIED_ALPHA] = requiredPreMulitpliedAlpha;
         break;
       }
       case Visual::Type::COLOR:
@@ -432,34 +434,51 @@ private:
       {
         visualMap[Visual::Property::TYPE]     = Visual::ANIMATED_IMAGE;
         visualMap[ImageVisual::Property::URL] = ANIMATED_WEBP_FILENAME;
-        visualMap[Visual::Property::PREMULTIPLIED_ALPHA] = requiredPreMulitpliedAlpha;
 
         // We will control the animation by StopAction.
         visualMap[Toolkit::DevelImageVisual::Property::STOP_BEHAVIOR] = DevelImageVisual::StopBehavior::FIRST_FRAME;
         break;
       }
+      /* We need rlottie and dali-extension. so just skip */
+      /*
+      case DevelVisual::Type::ANIMATED_VECTOR_IMAGE:
+      {
+        visualMap[Visual::Property::TYPE]     = DevelVisual::ANIMATED_VECTOR_IMAGE;
+        visualMap[ImageVisual::Property::URL] = ANIMATED_LOTTIE_FILENAME;
+
+        // We will control the animation by StopAction.
+        visualMap[Toolkit::DevelImageVisual::Property::STOP_BEHAVIOR] = DevelImageVisual::StopBehavior::FIRST_FRAME;
+        break;
+      }
+      */
       default:
         break;
     }
     return visualMap;
   }
 
-  Property::Map CreateTestVisualMap(std::uint32_t propertyTestTypeIndex, float minSizeOfVisual)
+  Property::Map CreateTestVisualMap(std::uint32_t propertyTestTypeIndex, bool isRelative, float minSizeOfVisual)
   {
     Property::Map visualMap;
 
-    auto offsetValue = BORDERLINE_OFFSET_LIST[propertyTestTypeIndex %  (NUMBER_OF_PROPERTY_TYPES / 2)];
-    auto colorValue = BORDERLINE_COLOR_LIST[propertyTestTypeIndex %  (NUMBER_OF_PROPERTY_TYPES / 2)];
-    auto widthValue = BORDERLINE_WIDTH_LIST[propertyTestTypeIndex %  (NUMBER_OF_PROPERTY_TYPES / 2)];
+    auto value = CORNER_RADIUS_RATES[propertyTestTypeIndex];
 
-    visualMap[DevelVisual::Property::BORDERLINE_WIDTH]  = widthValue;
-    visualMap[DevelVisual::Property::BORDERLINE_COLOR]  = colorValue;
-    visualMap[DevelVisual::Property::BORDERLINE_OFFSET] = offsetValue;
-    if(propertyTestTypeIndex >= (NUMBER_OF_PROPERTY_TYPES / 2))
+    if(isRelative)
     {
-      // Note : We should set CornerRadius as Vector4 type due to the animation TC.
-      visualMap[DevelVisual::Property::CORNER_RADIUS]        = CORNER_RADIUS_RATES;
-      visualMap[DevelVisual::Property::CORNER_RADIUS_POLICY] = Visual::Transform::Policy::RELATIVE;
+      visualMap[DevelControl::Property::CORNER_RADIUS]        = value;
+      visualMap[DevelControl::Property::CORNER_RADIUS_POLICY] = Visual::Transform::Policy::RELATIVE;
+    }
+    else
+    {
+      if(value.GetType() == Property::FLOAT)
+      {
+        visualMap[DevelControl::Property::CORNER_RADIUS] = value.Get<float>() * minSizeOfVisual;
+      }
+      else if(value.GetType() == Property::VECTOR4)
+      {
+        visualMap[DevelControl::Property::CORNER_RADIUS] = value.Get<Vector4>() * minSizeOfVisual;
+      }
+      visualMap[DevelControl::Property::CORNER_RADIUS_POLICY] = Visual::Transform::Policy::ABSOLUTE;
     }
     return visualMap;
   }
@@ -472,4 +491,4 @@ private:
   std::vector<Control> mControlList;
 };
 
-DALI_VISUAL_TEST_WITH_WINDOW_SIZE( BorderlineVisualTest, OnInit, TESTSET_VISUAL_SIZE * NUMBER_OF_PROPERTY_TYPES, TESTSET_VISUAL_SIZE * NUMBER_OF_VALID_VISUAL_TYPES )
+DALI_VISUAL_TEST_WITH_WINDOW_SIZE( CornerRadiusControlTest, OnInit, TESTSET_VISUAL_SIZE * NUMBER_OF_PROPERTY_TYPES, TESTSET_VISUAL_SIZE * NUMBER_OF_VALID_VISUAL_TYPES )
