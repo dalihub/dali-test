@@ -84,7 +84,7 @@ private:
     actor.SetProperty(TextLabel::Property::PIXEL_SIZE, 30);
 
     // Create a window and add the text label to it
-    Window window = Dali::Window::New(WINDOW_SIZE, index.c_str(), "", Dali::Application::OPAQUE);
+    Window window = Dali::Window::New(WINDOW_SIZE, index.c_str(), Dali::Application::OPAQUE);
     window.SetBackgroundColor( Color::CYAN );
     window.Add(actor);
 

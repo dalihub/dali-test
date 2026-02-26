@@ -82,7 +82,7 @@ private:
     PositionSize windowSize;
     windowSize.width = 480;
     windowSize.height = 800;
-    return Dali::Window::New( windowSize, "New window", "", Dali::Application::OPAQUE );
+    return Dali::Window::New( windowSize, "New window", Dali::Application::OPAQUE );
   }
 
   void PerformNextTest()
