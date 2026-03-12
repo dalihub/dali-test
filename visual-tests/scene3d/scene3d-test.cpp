@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,10 @@
 #include <dali-scene3d/dali-scene3d.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/image-loader/texture-manager.h>
-#include <dali/integration-api/debug.h>
 #include <dali/dali.h>
 #include <dali/devel-api/rendering/frame-buffer-devel.h>
+#include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <string>
 
 // INTERNAL INCLUDES
@@ -32,36 +33,40 @@ using namespace Dali;
 using namespace Dali::Toolkit;
 using namespace Dali::Scene3D::Loader;
 
-namespace
-{
+using Dali::Integration::ToDaliString;
 
-  const Vector3 CAMERA_DEFAULT_POSITION(0.0f, 0.0f, 3.5f);
+namespace {
 
-  const std::string RESOURCE_TYPE_DIRS[]{
-      TEST_SCENE_DIR "environments/",
-      TEST_SCENE_DIR "shaders/",
-      TEST_SCENE_DIR "models/",
-      TEST_SCENE_DIR "images/",
-  };
+const Vector3 CAMERA_DEFAULT_POSITION(0.0f, 0.0f, 3.5f);
 
-  const std::string FIRST_IMAGE_FILE  = TEST_IMAGE_DIR "scene3d/expected-result-1.png";
-  const std::string SECOND_IMAGE_FILE = TEST_IMAGE_DIR "scene3d/expected-result-2.png";
-  const std::string THIRD_IMAGE_FILE  = TEST_IMAGE_DIR "scene3d/expected-result-3.png";
-  const std::string FOURTH_IMAGE_FILE = TEST_IMAGE_DIR "scene3d/expected-result-4.png";
+const std::string RESOURCE_TYPE_DIRS[]{
+    TEST_SCENE_DIR "environments/",
+    TEST_SCENE_DIR "shaders/",
+    TEST_SCENE_DIR "models/",
+    TEST_SCENE_DIR "images/",
+};
 
-  const int WINDOW_WIDTH(480);
-  const int WINDOW_HEIGHT(800);
+const std::string FIRST_IMAGE_FILE =
+    TEST_IMAGE_DIR "scene3d/expected-result-1.png";
+const std::string SECOND_IMAGE_FILE =
+    TEST_IMAGE_DIR "scene3d/expected-result-2.png";
+const std::string THIRD_IMAGE_FILE =
+    TEST_IMAGE_DIR "scene3d/expected-result-3.png";
+const std::string FOURTH_IMAGE_FILE =
+    TEST_IMAGE_DIR "scene3d/expected-result-4.png";
 
-  enum TestStep
-  {
-    LOAD_FIRST_SCENE,
-    FIRST_SCENE_ANIMATION,
-    LOAD_SECOND_SCENE,
-    SECOND_SCENE_ANIMATION,
-    NUMBER_OF_STEPS
-  };
+const int WINDOW_WIDTH(480);
+const int WINDOW_HEIGHT(800);
 
-  static int gTestStep = -1;
+enum TestStep {
+  LOAD_FIRST_SCENE,
+  FIRST_SCENE_ANIMATION,
+  LOAD_SECOND_SCENE,
+  SECOND_SCENE_ANIMATION,
+  NUMBER_OF_STEPS
+};
+
+static int gTestStep = -1;
 
 } // namespace
 
@@ -79,13 +84,11 @@ namespace
  *   +
  *
  */
-class Scene3DTest : public VisualTest
-{
+class Scene3DTest : public VisualTest {
 public:
   Scene3DTest(Application &application) : mApplication(application) {}
 
-  void OnInit(Application &application)
-  {
+  void OnInit(Application &application) {
     Dali::Window window = mApplication.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
     window.GetRootLayer().SetProperty(Layer::Property::BEHAVIOR,
@@ -142,47 +145,35 @@ public:
   }
 
 private:
-  void PrepareNextTest()
-  {
+  void PrepareNextTest() {
     gTestStep++;
-    switch(gTestStep)
-    {
-      case LOAD_FIRST_SCENE:
-      {
-        mScene = LoadScene("exercise.dli", mSceneCamera);
-        mSceneLayer.Add(mScene);
+    switch (gTestStep) {
+    case LOAD_FIRST_SCENE: {
+      mScene = LoadScene("exercise.dli", mSceneCamera);
+      mSceneLayer.Add(mScene);
 
-        CaptureWindowAfterFrameRendered(mApplication.GetWindow());
-        break;
-      }
-    case FIRST_SCENE_ANIMATION:
-    {
-      if (mAnimation)
-      {
+      CaptureWindowAfterFrameRendered(mApplication.GetWindow());
+      break;
+    }
+    case FIRST_SCENE_ANIMATION: {
+      if (mAnimation) {
         mAnimation.Play();
-      }
-      else
-      {
+      } else {
         CaptureWindowAfterFrameRendered(mApplication.GetWindow());
       }
       break;
     }
-    case LOAD_SECOND_SCENE:
-    {
+    case LOAD_SECOND_SCENE: {
       UnparentAndReset(mScene);
       mScene = LoadScene("robot.dli", mSceneCamera);
       mSceneLayer.Add(mScene);
       CaptureWindowAfterFrameRendered(mApplication.GetWindow());
       break;
     }
-    case SECOND_SCENE_ANIMATION:
-    {
-      if (mAnimation)
-      {
+    case SECOND_SCENE_ANIMATION: {
+      if (mAnimation) {
         mAnimation.Play();
-      }
-      else
-      {
+      } else {
         CaptureWindowAfterFrameRendered(mApplication.GetWindow());
       }
       break;
@@ -192,31 +183,25 @@ private:
     }
   }
 
-  void OnFinishedAnimation(Animation& animation)
-  {
+  void OnFinishedAnimation(Animation &animation) {
     CaptureWindowAfterFrameRendered(mApplication.GetWindow());
   }
 
-  void PostRender(std::string outputFile, bool success)
-  {
-    const std::string images[] = {FIRST_IMAGE_FILE, SECOND_IMAGE_FILE, THIRD_IMAGE_FILE, FOURTH_IMAGE_FILE};
+  void PostRender(std::string outputFile, bool success) {
+    const std::string images[] = {FIRST_IMAGE_FILE, SECOND_IMAGE_FILE,
+                                  THIRD_IMAGE_FILE, FOURTH_IMAGE_FILE};
 
     CompareImageFile(images[gTestStep], outputFile, 0.98f);
 
-    if(gTestStep + 1 < NUMBER_OF_STEPS)
-    {
+    if (gTestStep + 1 < NUMBER_OF_STEPS) {
       PrepareNextTest();
-    }
-    else
-    {
+    } else {
       mApplication.Quit();
     }
   }
 
-  Actor LoadScene(std::string sceneName, CameraActor camera)
-  {
-    ResourceBundle::PathProvider pathProvider = [](ResourceType::Value type)
-    {
+  Actor LoadScene(std::string sceneName, CameraActor camera) {
+    ResourceBundle::PathProvider pathProvider = [](ResourceType::Value type) {
       return RESOURCE_TYPE_DIRS[type];
     };
 
@@ -230,13 +215,15 @@ private:
     std::vector<LightParameters> lights;
     std::vector<AnimationDefinition> animations;
 
-    LoadResult output{resources, scene, metaData, animations, animGroups, cameraParameters, lights};
+    LoadResult output{resources,        scene, metaData, animations, animGroups,
+                      cameraParameters, lights};
 
-    Dali::Scene3D::Loader::ModelLoader modelLoader(sceneFile, pathProvider(ResourceType::Mesh) + "/", output);
+    Dali::Scene3D::Loader::ModelLoader modelLoader(
+        ToDaliString(sceneFile),
+        ToDaliString(pathProvider(ResourceType::Mesh) + "/"), output);
     modelLoader.LoadModel(pathProvider);
 
-    if (cameraParameters.empty())
-    {
+    if (cameraParameters.empty()) {
       cameraParameters.push_back(CameraParameters());
       cameraParameters[0].matrix.SetTranslation(CAMERA_DEFAULT_POSITION);
     }
@@ -246,23 +233,23 @@ private:
 
     ViewProjection viewProjection = cameraParameters[0].GetViewProjection();
     Transforms xforms{MatrixStack{}, viewProjection};
-    Scene3D::Loader::ShaderManagerPtr   shaderManager = new Scene3D::Loader::ShaderManager();
-    NodeDefinition::CreateParams nodeParams{resources, xforms, shaderManager, {}, {}, {}};
+    Scene3D::Loader::ShaderManagerPtr shaderManager =
+        new Scene3D::Loader::ShaderManager();
+    NodeDefinition::CreateParams nodeParams{resources, xforms, shaderManager,
+                                            {},        {},     {}};
     Customization::Choices choices;
 
     Actor sceneRoot = Actor::New();
     SetActorCentered(sceneRoot);
 
-    for (auto root : scene.GetRoots())
-    {
+    for (auto root : scene.GetRoots()) {
       auto resourceRefs = resources.CreateRefCounter();
       scene.CountResourceRefs(root, choices, resourceRefs);
       resources.mReferenceCounts = std::move(resourceRefs);
       resources.CountEnvironmentReferences();
       resources.LoadResources(pathProvider);
 
-      if (auto actor = scene.CreateNodes(root, choices, nodeParams))
-      {
+      if (auto actor = scene.CreateNodes(root, choices, nodeParams)) {
         scene.ConfigureSkinningShaders(resources, actor,
                                        std::move(nodeParams.mSkinnables));
 
@@ -275,24 +262,22 @@ private:
       }
     }
 
-    if (!animations.empty())
-    {
-      auto getActor = [&sceneRoot](const Scene3D::Loader::AnimatedProperty &property)
-      {
-        return sceneRoot.FindChildByName(property.mNodeName);
-      };
+    if (!animations.empty()) {
+      auto getActor =
+          [&sceneRoot](const Scene3D::Loader::AnimatedProperty &property) {
+            return sceneRoot.FindChildByName(property.mNodeName);
+          };
 
       mAnimation = animations[0].ReAnimate(getActor);
       mAnimation.SetLooping(false);
 
-      //Set speed to be x100
+      // Set speed to be x100
       mAnimation.SetSpeedFactor(100.0f);
 
       // Wait until all animations are finished.
-      mAnimation.FinishedSignal().Connect(this, &Scene3DTest::OnFinishedAnimation);
-    }
-    else
-    {
+      mAnimation.FinishedSignal().Connect(this,
+                                          &Scene3DTest::OnFinishedAnimation);
+    } else {
       mAnimation.Reset();
     }
 
