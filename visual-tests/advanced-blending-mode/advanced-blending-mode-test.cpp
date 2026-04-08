@@ -53,7 +53,7 @@ public:
     imagePropertyMap.Insert(Toolkit::ImageVisual::Property::URL, BLEND_IMAGE );
     imageView.SetProperty(Toolkit::ImageView::Property::IMAGE, imagePropertyMap);
     imageView.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_CENTER);
-    imageView.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_CENTER);
+    imageView.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
     imageView.SetProperty(Actor::Property::SIZE, Vector2(600, 600));
     window.Add(imageView);
     imageView.ResourceReadySignal().Connect(this, &AdvancedBlendingModeTest::OnReady);
@@ -65,7 +65,7 @@ public:
     colorVisualMap_1.Insert(Toolkit::Visual::Property::PREMULTIPLIED_ALPHA, true);
     control_1.SetProperty(Toolkit::Control::Property::BACKGROUND, colorVisualMap_1);
     control_1.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_CENTER);
-    control_1.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_CENTER);
+    control_1.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
     control_1.SetProperty(Actor::Property::POSITION, Vector2(0, 0));
     control_1.SetProperty(Actor::Property::SIZE, Vector2(600, 200));
     if(Dali::Capabilities::IsBlendEquationSupported(Dali::DevelBlendEquation::SCREEN))
@@ -81,7 +81,7 @@ public:
     colorVisualMap_2.Insert(Toolkit::Visual::Property::PREMULTIPLIED_ALPHA, true);
     control_2.SetProperty(Toolkit::Control::Property::BACKGROUND, colorVisualMap_2);
     control_2.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_CENTER);
-    control_2.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_CENTER);
+    control_2.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
     control_2.SetProperty(Actor::Property::POSITION, Vector2(0, 200));
     control_2.SetProperty(Actor::Property::SIZE, Vector2(600, 200));
     if(Dali::Capabilities::IsBlendEquationSupported(Dali::DevelBlendEquation::SCREEN))
@@ -97,7 +97,7 @@ public:
     colorVisualMap_3.Insert(Toolkit::Visual::Property::PREMULTIPLIED_ALPHA, true);
     control_3.SetProperty(Toolkit::Control::Property::BACKGROUND, colorVisualMap_3);
     control_3.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_CENTER);
-    control_3.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_CENTER);
+    control_3.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
     control_3.SetProperty(Actor::Property::POSITION, Vector2(0, 400));
     control_3.SetProperty(Actor::Property::SIZE, Vector2(600, 200));
     if(Dali::Capabilities::IsBlendEquationSupported(Dali::DevelBlendEquation::SCREEN))

@@ -88,7 +88,7 @@ public:
 
         imageView.SetProperty(Actor::Property::SIZE, Vector2(IMAGE_SIZE, IMAGE_SIZE));
         imageView.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-        imageView.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+        imageView.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
         imageView.SetProperty(Actor::Property::POSITION_Y, yPosition);
         imageView.SetProperty(Actor::Property::POSITION_X, xPosition);
         defaultWindow.Add(imageView);

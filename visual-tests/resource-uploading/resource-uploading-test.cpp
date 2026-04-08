@@ -82,7 +82,7 @@ class ResourceUploadingTest: public VisualTest
     // Create a container to layout the images.
     FlexContainer container = FlexContainer::New();
     container.SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
-    container.SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
+    container.SetProperty( Actor::Property::PIVOT, Pivot::CENTER );
     container.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
     Vector3 offset( 0.9f, 0.70f, 0.0f );
     container.SetProperty( Actor::Property::SIZE_MODE_FACTOR, offset );
@@ -97,7 +97,7 @@ class ResourceUploadingTest: public VisualTest
       imagePropertyMap.Insert( ImageVisual::Property::URL, IMAGE_PATH[0] );
       mImageViews[x].SetProperty(ImageView::Property::IMAGE, imagePropertyMap );
       mImageViews[x].SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
-      mImageViews[x].SetProperty( Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER );
+      mImageViews[x].SetProperty( Actor::Property::PIVOT, Pivot::CENTER );
       mImageViews[x].SetProperty( FlexContainer::ChildProperty::FLEX, 0.5f );
       mImageViews[x].SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT );
       container.Add( mImageViews[x] );

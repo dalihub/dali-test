@@ -113,7 +113,7 @@ void VisualTest::SetupOffscreenRenderTask(Dali::Window window, Dali::CameraActor
     {
       mCameraActor = CameraActor::New(Vector2(window.GetSize().GetWidth(), window.GetSize().GetHeight()));
       mCameraActor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
-      mCameraActor.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER);
+      mCameraActor.SetProperty(Actor::Property::PIVOT, Pivot::CENTER);
       mCameraActor.SetInvertYAxis(true);
       window.Add(mCameraActor);
 

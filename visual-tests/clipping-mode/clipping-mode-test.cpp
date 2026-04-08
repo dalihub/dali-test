@@ -79,7 +79,7 @@ private:
     mApplication.GetWindow().Add(mContainer);
 
     Control A = Control::New();
-    A[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+    A[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
     A[Actor::Property::SIZE] = Vector2(200.0f, 200.0f);
     A[Actor::Property::POSITION] = Vector2(100.0f, 100.0f);
     A[Actor::Property::CLIPPING_MODE] = clippingMode;
@@ -87,7 +87,7 @@ private:
     mContainer.Add(A);
 
     Control B = Control::New();
-    B[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+    B[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
     B[Actor::Property::SIZE] = Vector2(200.0f, 200.0f);
     B[Actor::Property::POSITION] = Vector2(50.0f, 50.0f);
     B[Actor::Property::CLIPPING_MODE] = clippingMode;
@@ -95,7 +95,7 @@ private:
     A.Add(B);
 
     Control C = Control::New();
-    C[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+    C[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
     C[Actor::Property::SIZE] = Vector2(200.0f, 200.0f);
     C[Actor::Property::POSITION] = Vector2(100.0f, -50.0f);
     C[Control::Property::BACKGROUND] = Color::YELLOW;
@@ -119,7 +119,7 @@ private:
       G(black)   H(grey)
     */
     Control A = Control::New();
-    A[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+    A[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
     A[Actor::Property::SIZE] = Vector2(300.0f, 300.0f);
     A[Actor::Property::POSITION] = Vector2(100.0f, 100.0f);
     A[Actor::Property::CLIPPING_MODE] = clippingMode;
@@ -127,7 +127,7 @@ private:
     mContainer.Add(A);
 
     Control B = Control::New();
-    B[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+    B[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
     B[Actor::Property::SIZE] = Vector2(300.0f, 300.0f);
     B[Actor::Property::POSITION] = Vector2(50.0f, 50.0f);
     B[Actor::Property::CLIPPING_MODE] = clippingMode;
@@ -135,7 +135,7 @@ private:
     A.Add(B);
 
     Control C = Control::New();
-    C[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+    C[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
     C[Actor::Property::SIZE] = Vector2(250.0f, 250.0f);
     C[Actor::Property::POSITION] = Vector2(50.0f, 50.0f);
     C[Actor::Property::CLIPPING_MODE] = clippingMode;
@@ -143,35 +143,35 @@ private:
     B.Add(C);
 
     Control D = Control::New();
-    D[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+    D[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
     D[Actor::Property::SIZE] = Vector2(200.0f, 200.0f);
     D[Actor::Property::POSITION] = Vector2(-50.0f, -50.0f);
     D[Control::Property::BACKGROUND] = Color::BLUE;
     B.Add(D);
 
     Control E = Control::New();
-    E[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+    E[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
     E[Actor::Property::SIZE] = Vector2(100.0f, 100.0f);
     E[Actor::Property::POSITION] = Vector2(170.0f, 320.0f);
     E[Control::Property::BACKGROUND] = Color::MAGENTA;
     mContainer.Add(E);
 
     Control F = Control::New();
-    F[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+    F[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
     F[Actor::Property::SIZE] = Vector2(150.0f, 180.0f);
     F[Actor::Property::POSITION] = Vector2(120.0f, -50.0f);
     F[Control::Property::BACKGROUND] = Color::CYAN;
     A.Add(F);
 
     Control G = Control::New();
-    G[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+    G[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
     G[Actor::Property::SIZE] = Vector2(200.0f, 100.0f);
     G[Actor::Property::POSITION] = Vector2(50.0f, 150.0f);
     G[Control::Property::BACKGROUND] = Color::BLACK;
     C.Add(G);
 
     Control H = Control::New();
-    H[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+    H[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
     H[Actor::Property::SIZE] = Vector2(30.0f, 150.0f);
     H[Actor::Property::POSITION] = Vector2(150.0f, 50.0f);
     H[Control::Property::BACKGROUND] = Color::GREY;

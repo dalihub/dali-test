@@ -68,8 +68,8 @@ public:
     mTextLabel = TextLabel::New();
     mTextLabel.SetProperty(Actor::Property::PARENT_ORIGIN,
                            ParentOrigin::TOP_LEFT);
-    mTextLabel.SetProperty(Actor::Property::ANCHOR_POINT,
-                           AnchorPoint::TOP_LEFT);
+    mTextLabel.SetProperty(Actor::Property::PIVOT,
+                           Pivot::TOP_LEFT);
     mTextLabel.SetProperty(Actor::Property::POSITION, Vector3(0.f, 0.0f, 0.f));
     mTextLabel.SetProperty(TextLabel::Property::POINT_SIZE, 200);
     mTextLabel.SetProperty(TextLabel::Property::ELLIPSIS, false);
@@ -82,8 +82,8 @@ public:
     mTextEditor = TextEditor::New();
     mTextEditor.SetProperty(Actor::Property::PARENT_ORIGIN,
                             ParentOrigin::TOP_LEFT);
-    mTextEditor.SetProperty(Actor::Property::ANCHOR_POINT,
-                            AnchorPoint::TOP_LEFT);
+    mTextEditor.SetProperty(Actor::Property::PIVOT,
+                            Pivot::TOP_LEFT);
     mTextEditor.SetProperty(Actor::Property::POSITION, Vector3(0.f, 0.0f, 0.f));
     mTextEditor.SetProperty(TextEditor::Property::POINT_SIZE, 200);
 

@@ -92,7 +92,7 @@ public:
     mSceneLayer = Layer::New();
     mSceneLayer.SetProperty(Actor::Property::PARENT_ORIGIN,
                             ParentOrigin::CENTER);
-    mSceneLayer.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER);
+    mSceneLayer.SetProperty(Actor::Property::PIVOT, Pivot::CENTER);
     mSceneLayer.SetResizePolicy(ResizePolicy::FILL_TO_PARENT,
                                 Dimension::ALL_DIMENSIONS);
     mSceneLayer[Layer::Property::BEHAVIOR] = Layer::LAYER_3D;
@@ -127,7 +127,7 @@ public:
     auto offscreenUrl = Toolkit::TextureManager::AddTexture(offscreen);
     auto offscreenImage = Toolkit::ImageView::New(offscreenUrl);
     offscreenImage[Actor::Property::PARENT_ORIGIN] = ParentOrigin::CENTER;
-    offscreenImage[Actor::Property::ANCHOR_POINT] = AnchorPoint::CENTER;
+    offscreenImage[Actor::Property::PIVOT] = Pivot::CENTER;
     offscreenImage.SetResizePolicy(ResizePolicy::FILL_TO_PARENT,
                                    Dimension::ALL_DIMENSIONS);
     offscreenImage[Actor::Property::SCALE_Y] = -1; // Invert the image.

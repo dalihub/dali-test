@@ -58,7 +58,7 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     mActor = ImageView::New(ToDaliStringView(ICON_FILE));
-    mActor.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+    mActor.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
     window.Add(mActor);
 
     // Start the test

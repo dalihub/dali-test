@@ -82,7 +82,7 @@ public:
      *    +---------------+
      */
     TableView view = TableView::New(2, 1);
-    view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER);
+    view.SetProperty(Actor::Property::PIVOT, Pivot::CENTER);
     view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
     view.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
     view.SetCellAlignment(Toolkit::TableView::CellPosition(0, 0), HorizontalAlignment::CENTER, VerticalAlignment::CENTER);
@@ -110,7 +110,7 @@ public:
     for(int tree = 0; tree < 2; ++tree)
     {
       Control container = Control::New();
-      container.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_CENTER);
+      container.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
       container.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_CENTER);
       container.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
       Vector4 backgroundColor = tree == 0 ? Vector4(0.77f, 1.0f, 0.77f, 1.0f) : Vector4(0.8f, 0.8f, 1.0f, 1.0f);
@@ -122,7 +122,7 @@ public:
       {
         image[i] = ImageView::New(IMAGES[i]);
         image[i].ResourceReadySignal().Connect(this, &ClippingDrawOrderVerification::OnReady);
-        image[i].SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_CENTER);
+        image[i].SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
 
         if(i == 0)
         {

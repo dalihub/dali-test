@@ -77,7 +77,7 @@ class TextOutlineTest: public VisualTest
     {
       mTextLabel[i] = TextLabel::New();
       mTextLabel[i].SetProperty( Actor::Property::PARENT_ORIGIN,ParentOrigin::TOP_LEFT);
-      mTextLabel[i].SetProperty( Actor::Property::ANCHOR_POINT,AnchorPoint::TOP_LEFT);
+      mTextLabel[i].SetProperty( Actor::Property::PIVOT,Pivot::TOP_LEFT);
 
       // TODO : Since 2.3.32, we change the default value of REMOVE_FRONT_INSET and REMOVE_BACK_INSET as false.
       mTextLabel[i].SetProperty( DevelTextLabel::Property::REMOVE_FRONT_INSET, true);

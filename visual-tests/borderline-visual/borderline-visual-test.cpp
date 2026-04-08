@@ -300,7 +300,7 @@ private:
       // Create new Control and setup default data
       ImageView imageView = ImageView::New();
       imageView[Actor::Property::PARENT_ORIGIN] = ParentOrigin::TOP_LEFT;
-      imageView[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+      imageView[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
       imageView[Actor::Property::SIZE] = controlSize;
       imageView[Actor::Property::POSITION] = controlPosition;
 

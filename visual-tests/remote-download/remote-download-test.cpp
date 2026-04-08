@@ -75,9 +75,9 @@ public:
       mImageViews[i] = Toolkit::ImageView::New(ToDaliStringView(image.url));
       mImageViews[i].SetProperty(Actor::Property::PARENT_ORIGIN,
                                  ParentOrigin::TOP_LEFT);
-      mImageViews[i].SetProperty(Actor::Property::ANCHOR_POINT,
-                                 AnchorPoint::TOP_CENTER);
-      mImageViews[i].SetProperty(Actor::Property::POSITION_USES_ANCHOR_POINT,
+      mImageViews[i].SetProperty(Actor::Property::PIVOT,
+                                 Pivot::TOP_CENTER);
+      mImageViews[i].SetProperty(Actor::Property::POSITION_USES_PIVOT,
                                  false);
       mImageViews[i].SetProperty(Actor::Property::POSITION, image.position);
       mImageViews[i].SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.0f));

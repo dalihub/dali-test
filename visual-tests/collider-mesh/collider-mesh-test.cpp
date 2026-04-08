@@ -70,7 +70,7 @@ public:
     // Create a SceneView
     Scene3D::SceneView sceneView = Handle::New<Scene3D::SceneView>(
         {{Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
-         {Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER},
+         {Actor::Property::PIVOT, Pivot::CENTER},
          {Actor::Property::SIZE, windowSize}});
 
     mSceneView = sceneView;
@@ -82,7 +82,7 @@ public:
         Scene3D::Model::New(TEST_RESOURCES_DIR "collider-mesh/floors2.gltf");
     model.SetProperties({
         {Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
-        {Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER},
+        {Actor::Property::PIVOT, Pivot::CENTER},
     });
     sceneView.Add(model);
 

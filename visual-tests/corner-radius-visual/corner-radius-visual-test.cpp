@@ -297,7 +297,7 @@ private:
       // Create new Control and setup default data
       Control control = Control::New();
       control[Actor::Property::PARENT_ORIGIN] = ParentOrigin::TOP_LEFT;
-      control[Actor::Property::ANCHOR_POINT] = AnchorPoint::TOP_LEFT;
+      control[Actor::Property::PIVOT] = Pivot::TOP_LEFT;
       control[Actor::Property::SIZE] = controlSize;
       control[Actor::Property::POSITION] = controlPosition;
 

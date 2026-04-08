@@ -89,7 +89,7 @@ public:
 
     mAnimIcon = ImageView::New(ICON_IMAGE);
     mAnimIcon.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
-    mAnimIcon.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER);
+    mAnimIcon.SetProperty(Actor::Property::PIVOT, Pivot::CENTER);
 
     mPositionFactorIndex = mAnimIcon.RegisterProperty("positionFactor", 0.2f);
     Constraint constraint = Constraint::New<Vector3>(
