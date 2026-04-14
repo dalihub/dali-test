@@ -25,6 +25,7 @@
 #include <dali/dali.h>
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
+#include <dali/devel-api/object/property-map-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/string-utils.h>
 #include <string>
@@ -69,9 +70,10 @@ public:
 
     // Create a SceneView
     Scene3D::SceneView sceneView = Handle::New<Scene3D::SceneView>(
-        {{Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
-         {Actor::Property::PIVOT, Pivot::CENTER},
-         {Actor::Property::SIZE, windowSize}});
+        CreatePropertyMap({
+          {Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
+          {Actor::Property::PIVOT, Pivot::CENTER},
+          {Actor::Property::SIZE, windowSize}}));
 
     mSceneView = sceneView;
 
@@ -80,10 +82,10 @@ public:
     // Load the model and set IBL
     Scene3D::Model model =
         Scene3D::Model::New(TEST_RESOURCES_DIR "collider-mesh/floors2.gltf");
-    model.SetProperties({
+    model.SetProperties(CreatePropertyMap({
         {Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
         {Actor::Property::PIVOT, Pivot::CENTER},
-    });
+    }));
     sceneView.Add(model);
 
     model.ResourceReadySignal().Connect(this, &ColliderMeshTest::LoadingReady);
