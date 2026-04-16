@@ -17,7 +17,13 @@
 
 // INTERNAL INCLUDES
 #include "visual-test.h"
+
+// To ignore -Wdeprecated-enum-enum-conversion warning from OpenCV headers, at c++23
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-enum-enum-conversion"
 #include "image-util.h"
+#pragma GCC diagnostic pop
+
 #include <dali/devel-api/adaptor-framework/bitmap-saver.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/pixel-data-integ.h>
