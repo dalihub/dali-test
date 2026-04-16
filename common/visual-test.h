@@ -26,6 +26,7 @@
 #include <dali/integration-api/events/touch-event-integ.h>
 #include <cstdlib>
 #include <string>
+#include <functional>
 
 extern char* gTempFilename;
 extern char* gTempDir;
@@ -43,24 +44,27 @@ bool ParseEnvironment(int argc, char** argv, int width, int height);
  * @param[in] WindowHeight The height of the application's main window
  * @note This sets the DPI to be 96 for all tests so that text tests all produce the same output image
  */
-#define DALI_VISUAL_TEST_WITH_WINDOW_SIZE(VisualTestName, InitFunction, WindowWidth, WindowHeight)                                          \
-  int DALI_EXPORT_API main(int argc, char** argv)                                                                                           \
-  {                                                                                                                                         \
-    int n=asprintf(&gTempDir, "/tmp/dali-tests");                                                                                                 \
-    if(n>0)\
-    {\
+#define DALI_VISUAL_TEST_WITH_WINDOW_SIZE_AND_PREPROESS(VisualTestName, InitFunction, WindowWidth, WindowHeight, Preprocess)                  \
+  int DALI_EXPORT_API main(int argc, char** argv)                                                                                             \
+  {                                                                                                                                           \
+    int n=asprintf(&gTempDir, "/tmp/dali-tests");                                                                                             \
+    if(n>0)                                                                                                                                   \
+    {                                                                                                                                         \
       bool cont = ParseEnvironment(argc, argv, WindowWidth, WindowHeight);                                                                    \
       if(!cont) return 0;                                                                                                                     \
-      n=asprintf(&gTempFilename, "%s/%s", gTempDir, #VisualTestName);                                                                           \
+      n=asprintf(&gTempFilename, "%s/%s", gTempDir, #VisualTestName);                                                                         \
       setenv("DALI_DPI_HORIZONTAL", "96", true);                                                                                              \
       setenv("DALI_DPI_VERTICAL", "96", true);                                                                                                \
+      Preprocess();                                                                                                                           \
       Application    application = Application::New(&argc, &argv, "", Application::OPAQUE, Dali::Rect<int>(0, 0, WindowWidth, WindowHeight)); \
       VisualTestName test(application);                                                                                                       \
       application.InitSignal().Connect(&test, &VisualTestName::InitFunction);                                                                 \
       application.MainLoop();                                                                                                                 \
       return gExitValue;                                                                                                                      \
-    }\
+    }                                                                                                                                         \
   }
+
+#define DALI_VISUAL_TEST_WITH_WINDOW_SIZE(VisualTestName, InitFunction, WindowWidth, WindowHeight) DALI_VISUAL_TEST_WITH_WINDOW_SIZE_AND_PREPROESS(VisualTestName, InitFunction, WindowWidth, WindowHeight, std::function<void()>([](){}))
 
 /**
  * DALI_VISUAL_TEST is a wrapper for the boilerplate code to create the main function
