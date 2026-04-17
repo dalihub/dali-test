@@ -16,12 +16,12 @@
  */
 
 // EXTERNAL INCLUDES
-#include <string>
+#include <dali-toolkit/dali-toolkit.h>
 #include <dali/dali.h>
+#include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
-#include <dali-toolkit/dali-toolkit.h>
-#include <dali/devel-api/adaptor-framework/window-devel.h>
+#include <string>
 
 // INTERNAL INCLUDES
 #include "visual-test.h"
@@ -29,118 +29,96 @@
 using namespace Dali;
 using namespace Dali::Toolkit;
 
-namespace
-{
+namespace {
 
-const std::string IMAGE_FILE_1 = TEST_IMAGE_DIR "empty-scene-clear/expected-result-1.png";
-const std::string IMAGE_FILE_2 = TEST_IMAGE_DIR "empty-scene-clear/expected-result-2.png";
-const std::string IMAGE_FILE_3 = TEST_IMAGE_DIR "empty-scene-clear/expected-result-3.png";
+const std::string IMAGE_FILE_1 =
+    TEST_IMAGE_DIR "empty-scene-clear/expected-result-1.png";
+const std::string IMAGE_FILE_2 =
+    TEST_IMAGE_DIR "empty-scene-clear/expected-result-2.png";
+const std::string IMAGE_FILE_3 =
+    TEST_IMAGE_DIR "empty-scene-clear/expected-result-3.png";
 
-enum TestStep
-{
-  FIRST_WINDOW,
-  SECOND_WINDOW,
-  THIRD_WINDOW,
-  NUMBER_OF_STEPS
-};
+enum TestStep { FIRST_WINDOW, SECOND_WINDOW, THIRD_WINDOW, NUMBER_OF_STEPS };
 
 static int gTestStep = -1;
 
-}  // namespace
+} // namespace
 
 /**
- * @brief This is to test the functionality which allows the uploading of textures to the GPU
- * without rendering while the application is paused, and thus, have them available immediately
- * for rendering on resume.
+ * @brief This is to test the functionality which allows the uploading of
+ * textures to the GPU without rendering while the application is paused, and
+ * thus, have them available immediately for rendering on resume.
  */
-class EmptySceneClearTest: public VisualTest
-{
- public:
+class EmptySceneClearTest : public VisualTest {
+public:
+  EmptySceneClearTest(Application &application) : mApplication(application) {}
 
-  EmptySceneClearTest( Application& application )
-    : mApplication( application )
-  {
-  }
-
-  void OnInit( Application& application )
-  {
+  void OnInit(Application &application) {
     Dali::Window window = mApplication.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    mTextLabel = TextLabel::New( "Hello World" );
-    mTextLabel.SetProperty( Actor::Property::PIVOT, Pivot::TOP_LEFT );
-    window.Add( mTextLabel );
+    mTextLabel = TextLabel::New("Hello World");
+    mTextLabel.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+    window.Add(mTextLabel);
 
     // Start the test
     PerformNextTest();
   }
 
 private:
-
-  Dali::Window CreateNewWindow()
-  {
+  Dali::Window CreateNewWindow() {
     PositionSize windowSize;
     windowSize.width = 480;
     windowSize.height = 800;
-    return Dali::Window::New( windowSize, "New window", Dali::Application::OPAQUE );
+    return Dali::Window::New(windowSize, "New window", false);
   }
 
-  void PerformNextTest()
-  {
+  void PerformNextTest() {
     gTestStep++;
-    switch ( gTestStep )
-    {
-      case FIRST_WINDOW:
-      {
-        mTestWindow = mApplication.GetWindow();
-        CaptureWindowAfterFrameRendered(mTestWindow);
-        break;
-      }
-      case SECOND_WINDOW:
-      {
-        // Create an empty window with no renderable actors
-        mSecondWindow = CreateNewWindow();
-        mSecondWindow.SetBackgroundColor( Color::CYAN );
-        mTestWindow = mSecondWindow;
-        CaptureWindowAfterFrameRendered(mTestWindow);
-        break;
-      }
-      case THIRD_WINDOW:
-      {
+    switch (gTestStep) {
+    case FIRST_WINDOW: {
+      mTestWindow = mApplication.GetWindow();
+      CaptureWindowAfterFrameRendered(mTestWindow);
+      break;
+    }
+    case SECOND_WINDOW: {
+      // Create an empty window with no renderable actors
+      mSecondWindow = CreateNewWindow();
+      mSecondWindow.SetBackgroundColor(Color::CYAN);
+      mTestWindow = mSecondWindow;
+      CaptureWindowAfterFrameRendered(mTestWindow);
+      break;
+    }
+    case THIRD_WINDOW: {
 
-        // Create another empty window with no renderable actors
-        mThirdWindow = CreateNewWindow();
-        mThirdWindow.SetBackgroundColor( Color::RED );
-        mTestWindow = mThirdWindow;
-        CaptureWindowAfterFrameRendered(mTestWindow);
-        break;
-      }
-      default:
-        break;
+      // Create another empty window with no renderable actors
+      mThirdWindow = CreateNewWindow();
+      mThirdWindow.SetBackgroundColor(Color::RED);
+      mTestWindow = mThirdWindow;
+      CaptureWindowAfterFrameRendered(mTestWindow);
+      break;
+    }
+    default:
+      break;
     }
   }
 
-  void PostRender(std::string outputFile, bool success)
-  {
-    const std::string images[] = { IMAGE_FILE_1, IMAGE_FILE_2, IMAGE_FILE_3 };
+  void PostRender(std::string outputFile, bool success) {
+    const std::string images[] = {IMAGE_FILE_1, IMAGE_FILE_2, IMAGE_FILE_3};
     CompareImageFile(images[gTestStep], outputFile, 0.95f);
-    if(gTestStep < THIRD_WINDOW)
-    {
+    if (gTestStep < THIRD_WINDOW) {
       PerformNextTest();
-    }
-    else
-    {
+    } else {
       mApplication.Quit();
     }
   }
 
 private:
-
-  Application& mApplication;
+  Application &mApplication;
   Dali::Window mTestWindow;
   Dali::Window mSecondWindow;
   Dali::Window mThirdWindow;
-  TextLabel    mTextLabel;
+  TextLabel mTextLabel;
 };
 
-DALI_VISUAL_TEST( EmptySceneClearTest, OnInit )
+DALI_VISUAL_TEST(EmptySceneClearTest, OnInit)

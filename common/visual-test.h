@@ -19,66 +19,77 @@
  */
 
 // EXTERNAL INCLUDES
+#include <cstdlib>
 #include <dali/dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/events/point.h>
 #include <dali/integration-api/events/touch-event-integ.h>
-#include <cstdlib>
 #include <string>
 
-extern char* gTempFilename;
-extern char* gTempDir;
-extern bool  gFB;
-extern int   gExitValue;
+extern char *gTempFilename;
+extern char *gTempDir;
+extern bool gFB;
+extern int gExitValue;
 
-bool ParseEnvironment(int argc, char** argv, int width, int height);
+bool ParseEnvironment(int argc, char **argv, int width, int height);
 
 /**
- * DALI_VISUAL_TEST_WITH_WINDOW_SIZE is a wrapper for the boilerplate code to create
- * the main function of the visual test application with the given main window size.
+ * DALI_VISUAL_TEST_WITH_WINDOW_SIZE is a wrapper for the boilerplate code to
+ * create the main function of the visual test application with the given main
+ * window size.
  * @param[in] VisualTestName The class name of the visual test
- * @param[in] InitFunction The name of the callback function to connect with the application's InitSignal
+ * @param[in] InitFunction The name of the callback function to connect with the
+ * application's InitSignal
  * @param[in] WindowWidth The width of the application's main window
  * @param[in] WindowHeight The height of the application's main window
- * @note This sets the DPI to be 96 for all tests so that text tests all produce the same output image
+ * @note This sets the DPI to be 96 for all tests so that text tests all produce
+ * the same output image
  */
-#define DALI_VISUAL_TEST_WITH_WINDOW_SIZE(VisualTestName, InitFunction, WindowWidth, WindowHeight)                                          \
-  int DALI_EXPORT_API main(int argc, char** argv)                                                                                           \
-  {                                                                                                                                         \
-    int n=asprintf(&gTempDir, "/tmp/dali-tests");                                                                                                 \
-    if(n>0)\
-    {\
-      bool cont = ParseEnvironment(argc, argv, WindowWidth, WindowHeight);                                                                    \
-      if(!cont) return 0;                                                                                                                     \
-      n=asprintf(&gTempFilename, "%s/%s", gTempDir, #VisualTestName);                                                                           \
-      setenv("DALI_DPI_HORIZONTAL", "96", true);                                                                                              \
-      setenv("DALI_DPI_VERTICAL", "96", true);                                                                                                \
-      Application    application = Application::New(&argc, &argv, "", Application::OPAQUE, Dali::Rect<int>(0, 0, WindowWidth, WindowHeight)); \
-      VisualTestName test(application);                                                                                                       \
-      application.InitSignal().Connect(&test, &VisualTestName::InitFunction);                                                                 \
-      application.MainLoop();                                                                                                                 \
-      return gExitValue;                                                                                                                      \
-    }\
+#define DALI_VISUAL_TEST_WITH_WINDOW_SIZE(VisualTestName, InitFunction,        \
+                                          WindowWidth, WindowHeight)           \
+  int DALI_EXPORT_API main(int argc, char **argv) {                            \
+    int n = asprintf(&gTempDir, "/tmp/dali-tests");                            \
+    if (n > 0) {                                                               \
+      bool cont = ParseEnvironment(argc, argv, WindowWidth, WindowHeight);     \
+      if (!cont)                                                               \
+        return 0;                                                              \
+      n = asprintf(&gTempFilename, "%s/%s", gTempDir, #VisualTestName);        \
+      setenv("DALI_DPI_HORIZONTAL", "96", true);                               \
+      setenv("DALI_DPI_VERTICAL", "96", true);                                 \
+      Rect<int> windowSize{0, 0, WindowWidth, WindowHeight};                   \
+      WindowData windowData;                                                   \
+      windowData.SetTransparency(false);                                       \
+      windowData.SetPositionSize(windowSize);                                  \
+      Application application =                                                \
+          Application::New(&argc, &argv, "", false, windowData);               \
+      VisualTestName test(application);                                        \
+      application.InitSignal().Connect(&test, &VisualTestName::InitFunction);  \
+      application.MainLoop();                                                  \
+      return gExitValue;                                                       \
+    }                                                                          \
   }
 
 /**
- * DALI_VISUAL_TEST is a wrapper for the boilerplate code to create the main function
- * of the visual test application with the default main window size (i.e. 480 x 800).
+ * DALI_VISUAL_TEST is a wrapper for the boilerplate code to create the main
+ * function of the visual test application with the default main window size
+ * (i.e. 480 x 800).
  * @param[in] VisualTestName The class name of the visual test
- * @param[in] InitFunction The name of the callback function to connect with the application's InitSignal
+ * @param[in] InitFunction The name of the callback function to connect with the
+ * application's InitSignal
  */
-#define DALI_VISUAL_TEST(VisualTestName, InitFunction) DALI_VISUAL_TEST_WITH_WINDOW_SIZE(VisualTestName, InitFunction, 480, 800)
+#define DALI_VISUAL_TEST(VisualTestName, InitFunction)                         \
+  DALI_VISUAL_TEST_WITH_WINDOW_SIZE(VisualTestName, InitFunction, 480, 800)
 
 // The default threshold for image similarity
 #define DEFAULT_IMAGE_SIMILARITY_THRESHOLD 0.99f
 
 /**
- * @brief This class provides the functionality of visual test by capturing the content
- *        rendered by the GPU in the given window and compare it with a given image.
+ * @brief This class provides the functionality of visual test by capturing the
+ * content rendered by the GPU in the given window and compare it with a given
+ * image.
  */
-class VisualTest : public Dali::ConnectionTracker
-{
+class VisualTest : public Dali::ConnectionTracker {
 public:
   /**
    * @brief Constructor.
@@ -94,16 +105,24 @@ protected:
   /**
    * @brief Capture the content of the given window rendered by GPU
    * @param[in] window The window to be captured
-   * @param[in] customCamera The custom camera to be used to render the offscreen frame buffer (or otherwise a default camera will be created and used )
+   * @param[in] customCamera The custom camera to be used to render the
+   * offscreen frame buffer (or otherwise a default camera will be created and
+   * used )
    */
-  void CaptureWindow(Dali::Window window, Dali::CameraActor customCamera = Dali::CameraActor());
+  void CaptureWindow(Dali::Window window,
+                     Dali::CameraActor customCamera = Dali::CameraActor());
 
   /**
-   * @brief Capture the content of the given window rendered by GPU after 1 frame rendered
+   * @brief Capture the content of the given window rendered by GPU after 1
+   * frame rendered
    * @param[in] window The window to be captured
-   * @param[in] customCamera The custom camera to be used to render the offscreen frame buffer (or otherwise a default camera will be created and used )
+   * @param[in] customCamera The custom camera to be used to render the
+   * offscreen frame buffer (or otherwise a default camera will be created and
+   * used )
    */
-  void CaptureWindowAfterFrameRendered(Dali::Window window, Dali::CameraActor customCamera = Dali::CameraActor());
+  void CaptureWindowAfterFrameRendered(
+      Dali::Window window,
+      Dali::CameraActor customCamera = Dali::CameraActor());
 
   /**
    * @brief Compare the given area in the two image files.
@@ -111,43 +130,54 @@ protected:
    * @param[in] fileName2 The second image file
    * @param[in] similarityThreshold The threshold for similarity comparison
    * @param[in] areaToCompare The area to be compared
-   * @return Whether the similarity of the given area in the two images reaches the given threshold
+   * @return Whether the similarity of the given area in the two images reaches
+   * the given threshold
    */
-  bool CompareImageFile(const std::string fileName1, const std::string fileName2, const float similarityThreshold, const Dali::Rect<uint16_t>& areaToCompare=Dali::Rect<uint16_t>(0u, 0u, 0u, 0u));
+  bool CompareImageFile(const std::string fileName1,
+                        const std::string fileName2,
+                        const float similarityThreshold,
+                        const Dali::Rect<uint16_t> &areaToCompare =
+                            Dali::Rect<uint16_t>(0u, 0u, 0u, 0u));
 
   /**
    * @brief Emits a single touch
    *
    * touchPoint is mutable.
-   * touchPoint state of TouchPoint is irrelevant upon input, EmitTouch() sets it internally
+   * touchPoint state of TouchPoint is irrelevant upon input, EmitTouch() sets
+   * it internally
    *
    * @param[in] touchPoint Valid TouchPoint structure
    */
-  void EmitTouch(Dali::TouchPoint& touchPoint);
+  void EmitTouch(Dali::TouchPoint &touchPoint);
 
 private:
   /**
-   * @brief This virtual function will be called after the offscreen window frame buffer has been rendered.
+   * @brief This virtual function will be called after the offscreen window
+   * frame buffer has been rendered.
    *
-   * @param[in] outputFile The output file that the offscreen has been rendered to.
+   * @param[in] outputFile The output file that the offscreen has been rendered
+   * to.
    * @param[in] writeSuccess True if the file was written successfully.
    *
-   * @note  The visual test case must implement this function to check the result of the offscreen frame buffer.
+   * @note  The visual test case must implement this function to check the
+   * result of the offscreen frame buffer.
    */
   virtual void PostRender(std::string outputFile, bool writeSuccess) = 0;
 
   /**
    * @brief Set up the offscreen render task for offscreen rendering.
    * @param[in] window The window to be rendered
-   * @param[in] customCamera The custom camera to be used to render the offscreen frame buffer
+   * @param[in] customCamera The custom camera to be used to render the
+   * offscreen frame buffer
    */
-  void SetupOffscreenRenderTask(Dali::Window window, Dali::CameraActor customCamera);
+  void SetupOffscreenRenderTask(Dali::Window window,
+                                Dali::CameraActor customCamera);
 
   /**
    * @brief Callback function when a RenderTask has finished
    * @param[in] task The render task
    */
-  void OnOffscreenRenderFinished(Dali::RenderTask& task);
+  void OnOffscreenRenderFinished(Dali::RenderTask &task);
 
   /**
    * @brief Callback function when a window has been resized
@@ -156,20 +186,22 @@ private:
    */
   void OnWindowResized(Dali::Window window, Dali::Window::WindowSize size);
 
-  void OnAnimationFinished1(Dali::Animation& /* not used */);
-  void OnAnimationFinished2(Dali::Animation& /* not used */);
-  void OnAnimationFinished3(Dali::Animation& /* not used */);
-  void OnAnimationFinished4(Dali::Animation& /* not used */);
+  void OnAnimationFinished1(Dali::Animation & /* not used */);
+  void OnAnimationFinished2(Dali::Animation & /* not used */);
+  void OnAnimationFinished3(Dali::Animation & /* not used */);
+  void OnAnimationFinished4(Dali::Animation & /* not used */);
 
 private:
-  Dali::Texture     mTexture;     ///< The texture for the offscreen rendering
+  Dali::Texture mTexture;         ///< The texture for the offscreen rendering
   Dali::FrameBuffer mFrameBuffer; ///< The frame buffer for offscreen rendering
 
-  Dali::RenderTask              mOffscreenRenderTask; ///< The offscreen render task
-  Dali::CameraActor             mCameraActor;         ///< The camera actor for the offscreen render task
-  Dali::WeakHandle<Dali::Layer> mWindow;              ///< The weak handle of the window to be rendered
+  Dali::RenderTask mOffscreenRenderTask; ///< The offscreen render task
+  Dali::CameraActor
+      mCameraActor; ///< The camera actor for the offscreen render task
+  Dali::WeakHandle<Dali::Layer>
+      mWindow; ///< The weak handle of the window to be rendered
 
-  Dali::Window      mCaptureRequestedWindow;
+  Dali::Window mCaptureRequestedWindow;
   Dali::CameraActor mCaptureRequestedCamera;
 };
 
