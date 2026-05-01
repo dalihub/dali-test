@@ -196,10 +196,7 @@ private:
   Dali::FrameBuffer mFrameBuffer; ///< The frame buffer for offscreen rendering
 
   Dali::RenderTask mOffscreenRenderTask; ///< The offscreen render task
-  Dali::CameraActor
-      mCameraActor; ///< The camera actor for the offscreen render task
-  Dali::WeakHandle<Dali::Layer>
-      mWindow; ///< The weak handle of the window to be rendered
+  Dali::WeakHandle<Dali::Layer> mWindow; ///< The weak handle of the window to be rendered
 
   Dali::Window mCaptureRequestedWindow;
   Dali::CameraActor mCaptureRequestedCamera;
