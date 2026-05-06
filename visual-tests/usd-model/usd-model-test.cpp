@@ -81,7 +81,7 @@ class UsdModelTest : public VisualTest {
 public:
   UsdModelTest(Application &application) : mApplication(application) {}
 
-  void OnInit(Application &application) {
+  void OnInit(Application application) {
     Dali::Window window = mApplication.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
     window.GetRootLayer().SetProperty(Layer::Property::BEHAVIOR,
@@ -158,7 +158,7 @@ private:
     CaptureWindowAfterFrameRendered(mApplication.GetWindow());
   }
 
-  void OnFinishedAnimation(Animation &animation) {
+  void OnFinishedAnimation(Animation animation) {
     CaptureWindowAfterFrameRendered(mApplication.GetWindow());
   }
 

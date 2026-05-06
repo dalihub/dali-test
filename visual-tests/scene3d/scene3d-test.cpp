@@ -88,7 +88,7 @@ class Scene3DTest : public VisualTest {
 public:
   Scene3DTest(Application &application) : mApplication(application) {}
 
-  void OnInit(Application &application) {
+  void OnInit(Application application) {
     Dali::Window window = mApplication.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
     window.GetRootLayer().SetProperty(Layer::Property::BEHAVIOR,
@@ -183,7 +183,7 @@ private:
     }
   }
 
-  void OnFinishedAnimation(Animation &animation) {
+  void OnFinishedAnimation(Animation animation) {
     CaptureWindowAfterFrameRendered(mApplication.GetWindow());
   }
 

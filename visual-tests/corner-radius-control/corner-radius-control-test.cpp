@@ -154,7 +154,7 @@ public:
 
   ~CornerRadiusControlTest() {}
 
-  void OnInit(Application &application) {
+  void OnInit(Application application) {
     mWindow = mApplication.GetWindow();
     mWindow.SetBackgroundColor(
         Color::BLACK); // Due to the dog-anim.webp is white background, we make
@@ -217,7 +217,7 @@ private:
     }
   }
 
-  void OnFinishedAnimation(Animation &animation) {
+  void OnFinishedAnimation(Animation animation) {
     // Animation done. Check we need to go to next step
     gAnimationFinished = true;
     if (gAnimationFinished && gResourceReadyCount == TOTAL_RESOURCES) {

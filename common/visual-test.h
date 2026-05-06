@@ -177,7 +177,7 @@ private:
    * @brief Callback function when a RenderTask has finished
    * @param[in] task The render task
    */
-  void OnOffscreenRenderFinished(Dali::RenderTask &task);
+  void OnOffscreenRenderFinished(Dali::RenderTask task);
 
   /**
    * @brief Callback function when a window has been resized
@@ -186,10 +186,10 @@ private:
    */
   void OnWindowResized(Dali::Window window, Dali::Window::WindowSize size);
 
-  void OnAnimationFinished1(Dali::Animation & /* not used */);
-  void OnAnimationFinished2(Dali::Animation & /* not used */);
-  void OnAnimationFinished3(Dali::Animation & /* not used */);
-  void OnAnimationFinished4(Dali::Animation & /* not used */);
+  void OnAnimationFinished1(Dali::Animation /* not used */);
+  void OnAnimationFinished2(Dali::Animation /* not used */);
+  void OnAnimationFinished3(Dali::Animation /* not used */);
+  void OnAnimationFinished4(Dali::Animation /* not used */);
 
 private:
   Dali::Texture mTexture;         ///< The texture for the offscreen rendering

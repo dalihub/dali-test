@@ -77,7 +77,7 @@ public:
       : mApplication(application), mAnimIcon(), mLayer(), mAnimation(),
         mPositionFactorIndex() {}
 
-  void OnInit(Application &application) {
+  void OnInit(Application application) {
     Window window = mApplication.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 

@@ -64,7 +64,7 @@ class TextOutlineTest: public VisualTest
     setenv("DALI_MATCH_SYSTEM_LANGUAGE_DIRECTION", "0", true);
   }
 
-  void OnInit( Application& application )
+  void OnInit( Application application )
   {
     Dali::Window window = mApplication.GetWindow();
     window.SetBackgroundColor(Color::WHITE);

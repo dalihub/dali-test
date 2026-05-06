@@ -61,7 +61,7 @@ class ColliderMeshTest : public VisualTest {
 public:
   ColliderMeshTest(Application &application) : mApplication(application) {}
 
-  void OnInit(Application &application) {
+  void OnInit(Application application) {
     Dali::Window window = mApplication.GetWindow();
     mWindow = window;
     window.SetBackgroundColor(Color::BLACK);

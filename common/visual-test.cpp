@@ -19,10 +19,14 @@
 #include "visual-test.h"
 
 // To ignore -Wdeprecated-enum-enum-conversion warning from OpenCV headers, at c++23
+#if defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-enum-enum-conversion"
+#endif
 #include "image-util.h"
+#if defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
 
 #include <dali/devel-api/adaptor-framework/bitmap-saver.h>
 #include <dali/integration-api/debug.h>
@@ -158,7 +162,7 @@ void VisualTest::CaptureWindowAfterFrameRendered(Dali::Window window, Dali::Came
   firstFrameAnimator.Stop();
 }
 
-void VisualTest::OnAnimationFinished1(Dali::Animation& /* not used */)
+void VisualTest::OnAnimationFinished1(Dali::Animation /* not used */)
 {
   Debug::LogMessage(Debug::INFO, "First Update done()\n");
   Dali::Animation secondFrameAnimator = Dali::Animation::New(0);
@@ -167,7 +171,7 @@ void VisualTest::OnAnimationFinished1(Dali::Animation& /* not used */)
   secondFrameAnimator.Stop();
 }
 
-void VisualTest::OnAnimationFinished2(Dali::Animation& /* not used */)
+void VisualTest::OnAnimationFinished2(Dali::Animation /* not used */)
 {
   Debug::LogMessage(Debug::INFO, "Second Update done(). We can assume that at least 1 frame rendered now.\n");
   Debug::LogMessage(Debug::INFO, "But GPU might not be rendered to buffer well. Render 2 more frames.\n");
@@ -177,7 +181,7 @@ void VisualTest::OnAnimationFinished2(Dali::Animation& /* not used */)
   thirdFrameAnimator.Stop();
 }
 
-void VisualTest::OnAnimationFinished3(Dali::Animation& /* not used */)
+void VisualTest::OnAnimationFinished3(Dali::Animation /* not used */)
 {
   Debug::LogMessage(Debug::INFO, "Third Update done()\n");
   Dali::Animation fourthFrameAnimator = Dali::Animation::New(0);
@@ -186,7 +190,7 @@ void VisualTest::OnAnimationFinished3(Dali::Animation& /* not used */)
   fourthFrameAnimator.Stop();
 }
 
-void VisualTest::OnAnimationFinished4(Dali::Animation& /* not used */)
+void VisualTest::OnAnimationFinished4(Dali::Animation /* not used */)
 {
   Debug::LogMessage(Debug::INFO, "Fourth Update done(). We can assume that at least 1 frame rendered to surface now. Capturing window\n");
 
@@ -211,7 +215,7 @@ void VisualTest::CaptureWindow(Dali::Window window, Dali::CameraActor customCame
   }
 }
 
-void VisualTest::OnOffscreenRenderFinished(RenderTask& task)
+void VisualTest::OnOffscreenRenderFinished(RenderTask task)
 {
   Debug::LogMessage(Debug::INFO, "VisualTest::OnOffscreenRenderFinished(), capturing offscreen\n");
 
