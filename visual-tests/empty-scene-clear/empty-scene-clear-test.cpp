@@ -53,7 +53,7 @@ class EmptySceneClearTest : public VisualTest {
 public:
   EmptySceneClearTest(Application &application) : mApplication(application) {}
 
-  void OnInit(Application &application) {
+  void OnInit(Application application) {
     Dali::Window window = mApplication.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 

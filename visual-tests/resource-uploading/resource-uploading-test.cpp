@@ -74,7 +74,7 @@ class ResourceUploadingTest: public VisualTest
   {
   }
 
-  void OnInit( Application& application )
+  void OnInit( Application application )
   {
     Window defaultWindow = mApplication.GetWindow();
     defaultWindow.SetBackgroundColor(Color::WHITE);

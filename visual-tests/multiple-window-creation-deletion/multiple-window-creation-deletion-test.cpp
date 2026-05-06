@@ -41,7 +41,7 @@ public:
   MultipleWIndowCreationDeletionTest(Application &application)
       : mApplication(application) {}
 
-  void OnInit(Application &application) {
+  void OnInit(Application application) {
     Dali::Window window = mApplication.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 

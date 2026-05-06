@@ -41,7 +41,7 @@ public:
   ~AdvancedBlendingModeTest() = default; // Nothing to do in destructor
 
   // The Init signal is received once (only) during the Application lifetime
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     // Get a handle to the stage
     Window window = application.GetWindow();

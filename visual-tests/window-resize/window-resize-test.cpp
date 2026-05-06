@@ -53,7 +53,7 @@ class WindowResizeTest : public VisualTest {
 public:
   WindowResizeTest(Application &application) : mApplication(application) {}
 
-  void OnInit(Application &application) {
+  void OnInit(Application application) {
     Window window = mApplication.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 

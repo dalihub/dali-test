@@ -61,7 +61,7 @@ class TextWrappingTest : public VisualTest {
 public:
   TextWrappingTest(Application &application) : mApplication(application) {}
 
-  void OnInit(Application &application) {
+  void OnInit(Application application) {
     mWindow = mApplication.GetWindow();
     mWindow.SetBackgroundColor(Color::WHITE);
 
