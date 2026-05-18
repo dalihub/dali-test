@@ -16,10 +16,10 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-scene3d/integration-api/loader/navigation-mesh-factory.h>
 #include <dali-scene3d/public-api/algorithm/navigation-mesh.h>
 #include <dali-scene3d/public-api/controls/model/model.h>
 #include <dali-scene3d/public-api/controls/scene-view/scene-view.h>
-#include <dali-scene3d/public-api/loader/navigation-mesh-factory.h>
 #include <dali-scene3d/public-api/model-components/model-node.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali/dali.h>
@@ -47,7 +47,8 @@ using namespace Dali::Toolkit;
 #define TEST_RESOURCES_DIR
 #endif
 
-namespace {
+namespace
+{
 const std::string IMAGE_FILE = TEST_IMAGE_DIR "collider-mesh/ColliderMeshTest0";
 
 } // namespace
@@ -57,23 +58,26 @@ const std::string IMAGE_FILE = TEST_IMAGE_DIR "collider-mesh/ColliderMeshTest0";
  * textures to the GPU without rendering while the application is paused, and
  * thus, have them available immediately for rendering on resume.
  */
-class ColliderMeshTest : public VisualTest {
+class ColliderMeshTest : public VisualTest
+{
 public:
-  ColliderMeshTest(Application &application) : mApplication(application) {}
+  ColliderMeshTest(Application& application): mApplication(application)
+  {
+  }
 
-  void OnInit(Application application) {
+  void OnInit(Application application)
+  {
     Dali::Window window = mApplication.GetWindow();
-    mWindow = window;
+    mWindow             = window;
     window.SetBackgroundColor(Color::BLACK);
 
     const Vector2 windowSize = window.GetSize();
 
     // Create a SceneView
     Scene3D::SceneView sceneView = Handle::New<Scene3D::SceneView>(
-        CreatePropertyMap({
-          {Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
-          {Actor::Property::PIVOT, Pivot::CENTER},
-          {Actor::Property::SIZE, windowSize}}));
+      CreatePropertyMap({{Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
+                         {Actor::Property::PIVOT, Pivot::CENTER},
+                         {Actor::Property::SIZE, windowSize}}));
 
     mSceneView = sceneView;
 
@@ -81,10 +85,10 @@ public:
 
     // Load the model and set IBL
     Scene3D::Model model =
-        Scene3D::Model::New(TEST_RESOURCES_DIR "collider-mesh/floors2.gltf");
+      Scene3D::Model::New(TEST_RESOURCES_DIR "collider-mesh/floors2.gltf");
     model.SetProperties(CreatePropertyMap({
-        {Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
-        {Actor::Property::PIVOT, Pivot::CENTER},
+      {Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
+      {Actor::Property::PIVOT, Pivot::CENTER},
     }));
     sceneView.Add(model);
 
@@ -93,9 +97,11 @@ public:
   }
 
 private:
-  static bool OnModelHit(Scene3D::Model model, Scene3D::ModelNode node) {
+  static bool OnModelHit(Scene3D::Model model, Scene3D::ModelNode node)
+  {
     static const std::vector<std::string> NAMES = {"room0", "room1", "room2"};
-    for (auto name : NAMES) {
+    for(auto name : NAMES)
+    {
       auto actor = model.FindChildModelNodeByName(ToDaliStringView(name));
       actor.SetProperty(Actor::Property::COLOR, Color::WHITE);
     }
@@ -103,16 +109,17 @@ private:
     return true;
   }
 
-  void LoadingReady(Control control) {
+  void LoadingReady(Control control)
+  {
     using Scene3D::Model;
-    auto model = Model::DownCast(control);
+    auto model  = Model::DownCast(control);
     auto camera = model.GenerateCamera(0);
 
     mSceneView.AddCamera(camera);
     mSceneView.SelectCamera(mSceneView.GetCameraCount() - 1);
 
     [[maybe_unused]] auto transform =
-        Dali::DevelActor::GetWorldTransform(camera);
+      Dali::DevelActor::GetWorldTransform(camera);
 
     // Disconnect signal to avoid calling it recursively!
     model.ResourceReadySignal().Disconnect(this,
@@ -123,11 +130,11 @@ private:
     [[maybe_unused]] auto room2 = model.FindChildModelNodeByName("room2");
 
     auto collider0 = Scene3D::Loader::NavigationMeshFactory::CreateFromFile(
-        TEST_RESOURCES_DIR "collider-mesh/room0.col");
+      TEST_RESOURCES_DIR "collider-mesh/room0.col");
     auto collider1 = Scene3D::Loader::NavigationMeshFactory::CreateFromFile(
-        TEST_RESOURCES_DIR "collider-mesh/room1.col");
+      TEST_RESOURCES_DIR "collider-mesh/room1.col");
     auto collider2 = Scene3D::Loader::NavigationMeshFactory::CreateFromFile(
-        TEST_RESOURCES_DIR "collider-mesh/room2.col");
+      TEST_RESOURCES_DIR "collider-mesh/room2.col");
 
     // unparent one node to simulate case of setting the collider mesh while
     // node is not a part of model tree
@@ -144,17 +151,25 @@ private:
     PerformNextTest(1000);
   }
 
-  bool OnUpdate() {
-    if (mTestStep == 1) {
+  bool OnUpdate()
+  {
+    if(mTestStep == 1)
+    {
       Dali::TouchPoint p(0, Dali::PointState::DOWN, 400, 400);
       EmitTouch(p);
-    } else if (mTestStep == 2) {
+    }
+    else if(mTestStep == 2)
+    {
       Dali::TouchPoint p(0, Dali::PointState::DOWN, 798, 511);
       EmitTouch(p);
-    } else if (mTestStep == 3) {
+    }
+    else if(mTestStep == 3)
+    {
       Dali::TouchPoint p(0, Dali::PointState::DOWN, 568, 238);
       EmitTouch(p);
-    } else if (mTestStep == 4) {
+    }
+    else if(mTestStep == 4)
+    {
       mApplication.Quit();
     }
     CaptureWindowAfterFrameRendered(mWindow);
@@ -164,7 +179,8 @@ private:
 
   Dali::Timer mTimer;
 
-  void PerformNextTest(uint32_t millisDelay = 0) {
+  void PerformNextTest(uint32_t millisDelay = 0)
+  {
     mTimer.Reset();
     // check previous step
     mTimer = Dali::Timer::New(1000);
@@ -172,7 +188,8 @@ private:
     mTimer.Start();
   }
 
-  void PostRender(std::string outputFile, bool success) override {
+  void PostRender(std::string outputFile, bool success) override
+  {
     std::string fname(IMAGE_FILE);
     fname += std::to_string(mTestStep + 1);
     fname += ".png";
@@ -181,10 +198,10 @@ private:
   }
 
 private:
-  Application &mApplication;
-  Dali::Window mWindow;
+  Application&       mApplication;
+  Dali::Window       mWindow;
   Scene3D::SceneView mSceneView;
-  int mTestStep{-1};
+  int                mTestStep{-1};
 };
 
 DALI_VISUAL_TEST_WITH_WINDOW_SIZE(ColliderMeshTest, OnInit, 1280, 720)
