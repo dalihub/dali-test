@@ -17,6 +17,15 @@
 
 // EXTERNAL INCLUDES
 #include <dali-scene3d/dali-scene3d.h>
+#include <dali-scene3d/integration-api/loader/animated-property.h>
+#include <dali-scene3d/integration-api/loader/animation-definition.h>
+#include <dali-scene3d/integration-api/loader/camera-parameters.h>
+#include <dali-scene3d/integration-api/loader/index.h>
+#include <dali-scene3d/integration-api/loader/light-parameters.h>
+#include <dali-scene3d/integration-api/loader/model-loader.h>
+#include <dali-scene3d/integration-api/loader/resource-bundle.h>
+#include <dali-scene3d/integration-api/loader/scene-definition.h>
+#include <dali-scene3d/integration-api/loader/shader-manager.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/image-loader/texture-manager.h>
 #include <dali/dali.h>
