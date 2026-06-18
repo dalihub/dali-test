@@ -17,6 +17,24 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
+#include <cstdlib>
+
+// srand override alone doesn't seem to work from one machine to another so just return the same consecutive values
+extern "C" DALI_EXPORT_API int rand()
+{
+  static bool useIncreasingValue(false);
+  useIncreasingValue=!useIncreasingValue;
+  if(useIncreasingValue)
+  {
+    static int increasingValue = 1000;
+    increasingValue += 1000;
+    return increasingValue;
+  }
+
+  static int decreasingValue = __INT32_MAX__;
+  decreasingValue -= 1000;
+  return decreasingValue;
+}
 
 /// We want to use the default seed so everything looks the same in the demos
 extern "C" DALI_EXPORT_API void srand(unsigned int seed)
