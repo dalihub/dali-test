@@ -91,3 +91,4 @@ INCLUDE_DIRECTORIES(${ROOT_SRC_DIR}/common)
 
 ADD_SUBDIRECTORY(visual-tests)
 ADD_SUBDIRECTORY(dali-image-compare)
+ADD_SUBDIRECTORY(dali-override)
