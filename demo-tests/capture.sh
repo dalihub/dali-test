@@ -3,6 +3,9 @@
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Get the script name without extension for default directory naming
+SCRIPT_NAME=$(basename "$0" .sh)
+
 export DISPLAY=:99
 export LD_PRELOAD=$DESKTOP_PREFIX/lib/libdali-override.so
 export DALI_DPI_HORIZONTAL=96
@@ -18,8 +21,11 @@ Usage: $(basename "$0") [OPTIONS] [app] [width] [height]
 Capture screenshots of DALI demo applications.
 
 Options:
-  -h, --help      Show this help message and exit
-  -l, --list FILE Process applications from specified list file
+  -h, --help           Show this help message and exit
+  -l, --list FILE      Process applications from specified list file
+  -d, --directory DIR  Directory to store output PNG files
+                       (default: /tmp/{script-name}-YYYYMMDDHHMMSS.NNNNNNNNN)
+  -n, --no-logs        Disable application logging (output redirected to /dev/null)
 
 Arguments:
   app             Application name to run (searched in PATH)
@@ -31,6 +37,7 @@ Examples:
   $(basename "$0") -l dali-demo.list         Process apps from list file
   $(basename "$0") my-app                    Run single app with default size
   $(basename "$0") my-app 1920 1080          Run single app with custom size
+  $(basename "$0") -d /output my-app         Save screenshot to /output/
 EOF
 }
 
@@ -43,19 +50,30 @@ run_and_capture() {
     [ "$width" = "" ] && width=$DALI_WINDOW_WIDTH
     [ "$height" = "" ] && height=$DALI_WINDOW_HEIGHT
 
-    # Start Xvfb
-    Xvfb :99 -screen 0 ${width}x${height}x24 &
+    # Print app info to stdout
+    echo "Running: $app (${width}x${height})"
+
+    # Determine output destination for app logs
+    local output_dest
+    if [ "$NO_LOGS" = true ]; then
+        output_dest="/dev/null"
+    else
+        output_dest="$OUTPUT_DIR/logs/${app}.log"
+    fi
+
+    # Start Xvfb with output redirected
+    Xvfb :99 -screen 0 ${width}x${height}x24 >> "$output_dest" 2>&1 &
     local xvfb_pid=$!
 
-    # Run the application in xvfb-run
-    $app &
+    # Run the application with output redirected
+    $app >> "$output_dest" 2>&1 &
     local app_pid=$!
 
     # Wait for application to start
-    sleep 5
+    sleep 2
 
-    # Capture screenshot
-    import -display :99 -window root "$SCRIPT_DIR/reference/${app}.png"
+    # Capture screenshot to output directory (redirect output to log)
+    import -display :99 -window root "$OUTPUT_DIR/${app}.png" >> "$output_dest" 2>&1
 
     # Kill the application
     kill $app_pid
@@ -67,6 +85,8 @@ LIST_FILE=""
 APP_NAME=""
 APP_WIDTH=""
 APP_HEIGHT=""
+OUTPUT_DIR=""
+NO_LOGS=false
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -84,6 +104,19 @@ while [[ $# -gt 0 ]]; do
             LIST_FILE="$2"
             shift 2
             ;;
+        -d|--directory)
+            if [ -z "$2" ]; then
+                echo "Error: --directory requires a directory argument"
+                show_help
+                exit 1
+            fi
+            OUTPUT_DIR="$2"
+            shift 2
+            ;;
+        -n|--no-logs)
+            NO_LOGS=true
+            shift
+            ;;
         *)
             if [ -z "$APP_NAME" ]; then
                 APP_NAME="$1"
@@ -100,6 +133,19 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Set default output directory if not provided
+if [ -z "$OUTPUT_DIR" ]; then
+    OUTPUT_DIR="/tmp/${SCRIPT_NAME}-$(date +%Y%m%d%H%M%S.%N)"
+fi
+
+# Create output directory (always needed for screenshots)
+mkdir -p "$OUTPUT_DIR"
+
+# Create logs subdirectory (unless --no-logs is set)
+if [ "$NO_LOGS" = false ]; then
+    mkdir -p "$OUTPUT_DIR/logs"
+fi
 
 # If --list is specified, process the specified list file
 if [ -n "$LIST_FILE" ]; then
@@ -136,6 +182,7 @@ if [ -n "$LIST_FILE" ]; then
     wait
 
     echo "All applications processed and screenshots captured."
+    echo "Output directory: $OUTPUT_DIR"
 # If an app name is provided, run it directly
 elif [ -n "$APP_NAME" ]; then
     # Check if the app exists in PATH
@@ -145,7 +192,7 @@ elif [ -n "$APP_NAME" ]; then
     fi
 
     run_and_capture "$APP_NAME" "$APP_WIDTH" "$APP_HEIGHT"
-    echo "Screenshot captured for $APP_NAME"
+    echo "Output directory: $OUTPUT_DIR"
 else
     echo "Error: No action specified"
     show_help
