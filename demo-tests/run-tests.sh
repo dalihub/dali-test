@@ -20,7 +20,7 @@ Usage()
 }
 
 # Initialise the options
-OPTS=$(getopt -o vhxd:n:t: --long verbose,help,xml,directory:,no-logs,test: -n "$(basename "$0")" -- "$@")
+OPTS=$(getopt -o vhxd:n:t:s --long verbose,help,xml,directory:,no-logs,test:,skip-summary-output -n "$(basename "$0")" -- "$@")
 if [ $? != 0 ]; then echo; Usage; fi
 eval set -- "$OPTS"
 
@@ -30,6 +30,7 @@ NO_LOGS=false
 GENERATE_XML=""
 TEST_TO_EXECUTE=""
 VERBOSE=""
+SKIP_SUMMARY=false
 
 # Go through all the options
 if [[ $# -gt 1 ]] ; then
@@ -55,6 +56,10 @@ if [[ $# -gt 1 ]] ; then
             -t|--test ) # Execute a single test by name
                 TEST_TO_EXECUTE="$2"
                 shift 2
+                ;;
+            -s|--skip-summary-output ) # Skip displaying the test summary output
+                SKIP_SUMMARY=true
+                shift
                 ;;
             -h|--help ) # Show this help message
                 shift
@@ -177,15 +182,17 @@ percent_passing=$(printf "%.2f\n" "$((10000 * $num_passes / $num_tests ))e-2")
 percent_failing=$(printf "%.2f\n" "$((10000 * $num_fails / $num_tests ))e-2")
 
 # Output the summary of test results
-TestOutputColor=${Green}
-if [[ ! "$num_passes" = "$num_tests" ]] ; then TestOutputColor=${Red}; fi
+if [ "$SKIP_SUMMARY" = false ]; then
+    TestOutputColor=${Green}
+    if [[ ! "$num_passes" = "$num_tests" ]] ; then TestOutputColor=${Red}; fi
 
-echo
-echo -e "${Bold}Test Summary:${Clear}"
-echo -e "  Total tests: $num_tests"
-echo -e "  Number of test passes: ${Bold}$num_passes ($percent_passing%)${Clear}"
-echo -e "  ${TestOutputColor}Number of test failures: ${Bold}$num_fails${Clear}"
-echo -e "  Output directory: $OUTPUT_DIR"
+    echo
+    echo -e "${Bold}Test Summary:${Clear}"
+    echo -e "  Total tests: $num_tests"
+    echo -e "  Number of test passes: ${Bold}$num_passes ($percent_passing%)${Clear}"
+    echo -e "  ${TestOutputColor}Number of test failures: ${Bold}$num_fails${Clear}"
+    echo -e "  Output directory: $OUTPUT_DIR"
+fi
 
 # Create an XML file with all the output
 if [[ "$GENERATE_XML" = "1" ]]
