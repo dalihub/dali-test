@@ -20,12 +20,13 @@ Usage: $(basename "$0") [OPTIONS] [app] [width] [height]
 
 Capture screenshots of DALI demo applications.
 
-Options:
-  -h, --help           Show this help message and exit
-  -l, --list FILE      Process applications from specified list file
-  -d, --directory DIR  Directory to store output PNG files
-                       (default: /tmp/{script-name}-YYYYMMDDHHMMSS.NNNNNNNNN)
-  -n, --no-logs        Disable application logging (output redirected to /dev/null)
+  Options:
+    -h, --help           Show this help message and exit
+    -l, --list FILE      Process applications from specified list file
+    -d, --directory DIR  Directory to store output PNG files
+                         (default: /tmp/{script-name}-YYYYMMDDHHMMSS.NNNNNNNNN)
+    -n, --no-logs        Disable application logging (output redirected to /dev/null)
+    -w, --wait-time SEC  Wait time in seconds before capturing screenshot (default: 2)
 
 Arguments:
   app             Application name to run (searched in PATH)
@@ -70,7 +71,7 @@ run_and_capture() {
     local app_pid=$!
 
     # Wait for application to start
-    sleep 2
+    sleep $WAIT_TIME
 
     # Capture screenshot to output directory (redirect output to log)
     import -display :99 -window root "$OUTPUT_DIR/${app}.png" >> "$output_dest" 2>&1
@@ -87,6 +88,7 @@ APP_WIDTH=""
 APP_HEIGHT=""
 OUTPUT_DIR=""
 NO_LOGS=false
+WAIT_TIME=2
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -116,6 +118,15 @@ while [[ $# -gt 0 ]]; do
         -n|--no-logs)
             NO_LOGS=true
             shift
+            ;;
+        -w|--wait-time)
+            if [ -z "$2" ]; then
+                echo "Error: --wait-time requires a number argument"
+                show_help
+                exit 1
+            fi
+            WAIT_TIME="$2"
+            shift 2
             ;;
         *)
             if [ -z "$APP_NAME" ]; then
