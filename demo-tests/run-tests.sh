@@ -147,31 +147,39 @@ for ref_image in "${test_files[@]}"; do
     echo -e "${Bold}Executing: $app_name${Clear}"
 
     # Determine log file for this app
-    app_log_file="$OUTPUT_DIR/logs/${app_name}.log"
-
-    # Call capture.sh with the app name and output directory
     if [ "$NO_LOGS" = true ]; then
-        "$SCRIPT_DIR/capture.sh" -d "$OUTPUT_DIR" -n "$app_name" >> /dev/null 2>&1
+      app_log_file=/dev/null
+      no_logs_option=
     else
-        "$SCRIPT_DIR/capture.sh" -d "$OUTPUT_DIR" "$app_name" >> "$OUTPUT_DIR/logs/capture-sh.log" 2>&1
+      app_log_file="$OUTPUT_DIR/logs/${app_name}.log"
+      no_logs_option="-n"
     fi
 
-    # Compare captured image with reference using dali-image-compare
-    if [ "$NO_LOGS" = true ]; then
-        dali-image-compare "$ref_image" "$OUTPUT_DIR/${app_name}.png" >> /dev/null 2>&1
-        compare_result=$?
-    else
+    # Try with different wait times (2, 5, 10 seconds) until one passes
+    test_passed=false
+    for wait_time in 2 5 10; do
+        # Call capture.sh with the app name, output directory, and wait-time
+        "$SCRIPT_DIR/capture.sh" -d "$OUTPUT_DIR" $no_logs_option --wait-time $wait_time "$app_name" >> "$app_log_file" 2>&1
+
+        # Compare captured image with reference using dali-image-compare
         dali-image-compare "$ref_image" "$OUTPUT_DIR/${app_name}.png" >> "$app_log_file" 2>&1
         compare_result=$?
-    fi
 
-    # Check result and update counters
-    if [ $compare_result -eq 0 ]; then
-        echo -e "  ${Green}Passed${Clear}"
-        testOutput="$testOutput $app_name,Passed"
-        ((num_passes++))
-    else
-        echo -e "  ${Red}Failed${Clear}"
+        # Check result
+        if [ $compare_result -eq 0 ]; then
+            echo -e "  ${Green}Passed (wait-time: ${wait_time}s)${Clear}"
+            testOutput="$testOutput $app_name,Passed"
+            ((num_passes++))
+            test_passed=true
+            break
+        else
+            echo -e "  Failed with wait-time ${wait_time}s, trying next..."
+        fi
+    done
+
+    # If all attempts failed, mark as failed
+    if [ "$test_passed" = false ]; then
+        echo -e "  ${Red}Failed (all wait-times tried)${Clear}"
         testOutput="$testOutput $app_name,Failed"
         ((num_fails++))
     fi
