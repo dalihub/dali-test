@@ -31,6 +31,7 @@ GENERATE_XML=""
 TEST_TO_EXECUTE=""
 VERBOSE=""
 SKIP_SUMMARY=false
+INITIAL_TIMEOUT=10
 
 # Go through all the options
 if [[ $# -gt 1 ]] ; then
@@ -104,6 +105,38 @@ Green='\e[0;32m'
 Red='\e[0;31m'
 Clear='\e[0m'
 
+# Display pool management
+DISPLAY_POOL_START=99
+DISPLAY_POOL_SIZE=50
+LOCK_DIR="$OUTPUT_DIR/.display_locks"
+
+# Initialize lock directory
+mkdir -p "$LOCK_DIR"
+
+# Acquire a display from the pool using atomic mkdir for locking
+acquire_display() {
+    local display
+    while true; do
+        for ((i=0; i<DISPLAY_POOL_SIZE; i++)); do
+            display=$((DISPLAY_POOL_START + i))
+            lock_dir="$LOCK_DIR/display_$display"
+            # Try to acquire lock atomically using mkdir
+            if mkdir "$lock_dir" 2>/dev/null; then
+                echo $display
+                return 0
+            fi
+        done
+        # No display available, wait a bit and retry
+        sleep 0.1
+    done
+}
+
+# Release a display back to the pool
+release_display() {
+    local display=$1
+    rmdir "$LOCK_DIR/display_$display" 2>/dev/null
+}
+
 # Find all PNG files in the reference directory
 test_files=()
 for ref_image in "$REFERENCE_DIR"/*.png; do
@@ -139,13 +172,38 @@ if [[ "$TEST_TO_EXECUTE" != "" ]] ; then
     num_tests=${#test_files[@]}
 fi
 
-# Execute each test
+# Arrays to track results
+declare -a app_names
+declare -a ref_images
+declare -a failed_apps
+declare -A app_results
+
+# Build list of apps to test
 for ref_image in "${test_files[@]}"; do
-    # Extract app name from filename (remove path and .png extension)
     app_name=$(basename "$ref_image" .png)
+    app_names+=("$app_name")
+    ref_images+=("$ref_image")
+done
 
-    echo -e "${Bold}Executing: $app_name${Clear}"
+# Phase A: Parallel capture with wait-time 2s
+echo -e "${Bold}Phase A: Capturing all tests in parallel (wait-time: ${INITIAL_TIMEOUT}s)${Clear}"
 
+# Function to capture a single app with display management
+capture_app() {
+    local app_name=$1
+    local display=$2
+    local app_log_file=$3
+    local no_logs_option=$4
+
+    "$SCRIPT_DIR/capture.sh" -d "$OUTPUT_DIR" $no_logs_option --display $display --wait-time $INITIAL_TIMEOUT "$app_name" >> "$app_log_file" 2>&1
+
+    # Release the display when done
+    release_display "$display"
+}
+
+for i in "${!app_names[@]}"; do
+    app_name="${app_names[$i]}"
+    
     # Determine log file for this app
     if [ "$NO_LOGS" = true ]; then
       app_log_file=/dev/null
@@ -154,36 +212,102 @@ for ref_image in "${test_files[@]}"; do
       app_log_file="$OUTPUT_DIR/logs/${app_name}.log"
       no_logs_option="-n"
     fi
+    
+    # Acquire a display from the pool (blocks until one is available)
+    display=$(acquire_display)
+    echo -e "  Starting: $app_name (display: $display)"
 
-    # Try with different wait times (2, 5, 10 seconds) until one passes
-    test_passed=false
-    for wait_time in 2 5 10; do
-        # Call capture.sh with the app name, output directory, and wait-time
-        "$SCRIPT_DIR/capture.sh" -d "$OUTPUT_DIR" $no_logs_option --wait-time $wait_time "$app_name" >> "$app_log_file" 2>&1
+    # Run capture in background, will release display when done
+    capture_app "$app_name" "$display" "$app_log_file" "$no_logs_option" &
+done
 
-        # Compare captured image with reference using dali-image-compare
-        dali-image-compare "$ref_image" "$OUTPUT_DIR/${app_name}.png" >> "$app_log_file" 2>&1
-        compare_result=$?
+# Wait for all captures to complete
+wait
+echo -e "  ${Green}All captures complete${Clear}"
 
-        # Check result
-        if [ $compare_result -eq 0 ]; then
-            echo -e "  ${Green}Passed (wait-time: ${wait_time}s)${Clear}"
-            testOutput="$testOutput $app_name,Passed"
-            ((num_passes++))
-            test_passed=true
-            break
-        else
-            echo -e "  Failed with wait-time ${wait_time}s, trying next..."
-        fi
-    done
-
-    # If all attempts failed, mark as failed
-    if [ "$test_passed" = false ]; then
-        echo -e "  ${Red}Failed (all wait-times tried)${Clear}"
-        testOutput="$testOutput $app_name,Failed"
-        ((num_fails++))
+# Phase B: Compare all captures
+echo -e "${Bold}Phase B: Comparing all captures${Clear}"
+for i in "${!app_names[@]}"; do
+    app_name="${app_names[$i]}"
+    ref_image="${ref_images[$i]}"
+    
+    if [ "$NO_LOGS" = true ]; then
+      app_log_file=/dev/null
+    else
+      app_log_file="$OUTPUT_DIR/logs/${app_name}.log"
+    fi
+    
+    dali-image-compare "$ref_image" "$OUTPUT_DIR/${app_name}.png" >> "$app_log_file" 2>&1
+    compare_result=$?
+    
+    if [ $compare_result -eq 0 ]; then
+        echo -e "  ${Green}Passed:${Clear} $app_name"
+        app_results["$app_name"]="Passed"
+        testOutput="$testOutput $app_name,Passed"
+        ((num_passes++))
+    else
+        echo -e "  Failed: $app_name (will retry)"
+        failed_apps+=("$app_name")
+        app_results["$app_name"]="Failed"
     fi
 done
+
+# Phase C: Retry failures with wait-time 5s, then 10s
+if [ ${#failed_apps[@]} -gt 0 ]; then
+    echo -e "${Bold}Phase C: Retrying ${#failed_apps[@]} failed test(s)${Clear}"
+    
+    for app_name in "${failed_apps[@]}"; do
+        retry_passed=false
+        
+        # Find index for this app
+        for i in "${!app_names[@]}"; do
+            if [ "${app_names[$i]}" = "$app_name" ]; then
+                ref_image="${ref_images[$i]}"
+                break
+            fi
+        done
+        
+        if [ "$NO_LOGS" = true ]; then
+          app_log_file=/dev/null
+          no_logs_option=
+        else
+          app_log_file="$OUTPUT_DIR/logs/${app_name}.log"
+          no_logs_option="-n"
+        fi
+        
+        for wait_time in 2 5 10; do
+            if [ "$retry_passed" = true ]; then
+                break
+            fi
+            
+            display=$(acquire_display)
+            echo -e "  Retrying: $app_name (wait-time: ${wait_time}s, display: $display)"
+            "$SCRIPT_DIR/capture.sh" -d "$OUTPUT_DIR" $no_logs_option --display $display --wait-time $wait_time "$app_name" >> "$app_log_file" 2>&1
+            release_display "$display"
+            
+            dali-image-compare "$ref_image" "$OUTPUT_DIR/${app_name}.png" >> "$app_log_file" 2>&1
+            compare_result=$?
+            
+            if [ $compare_result -eq 0 ]; then
+                echo -e "  ${Green}Passed on retry:${Clear} $app_name (wait-time: ${wait_time}s)"
+                app_results["$app_name"]="Passed"
+                testOutput="$testOutput $app_name,Passed"
+                ((num_passes++))
+                retry_passed=true
+            else
+                echo -e "  Failed with wait-time ${wait_time}s"
+            fi
+        done
+        
+        # If all retries failed, mark as failed
+        if [ "$retry_passed" = false ]; then
+            echo -e "  ${Red}Failed (all retries exhausted):${Clear} $app_name"
+            app_results["$app_name"]="Failed"
+            testOutput="$testOutput $app_name,Failed"
+            ((num_fails++))
+        fi
+    done
+fi
 
 # Calculate percentages
 percent_passing=$(printf "%.2f\n" "$((10000 * $num_passes / $num_tests ))e-2")
