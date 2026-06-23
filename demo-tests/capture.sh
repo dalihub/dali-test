@@ -27,6 +27,7 @@ Capture screenshots of DALI demo applications.
                          (default: /tmp/{script-name}-YYYYMMDDHHMMSS.NNNNNNNNN)
     -n, --no-logs        Disable application logging (output redirected to /dev/null)
     -w, --wait-time SEC  Wait time in seconds before capturing screenshot (default: 2)
+    -x, --display NUM    Xvfb display number to use (default: 99)
 
 Arguments:
   app             Application name to run (searched in PATH)
@@ -63,7 +64,7 @@ run_and_capture() {
     fi
 
     # Start Xvfb with output redirected
-    Xvfb :99 -screen 0 ${width}x${height}x24 >> "$output_dest" 2>&1 &
+    Xvfb :$DISPLAY_NUM -screen 0 ${width}x${height}x24 >> "$output_dest" 2>&1 &
     local xvfb_pid=$!
 
     # Run the application with output redirected
@@ -74,7 +75,7 @@ run_and_capture() {
     sleep $WAIT_TIME
 
     # Capture screenshot to output directory (redirect output to log)
-    import -display :99 -window root "$OUTPUT_DIR/${app}.png" >> "$output_dest" 2>&1
+    import -display :$DISPLAY_NUM -window root "$OUTPUT_DIR/${app}.png" >> "$output_dest" 2>&1
 
     # Kill the application
     kill $app_pid
@@ -89,6 +90,7 @@ APP_HEIGHT=""
 OUTPUT_DIR=""
 NO_LOGS=false
 WAIT_TIME=2
+DISPLAY_NUM=99
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -126,6 +128,16 @@ while [[ $# -gt 0 ]]; do
                 exit 1
             fi
             WAIT_TIME="$2"
+            shift 2
+            ;;
+        -x|--display)
+            if [ -z "$2" ]; then
+                echo "Error: --display requires a number argument"
+                show_help
+                exit 1
+            fi
+            DISPLAY_NUM=$2
+            export DISPLAY=:$DISPLAY_NUM
             shift 2
             ;;
         *)
