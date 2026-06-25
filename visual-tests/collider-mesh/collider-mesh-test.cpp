@@ -71,13 +71,13 @@ public:
     mWindow             = window;
     window.SetBackgroundColor(Color::BLACK);
 
-    const Vector2 windowSize = window.GetSize();
+    auto positionSize = window.GetPositionSize();
 
     // Create a SceneView
     Scene3D::SceneView sceneView = Handle::New<Scene3D::SceneView>(
       CreatePropertyMap({{Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
                          {Actor::Property::PIVOT, Pivot::CENTER},
-                         {Actor::Property::SIZE, windowSize}}));
+                         {Actor::Property::SIZE, Vector2(positionSize.width, positionSize.height)}}));
 
     mSceneView = sceneView;
 

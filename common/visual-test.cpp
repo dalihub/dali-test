@@ -92,14 +92,14 @@ VisualTest::VisualTest()
 
 void VisualTest::SetupOffscreenRenderTask(Dali::Window window, Dali::CameraActor customCamera)
 {
-  window.ResizeSignal().Connect(this, &VisualTest::OnWindowResized);
+  window.ResizedSignal().Connect(this, &VisualTest::OnWindowResized);
 
   if(!mOffscreenRenderTask || window.GetRootLayer() != mWindow.GetHandle())
   {
     Layer rootLayer = window.GetRootLayer();
     mWindow         = rootLayer;
 
-    mTexture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, window.GetSize().GetWidth(), window.GetSize().GetHeight());
+    mTexture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, window.GetPositionSize().width, window.GetPositionSize().height);
 
     mFrameBuffer = FrameBuffer::New(mTexture.GetWidth(), mTexture.GetHeight(), FrameBuffer::Attachment::DEPTH_STENCIL);
     mFrameBuffer.AttachColorTexture(mTexture);
@@ -121,7 +121,7 @@ void VisualTest::SetupOffscreenRenderTask(Dali::Window window, Dali::CameraActor
     }
     else
     {
-      mOffscreenRenderTask.SetBuiltinCameraActor(Dali::RenderTask::BuiltinCameraType::ATTACHED_TO_SOURCE_ACTOR, Vector2(window.GetSize().GetWidth(), window.GetSize().GetHeight()), Property::Map().Add(Dali::CameraActor::Property::INVERT_Y_AXIS, true));
+      mOffscreenRenderTask.SetBuiltinCameraActor(Dali::RenderTask::BuiltinCameraType::ATTACHED_TO_SOURCE_ACTOR, Vector2(window.GetPositionSize().width, window.GetPositionSize().height), Property::Map().Add(Dali::CameraActor::Property::INVERT_Y_AXIS, true));
     }
   }
 
@@ -132,7 +132,7 @@ void VisualTest::SetupOffscreenRenderTask(Dali::Window window, Dali::CameraActor
 
 void VisualTest::OnWindowResized(Dali::Window window, Dali::Window::WindowSize size)
 {
-  window.ResizeSignal().Disconnect(this, &VisualTest::OnWindowResized);
+  window.ResizedSignal().Disconnect(this, &VisualTest::OnWindowResized);
 
   // When the window is resized, recreate the offscreen render task
   RenderTaskList taskList = window.GetRenderTaskList();
