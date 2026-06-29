@@ -71,8 +71,7 @@ private:
     if (gTestStep == PARTIAL_WINDOW_CAPTURE) {
       // Resize the window
       Window window = mApplication.GetWindow();
-      Window::WindowSize WINDOW_SIZE(300, 600);
-      window.SetSize(WINDOW_SIZE);
+      window.SetPositionSize(PositionSize(0, 0, 300, 600));
     }
     CaptureWindowAfterFrameRendered(mApplication.GetWindow());
   }
