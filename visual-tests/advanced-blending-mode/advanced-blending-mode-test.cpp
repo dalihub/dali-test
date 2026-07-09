@@ -18,7 +18,7 @@
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali/devel-api/actors/actor-devel.h>
 
-#include <dali/devel-api/common/capabilities.h>
+#include <dali/public-api/common/capabilities.h>
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
