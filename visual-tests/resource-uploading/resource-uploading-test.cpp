@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <string>
 #include <dali/dali.h>
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali-toolkit/dali-toolkit.h>
@@ -83,9 +84,9 @@ class ResourceUploadingTest: public VisualTest
     FlexContainer container = FlexContainer::New();
     container.SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
     container.SetProperty( Actor::Property::PIVOT, Pivot::CENTER );
-    container.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
+    DevelActor::SetResizePolicy(container,  ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
     Vector3 offset( 0.9f, 0.70f, 0.0f );
-    container.SetProperty( Actor::Property::SIZE_MODE_FACTOR, offset );
+    container.SetProperty( DevelActor::Property::SIZE_MODE_FACTOR, offset );
     container.SetProperty( FlexContainer::Property::FLEX_DIRECTION, FlexContainer::ROW );
     defaultWindow.Add( container );
 
@@ -99,7 +100,7 @@ class ResourceUploadingTest: public VisualTest
       mImageViews[x].SetProperty( Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER );
       mImageViews[x].SetProperty( Actor::Property::PIVOT, Pivot::CENTER );
       mImageViews[x].SetProperty( FlexContainer::ChildProperty::FLEX, 0.5f );
-      mImageViews[x].SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT );
+      DevelActor::SetResizePolicy(mImageViews[x], ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT);
       container.Add( mImageViews[x] );
     }
 

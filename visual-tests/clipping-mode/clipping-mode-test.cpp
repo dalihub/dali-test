@@ -20,6 +20,7 @@
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali/integration-api/debug.h>
+#include <dali/devel-api/actors/actor-devel.h>
 
 // INTERNAL INCLUDES
 #include "visual-test.h"
@@ -74,7 +75,7 @@ private:
   void CreateSimpleScene(ClippingMode::Type clippingMode)
   {
     mContainer = Actor::New();
-    mContainer.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
+    DevelActor::SetResizePolicy(mContainer, ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
     mContainer[Actor::Property::PARENT_ORIGIN] = ParentOrigin::CENTER;
     mApplication.GetWindow().Add(mContainer);
 
@@ -105,7 +106,7 @@ private:
   void CreateComplextScene(ClippingMode::Type clippingMode)
   {
     mContainer = Actor::New();
-    mContainer.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
+    DevelActor::SetResizePolicy(mContainer, ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
     mContainer[Actor::Property::PARENT_ORIGIN] = ParentOrigin::CENTER;
     mApplication.GetWindow().Add(mContainer);
 
