@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <string>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/integration-api/debug.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/controls/table-view/table-view.h>
@@ -84,7 +85,7 @@ public:
     TableView view = TableView::New(2, 1);
     view.SetProperty(Actor::Property::PIVOT, Pivot::CENTER);
     view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
-    view.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
+    DevelActor::SetResizePolicy(view, ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
     view.SetCellAlignment(Toolkit::TableView::CellPosition(0, 0), HorizontalAlignment::CENTER, VerticalAlignment::CENTER);
     view.SetCellAlignment(Toolkit::TableView::CellPosition(1, 0), HorizontalAlignment::CENTER, VerticalAlignment::CENTER);
     view.SetCellPadding(Vector2(14.0f, 7.0f));
@@ -112,7 +113,7 @@ public:
       Control container = Control::New();
       container.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
       container.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_CENTER);
-      container.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
+      DevelActor::SetResizePolicy(container, ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
       Vector4 backgroundColor = tree == 0 ? Vector4(0.77f, 1.0f, 0.77f, 1.0f) : Vector4(0.8f, 0.8f, 1.0f, 1.0f);
       container.SetProperty(Control::Property::BACKGROUND, backgroundColor);
       ImageView image[5];

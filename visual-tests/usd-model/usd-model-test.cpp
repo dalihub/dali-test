@@ -30,6 +30,7 @@
 #include <dali-toolkit/devel-api/image-loader/texture-manager.h>
 #include <dali/dali.h>
 #include <dali/devel-api/rendering/frame-buffer-devel.h>
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <cstdio>
@@ -103,8 +104,7 @@ public:
     mSceneLayer.SetProperty(Actor::Property::PARENT_ORIGIN,
                             ParentOrigin::CENTER);
     mSceneLayer.SetProperty(Actor::Property::PIVOT, Pivot::CENTER);
-    mSceneLayer.SetResizePolicy(ResizePolicy::FILL_TO_PARENT,
-                                Dimension::ALL_DIMENSIONS);
+    DevelActor::SetResizePolicy(mSceneLayer, ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
     mSceneLayer[Layer::Property::BEHAVIOR] = Layer::LAYER_3D;
     window.Add(mSceneLayer);
 
@@ -136,8 +136,7 @@ public:
     auto offscreenImage                            = Toolkit::ImageView::New(offscreenUrl);
     offscreenImage[Actor::Property::PARENT_ORIGIN] = ParentOrigin::CENTER;
     offscreenImage[Actor::Property::PIVOT]         = Pivot::CENTER;
-    offscreenImage.SetResizePolicy(ResizePolicy::FILL_TO_PARENT,
-                                   Dimension::ALL_DIMENSIONS);
+    DevelActor::SetResizePolicy(offscreenImage, ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
     offscreenImage[Actor::Property::SCALE_Y] = -1; // Invert the image.
     window.Add(offscreenImage);
 

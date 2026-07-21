@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali/dali.h>
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <string>
@@ -82,8 +83,7 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     mLayer = Layer::New();
-    mLayer.SetResizePolicy(ResizePolicy::FILL_TO_PARENT,
-                           Dimension::ALL_DIMENSIONS);
+    DevelActor::SetResizePolicy(mLayer, ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
     mLayer.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
     window.Add(mLayer);
 
