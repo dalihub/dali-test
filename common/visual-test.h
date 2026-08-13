@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <cstdlib>
 #include <dali/dali.h>
-#include <dali/devel-api/adaptor-framework/image-loading.h>
+#include <dali/public-api/adaptor-framework/image-loading.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/events/point.h>
 #include <dali/integration-api/events/touch-event-integ.h>
