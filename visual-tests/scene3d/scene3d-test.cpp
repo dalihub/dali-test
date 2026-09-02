@@ -304,7 +304,7 @@ private:
       };
 
       mAnimation = animations[0].ReAnimate(getActor);
-      mAnimation.SetLooping(false);
+      mAnimation.SetLoopCount(1);
 
       // Set speed to be x100
       mAnimation.SetSpeedFactor(100.0f);
