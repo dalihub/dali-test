@@ -20,7 +20,7 @@
 
 // We don't want to run any animations so override all playing methods
 
-namespace Dali
+namespace DALI_NAMESPACE
 {
 void Animation::Play()
 {
