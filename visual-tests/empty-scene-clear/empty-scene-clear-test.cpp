@@ -85,6 +85,7 @@ private:
       // Create an empty window with no renderable actors
       mSecondWindow = CreateNewWindow();
       mSecondWindow.SetBackgroundColor(Color::CYAN);
+      mSecondWindow.Show();
       mTestWindow = mSecondWindow;
       CaptureWindowAfterFrameRendered(mTestWindow);
       break;
@@ -94,6 +95,7 @@ private:
       // Create another empty window with no renderable actors
       mThirdWindow = CreateNewWindow();
       mThirdWindow.SetBackgroundColor(Color::RED);
+      mThirdWindow.Show();
       mTestWindow = mThirdWindow;
       CaptureWindowAfterFrameRendered(mTestWindow);
       break;
