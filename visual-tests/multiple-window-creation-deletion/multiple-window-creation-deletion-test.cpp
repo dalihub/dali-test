@@ -79,6 +79,7 @@ private:
     Window window = Dali::Window::New(WINDOW_SIZE, index.c_str(), false);
     window.SetBackgroundColor(Color::CYAN);
     window.Add(actor);
+    window.Show();
 
     return window;
   }
