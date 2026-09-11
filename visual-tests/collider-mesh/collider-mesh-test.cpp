@@ -75,7 +75,7 @@ public:
 
     // Create a SceneView
     Scene3D::SceneView sceneView = Handle::New<Scene3D::SceneView>(
-      CreatePropertyMap({{Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
+      Dali::DevelProperty::CreatePropertyMap({{Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
                          {Actor::Property::PIVOT, Pivot::CENTER},
                          {Actor::Property::SIZE, Vector2(positionSize.width, positionSize.height)}}));
 
@@ -86,7 +86,7 @@ public:
     // Load the model and set IBL
     Scene3D::Model model =
       Scene3D::Model::New(TEST_RESOURCES_DIR "collider-mesh/floors2.gltf");
-    model.SetProperties(CreatePropertyMap({
+    model.SetProperties(Dali::DevelProperty::CreatePropertyMap({
       {Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER},
       {Actor::Property::PIVOT, Pivot::CENTER},
     }));
