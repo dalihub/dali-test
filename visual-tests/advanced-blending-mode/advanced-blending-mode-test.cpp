@@ -16,6 +16,7 @@
  */
 
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/devel-api/actors/actor-devel.h>
 
 #include <dali/public-api/common/capabilities.h>
