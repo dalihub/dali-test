@@ -104,9 +104,9 @@ private:
     for(auto name : NAMES)
     {
       auto actor = model.FindChildModelNodeByName(ToDaliStringView(name));
-      actor.SetProperty(Actor::Property::COLOR, Color::WHITE);
+      actor.SetProperty(Actor::Property::COLOR_MULTIPLIER, Color::WHITE);
     }
-    node.SetProperty(Actor::Property::COLOR, Color::RED);
+    node.SetProperty(Actor::Property::COLOR_MULTIPLIER, Color::RED);
     return true;
   }
 
