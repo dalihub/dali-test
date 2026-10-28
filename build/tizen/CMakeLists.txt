@@ -60,16 +60,16 @@ else()
     SET(USD_LOADER_ENABLED OFF)
 endif()
 
-SET(PKG_LIST dali2-core
-             dali2-adaptor
-             dali2-toolkit
-             dali2-scene3d
+SET(PKG_LIST dali3-core
+             dali3-adaptor
+             dali3-toolkit
+             dali3-scene3d
              Magick++
              ${OPENCV})
 
 if( USD_LOADER_ENABLED )
   SET(PKG_LIST ${PKG_LIST} 
-               dali2-usd-loader)
+               dali3-usd-loader)
 endif()
 
 PKG_CHECK_MODULES(REQUIRED_PKGS REQUIRED ${PKG_LIST})
