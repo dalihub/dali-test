@@ -337,18 +337,19 @@ private:
              ++mapIndex) {
           KeyValuePair pair = testVisualMap.GetKeyValue(mapIndex);
           // We can assume that we only use index key in this sample
-          if (pair.first.type == Property::Key::Type::INDEX) {
+          if (pair.first.GetType() == Property::Key::Type::INDEX) {
             // We want to animate CornerRadius or Borderline only in this sample
-            if ((pair.first.indexKey ==
+            if ((pair.first.GetIndexKey() ==
                  DevelVisual::Property::BORDERLINE_WIDTH) ||
-                (pair.first.indexKey ==
+                (pair.first.GetIndexKey() ==
                  DevelVisual::Property::BORDERLINE_COLOR) ||
-                (pair.first.indexKey ==
+                (pair.first.GetIndexKey() ==
                  DevelVisual::Property::BORDERLINE_OFFSET) ||
-                (pair.first.indexKey == DevelVisual::Property::CORNER_RADIUS)) {
+                (pair.first.GetIndexKey() ==
+                 DevelVisual::Property::CORNER_RADIUS)) {
               mAnimation.AnimateTo(DevelControl::GetVisualProperty(
                                        imageView, ImageView::Property::IMAGE,
-                                       pair.first.indexKey),
+                                       pair.first.GetIndexKey()),
                                    pair.second);
             }
           }

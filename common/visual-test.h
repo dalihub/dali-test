@@ -60,7 +60,7 @@ bool ParseEnvironment(int argc, char **argv, int width, int height);
       setenv("DALI_DPI_VERTICAL", "96", true);                                 \
       Rect<int> windowSize{0, 0, WindowWidth, WindowHeight};                   \
       WindowData windowData;                                                   \
-      windowData.SetTransparency(false);                                       \
+      windowData.SetTransparent(false);                                        \
       windowData.SetPositionSize(windowSize);                                  \
       Application application =                                                \
           Application::New(&argc, &argv, "", false, windowData);               \
