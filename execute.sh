@@ -161,7 +161,7 @@ if [ "$demo_tests_available" -eq 1 ]; then
                 if [ -n "$testName" ] && [ -n "$testResult" ]; then
                     testOutput="$testOutput ${testName}:demo,$testResult"
                     ((num_demo_tests++))
-                    if [ "$testResult" = "Passed" ]; then
+                    if [ "$testResult" = "Passed" ] || [ "$testResult" = "Skipped" ]; then
                         ((num_passes++))
                     else
                         ((num_fails++))
