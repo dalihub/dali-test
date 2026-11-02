@@ -30,7 +30,6 @@
 
 #include <dali/devel-api/adaptor-framework/bitmap-saver.h>
 #include <dali/integration-api/debug.h>
-#include <dali/integration-api/pixel-data-integ.h>
 
 // EXTERNAL INCLUDES
 #include <Magick++.h>
@@ -237,11 +236,10 @@ void VisualTest::OnOffscreenRenderFinished(RenderTask task)
     }
     else
     {
-      Dali::PixelData pixelData = task.GetRenderResult();
-      if(pixelData)
+      Dali::PixelBuffer pixelBuffer = task.GetRenderResultBuffer();
+      if(pixelBuffer)
       {
-        auto pixelDataBuffer = Dali::Integration::GetPixelDataBuffer(pixelData);
-        success = Dali::EncodeToFile(pixelDataBuffer.buffer, imageName, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight());
+        success = Dali::EncodeToFile(pixelBuffer.GetBuffer(), imageName, pixelBuffer.GetPixelFormat(), pixelBuffer.GetWidth(), pixelBuffer.GetHeight());
       }
     }
   }
