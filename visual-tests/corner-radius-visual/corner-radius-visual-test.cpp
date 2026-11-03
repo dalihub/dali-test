@@ -335,9 +335,10 @@ private:
              ++mapIndex) {
           KeyValuePair pair = testVisualMap.GetKeyValue(mapIndex);
           // We can assume that we only use index key in this sample
-          if (pair.first.type == Property::Key::Type::INDEX) {
+          if (pair.first.GetType() == Property::Key::Type::INDEX) {
             // We want to animate CornerRadius only in this sample
-            if (pair.first.indexKey == DevelVisual::Property::CORNER_RADIUS) {
+            if (pair.first.GetIndexKey() ==
+                DevelVisual::Property::CORNER_RADIUS) {
               if (pair.second.GetType() == Property::FLOAT) {
                 float inputValue;
                 Vector4 convertedValue;
@@ -346,12 +347,12 @@ private:
                     Vector4(inputValue, inputValue, inputValue, inputValue);
                 mAnimation.AnimateTo(DevelControl::GetVisualProperty(
                                          control, Control::Property::BACKGROUND,
-                                         pair.first.indexKey),
+                                         pair.first.GetIndexKey()),
                                      convertedValue);
               } else {
                 mAnimation.AnimateTo(DevelControl::GetVisualProperty(
                                          control, Control::Property::BACKGROUND,
-                                         pair.first.indexKey),
+                                         pair.first.GetIndexKey()),
                                      pair.second);
               }
             }
