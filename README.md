@@ -47,7 +47,7 @@ To run all the tests:
 
          $ ./execute.sh
 
-This will run each test on it's own X server.
+This will run each test on its own X server.
 
 # Running individual tests
 
