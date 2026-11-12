@@ -268,7 +268,7 @@ private:
     ViewProjection                    viewProjection = cameraParameters[0].GetViewProjection();
     Transforms                        xforms{MatrixStack{}, viewProjection};
     Scene3D::Loader::ShaderManagerPtr shaderManager =
-      new Scene3D::Loader::ShaderManager();
+      Scene3D::Loader::ShaderManager::New();
     NodeDefinition::CreateParams nodeParams{resources, xforms, shaderManager, {}, {}, {}};
     Customization::Choices       choices;
 

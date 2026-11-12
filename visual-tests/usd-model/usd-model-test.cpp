@@ -226,7 +226,7 @@ private:
     SetActorCentered(camera);
 
     Scene3D::Loader::ShaderManagerPtr shaderManager =
-      new Scene3D::Loader::ShaderManager();
+      Scene3D::Loader::ShaderManager::New();
     ViewProjection               viewProjection = cameraParameters[0].GetViewProjection();
     Transforms                   xforms{MatrixStack{}, viewProjection};
     NodeDefinition::CreateParams nodeParams{resources, xforms, shaderManager, {}, {}, {}};
