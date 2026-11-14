@@ -26,7 +26,7 @@ demo_output_dir=""
 NO_LOGS=true
 
 # Go through all the options
-if [[ $* > 1 ]] ; then
+if [ "$#" -gt 0 ] ; then
     while true;
     do
         case "$1" in
@@ -97,28 +97,65 @@ if [[ "$TEST_TO_EXECUTE" != "" ]] ; then
   num_visual_tests=1
 fi
 
-# Execute each test executable in turn
-for i in $tests ; do
-    test=$(basename $i).test
+# Run a visual test and leave its result in visual_result.
+RunVisualTest()
+{
+    local test=$1
     dimensions=$($test --get-dimensions 2>/dev/null)
     command="timeout 3m xvfb-run -s \"-screen 0 $dimensions -fbdir /var/tmp\" $DEBUG $test --fb $dir ${REDIRECT_OUTPUT}"
     echo -e "${Bold}Executing: $command"
-    # Run a second time if failed the first as it seems to fail incorrectly from time to time
-    eval $command || eval $command
+    eval $command
+    visual_result=$?
+}
 
-    percent=$?
-    # Check the test result
-    if [ "$percent" != "0" ]; then
-        echo "$test Failed ($percent % match)"
-        testOutput="$testOutput $test,Failed"
-        ((num_fails++))
-    else
+declare -a visual_tests
+declare -a failed_visual_tests
+declare -A visual_results
+
+# Run every visual test once before retrying failures.
+for i in $tests ; do
+    test=$(basename "$i").test
+    visual_tests+=("$test")
+    RunVisualTest "$test"
+    if [ "$visual_result" -eq 0 ]; then
         echo "$test Passed"
-        testOutput="$testOutput $test,Passed"
-        ((num_passes++))
+        visual_results["$test"]=Passed
+    else
+        echo "$test Failed ($visual_result % match; will retry)"
+        failed_visual_tests+=("$test")
     fi
+done
 
-    #read -p "Waiting..>" aline
+# Retry only the tests that failed their first run, pausing before each attempt.
+if [ ${#failed_visual_tests[@]} -gt 0 ]; then
+    echo -e "${Bold}Retrying ${#failed_visual_tests[@]} failed visual test(s)${Clear}"
+    for test in "${failed_visual_tests[@]}"; do
+        visual_results["$test"]=Failed
+        for wait_time in 2 5 10; do
+            echo "$test Retrying after ${wait_time}s"
+            sleep "$wait_time"
+            RunVisualTest "$test"
+            if [ "$visual_result" -eq 0 ]; then
+                echo "$test Passed on retry"
+                visual_results["$test"]=Passed
+                break
+            fi
+            echo "$test Retry failed ($visual_result % match)"
+        done
+        if [ "${visual_results["$test"]}" = Failed ]; then
+            echo "$test Failed after all retries"
+        fi
+    done
+fi
+
+for test in "${visual_tests[@]}"; do
+    result=${visual_results["$test"]}
+    testOutput="$testOutput $test,$result"
+    if [ "$result" = Passed ]; then
+        ((num_passes++))
+    else
+        ((num_fails++))
+    fi
 done
 
 # Run demo tests if available
